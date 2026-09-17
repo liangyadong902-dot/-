@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>途个惊喜 · 运营后厨</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
+  <style>
+    /*
+      Visual system — 烘焙店参考图 → 途个惊喜管理端
+      Canvas cream #F6F1E6    Wash sage-mist #E4EDD8
+      Accent sage #8EA47C     Deep #6C7E58
+      Ink #3C342C             Muted #8F8376
+      Paper #FFFDF8           Line #E7DCCE
+      Script caramel #D4924A  (右图 Good Morning)
+      Type: Caveat / Noto Serif SC / Noto Sans SC
+      Rhythm: 8px base, 20px page gutter
+      Pattern: cloud scallop, magazine special, line-art tiles, paper tickets
+    */
+    :root {
+      --cream: #F6F1E6;
+      --cream-2: #EFE6D6;
+      --sage: #8EA47C;
+      --sage-deep: #6C7E58;
+      --sage-mist: #E4EDD8;
+      --sage-soft: #C9D6B8;
+      --ink: #3C342C;
+      --muted: #8F8376;
+      --paper: #FFFDF8;
+      --line: #E7DCCE;
+      --blush: #E8B4A2;
+      --caramel: #D4924A;
+      --bread: #E8C9A0;
+      --side: 228px;
+      --head: 118px;
+      --gutter: clamp(16px, 2vw, 32px);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+      color: var(--ink);
+      background: var(--cream);
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+    body.app-on { background: var(--cream); }
+    [hidden] { display: none !important; }
+    button, input, select, textarea { font-family: inherit; color: inherit; }
+    button { cursor: pointer; }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; }
+
+    /* ── login ── */
+    .login-stage, .login-card {
+      width: 100%;
+      height: 100%;
+    }
+    .login-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1.28fr) minmax(380px, 0.72fr);
+      background: var(--cream);
+      overflow: hidden;
+      position: relative;
+    }
+    .login-card::after {
+      content: "";
+      position: absolute; inset: 0; pointer-events: none; z-index: 8;
+      opacity: 0.03; mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+    }
+    .login-hero {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: clamp(22px, 3vh, 36px) clamp(22px, 2.6vw, 44px) 22px;
+      background:
+        radial-gradient(56px 34px at 8% 0%, #f7faf3 0 62%, transparent 63%),
+        radial-gradient(72px 42px at 36% -4%, #eef5e5 0 64%, transparent 65%),
+        radial-gradient(64px 38px at 78% 0%, #f8fbf5 0 60%, transparent 61%),
+        linear-gradient(180deg, #E3EDD6 0%, #EAF1E0 28%, var(--cream) 100%);
+    }
+    .login-lamp {
+      position: absolute; right: 18%; top: -8px; z-index: 2; pointer-events: none;
+    }
+    .login-brand { position: relative; z-index: 2; flex-shrink: 0; }
+    .login-brand .cursive-row {
+      display: flex; align-items: flex-start; gap: 8px; min-height: 28px;
+    }
+    .cursive {
+      font-family: "Caveat", cursive;
+      font-weight: 700;
+      color: var(--caramel);
+      font-size: 34px;
+      line-height: 1;
+      transform: rotate(-8deg);
+      transform-origin: left center;
+      display: inline-block;
+    }
+    .shop-title {
+      font-family: "Noto Serif SC", serif;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      line-height: 1.12;
+      text-wrap: balance;
+    }
+    .login-hero .shop-title { font-size: clamp(34px, 3.4vw, 52px); margin: 8px 0 6px; }
+    .slogan { font-size: 13px; color: var(--muted); font-weight: 500; display: flex; gap: 6px; align-items: center; }
+    .login-art {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(200px, 0.9fr);
+      gap: 16px;
+      margin-top: 18px;
+      position: relative; z-index: 2;
+    }
+    .login-shot {
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+      box-shadow: 0 14px 32px rgba(60,52,44,0.12);
+    }
+    .login-shot img { width: 100%; height: 100%; object-fit: cover; }
+    .login-shot-main {
+      border-radius: 40px 26px 52px 22px;
+    }
+    .login-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+      position: relative;
+    }
+    .login-ticket {
+      background: var(--paper);
+      border: 1.4px solid var(--ink);
+      border-radius: 18px 18px 18px 6px;
+      padding: 14px 16px 12px;
+      box-shadow: 3px 3px 0 rgba(60,52,44,0.06);
+      transform: rotate(-2.5deg);
+      z-index: 3;
+      flex-shrink: 0;
+    }
+    .login-ticket .eyebrow { margin-bottom: 6px; }
+    .login-ticket h3 {
+      font-family: "Noto Serif SC", serif;
+      font-size: clamp(16px, 1.5vw, 20px);
+      font-weight: 900;
+      line-height: 1.25;
+      text-wrap: balance;
+    }
+    .login-ticket p { font-size: 12px; color: var(--muted); margin: 6px 0 10px; }
+    .login-shot-side {
+      flex: 1;
+      min-height: 140px;
+      border-radius: 22px 16px 28px 14px;
+      transform: rotate(3.5deg);
+      outline: 8px solid var(--paper);
+    }
+    .login-mascot {
+      position: absolute;
+      left: -8px;
+      bottom: -6px;
+      z-index: 4;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .fresh-orb {
+      position: absolute; left: 12px; bottom: 12px;
+      width: 58px; height: 58px; border-radius: 50%;
+      background: var(--sage); color: #fff;
+      display: grid; place-items: center;
+      font-size: 10px; font-weight: 700; line-height: 1.2; text-align: center;
+      box-shadow: 0 4px 12px rgba(108,126,88,0.38);
+    }
+    .speech {
+      background: var(--paper);
+      border: 1.4px solid var(--ink);
+      border-radius: 14px 14px 14px 4px;
+      padding: 6px 12px;
+      font-size: 12px; font-weight: 600;
+      box-shadow: 2px 2px 0 rgba(60,52,44,0.06);
+      display: inline-block;
+    }
+    .login-pane {
+      position: relative;
+      height: 100%;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background:
+        radial-gradient(80px 48px at 80% 0%, #f7faf3 0 62%, transparent 63%),
+        var(--paper);
+      padding: clamp(28px, 6vh, 64px) clamp(28px, 4vw, 64px);
+    }
+    .login-pane::before {
+      content: "";
+      position: absolute;
+      left: -18px; top: -10%; bottom: -10%;
+      width: 36px;
+      background:
+        radial-gradient(18px 16px at 0 8%, transparent 70%, var(--paper) 71%),
+        radial-gradient(18px 16px at 0 24%, transparent 70%, var(--paper) 71%),
+        radial-gradient(18px 16px at 0 40%, transparent 70%, var(--paper) 71%),
+        radial-gradient(18px 16px at 0 56%, transparent 70%, var(--paper) 71%),
+        radial-gradient(18px 16px at 0 72%, transparent 70%, var(--paper) 71%),
+        radial-gradient(18px 16px at 0 88%, transparent 70%, var(--paper) 71%);
+      pointer-events: none;
+    }
+    .login-form {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      position: relative; z-index: 2;
+    }
+    .login-form h2 { font-family: "Noto Serif SC", serif; font-size: 28px; font-weight: 900; margin-bottom: 6px; }
+    .login-form p.hint { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.55; }
+    .login-roles .chip { background: var(--cream-2); }
+    .login-extra input { accent-color: var(--sage); }
+    .pass-wrap { position: relative; }
+    .pass-wrap input { padding-right: 44px; }
+    .pass-toggle {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      width: 32px; height: 32px; border: none; background: transparent;
+      color: var(--muted); display: grid; place-items: center;
+    }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 11px; letter-spacing: 0.14em; font-weight: 700; color: var(--sage-deep); margin-bottom: 6px; }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      background: var(--paper);
+      border: 1.4px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 14px;
+      outline: none;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--sage); }
+    .field textarea { min-height: 92px; resize: vertical; line-height: 1.55; }
+    .btn-sage, .btn-ink, .btn-ghost, .btn-search {
+      border: none; border-radius: 999px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-sage { background: var(--sage); color: #fff; }
+    .btn-sage:hover { background: var(--sage-deep); }
+    .btn-ink { background: var(--ink); color: #fff; }
+    .btn-ghost { background: var(--paper); color: var(--ink); border: 1.4px solid var(--line); }
+    .btn-block { width: 100%; height: 46px; font-size: 15px; }
+    .login-form .field input {
+      height: 48px;
+      border-radius: 999px;
+      background: var(--cream);
+      padding: 0 16px;
+    }
+    .login-form .btn-block { height: 48px; margin-top: 4px; }
+    .login-extra {
+      display: flex; justify-content: space-between; align-items: center;
+      margin: 4px 0 16px; font-size: 12px; color: var(--muted);
+    }
+    .login-extra label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .login-foot {
+      margin-top: 28px; padding-top: 16px; border-top: 1px dashed var(--line);
+      font-size: 12px; color: var(--muted); line-height: 1.6;
+    }
+
+    /* ── app shell ── */
+    #app {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      display: grid;
+      grid-template-columns: var(--side) minmax(0, 1fr);
+      background: var(--cream);
+      position: relative;
+      overflow: hidden;
+    }
+    #app::after {
+      content: "";
+      position: absolute; inset: 0; pointer-events: none; z-index: 40;
+      opacity: 0.028; mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+    }
+    .side {
+      background: linear-gradient(180deg, #E3EDD6 0%, #EAF1E0 90px, var(--cream) 160px);
+      border-right: 1px solid var(--line);
+      display: flex; flex-direction: column;
+      position: relative; z-index: 2;
+      min-height: 0;
+      height: 100%;
+    }
+    .side-brand { padding: 22px 18px 10px; }
+    .side-brand .shop-title { font-size: 22px; }
+    .nav-scroll { flex: 1; overflow: auto; padding: 8px 12px 18px; scrollbar-width: thin; }
+    .nav-label {
+      font-size: 10px; letter-spacing: 0.16em; font-weight: 700;
+      color: var(--sage-deep); padding: 12px 10px 6px;
+    }
+    .nav-item {
+      width: 100%;
+      display: flex; align-items: center; gap: 10px;
+      background: transparent; border: none;
+      padding: 9px 10px; border-radius: 14px;
+      font-size: 13px; font-weight: 600; text-align: left;
+      color: var(--ink);
+    }
+    .nav-item svg { flex-shrink: 0; color: var(--sage-deep); }
+    .nav-item:hover { background: rgba(255,253,248,0.7); }
+    .nav-item.on { background: var(--paper); box-shadow: 0 3px 12px rgba(60,52,44,0.05); }
+    .nav-item.on span { color: var(--sage-deep); }
+    .side-foot {
+      padding: 12px 14px 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .ava {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--paper); border: 1.3px solid var(--ink);
+      display: grid; place-items: center; overflow: hidden; flex-shrink: 0;
+    }
+    .side-foot small { display: block; color: var(--muted); font-size: 11px; font-weight: 500; }
+
+    .workspace {
+      display: flex; flex-direction: column;
+      min-width: 0; min-height: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    .cloud-head {
+      position: relative; flex-shrink: 0; z-index: 3;
+      background:
+        radial-gradient(42px 28px at 6% 0%, #f7faf3 0 62%, transparent 63%),
+        radial-gradient(56px 34px at 38% -6%, #f8fbf5 0 60%, transparent 61%),
+        radial-gradient(52px 32px at 78% 2%, #f3f7ec 0 62%, transparent 63%),
+        linear-gradient(180deg, #E3EDD6 0%, #E8F0DC 100%);
+      padding: 16px var(--gutter) 22px;
+    }
+    .scallop-row {
+      position: absolute; left: -20px; right: -20px; bottom: -16px;
+      height: 36px; pointer-events: none; overflow: hidden;
+    }
+    .scallop-row i {
+      position: absolute; bottom: 0; height: 32px;
+      background: var(--cream); border-radius: 50%;
+    }
+    .head-row {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px; position: relative; z-index: 1; flex-wrap: wrap;
+    }
+    .greet { min-width: 0; flex: 1; }
+    .greet .cursive { font-size: clamp(24px, 2.2vw, 32px); }
+    .greet h1 { font-family: "Noto Serif SC", serif; font-size: clamp(20px, 1.8vw, 26px); font-weight: 900; margin-top: 4px; }
+    .greet .sub { font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 500; }
+    .head-tools { display: flex; align-items: center; gap: 10px; padding-top: 6px; flex: 1; min-width: min(100%, 420px); justify-content: flex-end; }
+    .search-box {
+      flex: 1; min-width: 180px; max-width: 420px; height: 40px; background: var(--paper); border-radius: 999px;
+      display: flex; align-items: center; padding: 0 6px 0 14px; gap: 8px;
+      box-shadow: 0 3px 12px rgba(60,52,44,0.05);
+    }
+    .search-box input { border: none; outline: none; background: transparent; width: 100%; font-size: 12px; }
+    .search-box input::placeholder { color: #B3A698; }
+    .btn-search {
+      height: 30px; padding: 0 14px; background: var(--sage); color: #fff; font-size: 11px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: 14px; border: none;
+      background: var(--paper); color: var(--sage-deep);
+      display: grid; place-items: center;
+      box-shadow: 0 3px 12px rgba(60,52,44,0.05);
+    }
+    .mascot-mini { display: flex; flex-direction: column; align-items: flex-end; min-width: 148px; }
+    .mascot-mini .speech { font-size: 11px; margin-bottom: 2px; }
+
+    .main {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 18px var(--gutter) 32px;
+      scrollbar-width: thin;
+      container-type: inline-size;
+      container-name: stage;
+    }
+    .view { display: none; animation: fadeIn .28s ease; width: 100%; }
+    .view.on { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .section-header { display: flex; justify-content: space-between; align-items: baseline; margin: 8px 0 12px; }
+    .section-title { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+    .view-more { font-size: 12px; color: var(--muted); background: none; border: none; font-weight: 600; }
+
+    .special-block {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.95fr) minmax(280px, 1.05fr);
+      gap: clamp(16px, 2vw, 28px);
+      align-items: stretch;
+      margin-bottom: 4px;
+    }
+    .special-photo {
+      width: 100%;
+      min-height: 260px;
+      border-radius: 36px 22px 48px 18px; overflow: hidden; position: relative;
+      box-shadow: 0 12px 28px rgba(60,52,44,0.10);
+    }
+    .special-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .v-label {
+      position: absolute; left: 10px; top: 18px; writing-mode: vertical-rl;
+      letter-spacing: 0.18em; font-size: 9px; font-weight: 700; color: rgba(255,255,255,.92);
+      text-shadow: 0 1px 4px rgba(0,0,0,.28);
+    }
+    .photo-tag {
+      position: absolute; right: 12px; top: 46%;
+      background: var(--paper); font-family: "Noto Serif SC", serif;
+      font-size: 10px; font-weight: 700; padding: 7px 8px; border-radius: 3px;
+      transform: rotate(6deg); box-shadow: 0 2px 8px rgba(60,52,44,0.12);
+    }
+    .eyebrow { font-size: 10px; letter-spacing: 0.18em; color: var(--sage-deep); font-weight: 700; margin-bottom: 8px; }
+    .special-copy h2 { font-family: "Noto Serif SC", serif; font-size: 26px; font-weight: 900; line-height: 1.25; margin-bottom: 8px; text-wrap: balance; }
+    .special-copy p { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+    .link-cta { background: none; border: none; color: var(--sage-deep); font-size: 14px; font-weight: 700; display: inline-flex; gap: 4px; align-items: center; }
+    .kpi-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-top: 14px; }
+    .kpi { background: var(--paper); border-radius: 14px; padding: 10px 12px; box-shadow: 0 3px 12px rgba(60,52,44,0.04); }
+    .kpi b { display: block; font-size: 18px; font-weight: 800; }
+    .kpi span { font-size: 11px; color: var(--muted); }
+
+    .cat-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      width: 100%;
+      margin: 8px 0 16px;
+      padding: 4px 0 2px;
+    }
+    .cat-item {
+      background: none; border: none; padding: 8px 16px 10px;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .cat-icon {
+      width: 72px; height: 60px; display: grid; place-items: center;
+    }
+    .cat-item strong { font-size: 13px; }
+    .cat-item em { font-size: 9px; color: var(--muted); letter-spacing: 0.12em; font-style: normal; }
+
+    .member-banner {
+      background: linear-gradient(90deg, #B4C6A2 0%, #D2E0C3 52%, #E7F0DB 100%);
+      border-radius: 16px; min-height: 72px; display: flex; overflow: hidden; margin-bottom: 18px;
+    }
+    .member-banner .copy { padding: 12px 16px; flex: 1; min-width: 0; }
+    .member-banner .kicker { font-size: 9px; letter-spacing: 0.16em; font-weight: 700; color: #5A6B4C; }
+    .member-banner h3 { font-size: 16px; font-weight: 800; margin: 4px 0 8px; }
+    .member-banner img { width: min(28%, 240px); min-width: 140px; object-fit: cover; flex-shrink: 0; }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+    .product-grid.trio {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .product-card {
+      background: var(--paper); border-radius: 16px; overflow: hidden;
+      box-shadow: 0 4px 14px rgba(60,52,44,0.05);
+    }
+    .prod-img-wrap { aspect-ratio: 16 / 10; height: auto; position: relative; background: var(--cream-2); }
+    .prod-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .top-badge {
+      position: absolute; top: 8px; left: 8px;
+      background: var(--sage); color: #fff; font-size: 10px; font-weight: 800;
+      padding: 3px 7px; border-radius: 4px;
+    }
+    .prod-info { padding: 10px 12px 12px; }
+    .prod-name { font-size: 14px; font-weight: 800; margin-bottom: 4px; }
+    .prod-desc { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+    .prod-bottom { display: flex; justify-content: space-between; align-items: center; }
+    .prod-price { font-size: 16px; font-weight: 800; }
+    .prod-price span { font-size: 11px; }
+    .btn-add {
+      width: 26px; height: 26px; border-radius: 50%; border: none;
+      background: var(--sage); color: #fff; font-size: 16px; line-height: 1;
+      display: grid; place-items: center;
+    }
+
+    .two-col { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 16px; margin-top: 18px; }
+    .paper {
+      background: var(--paper); border-radius: 18px;
+      box-shadow: 0 4px 14px rgba(60,52,44,0.05);
+      padding: 16px 18px;
+    }
+    .todo-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px dashed var(--line); font-size: 13px;
+    }
+    .todo-row:last-child { border-bottom: none; }
+    .spark { display: flex; align-items: flex-end; gap: 8px; height: 92px; margin-top: 8px; }
+    .spark i {
+      flex: 1; background: var(--sage); border-radius: 8px 8px 4px 4px; opacity: .85;
+      min-height: 8px;
+    }
+    .spark i:nth-child(odd) { background: var(--sage-soft); }
+    .spark-cap { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: 6px; letter-spacing: 0.08em; }
+
+    .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+    .chip {
+      border: none; background: var(--cream-2); color: var(--muted);
+      padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    }
+    .chip.on { background: var(--sage); color: #fff; }
+    .grow { flex: 1; min-width: 180px; }
+    .toolbar .search-box { width: auto; flex: 1; }
+
+    .sheet { background: var(--paper); border-radius: 18px; overflow: auto; box-shadow: 0 4px 14px rgba(60,52,44,0.05); }
+    .sheet table { width: 100%; border-collapse: collapse; min-width: 720px; }
+    .sheet th {
+      text-align: left; font-size: 11px; letter-spacing: 0.12em; color: var(--sage-deep);
+      font-weight: 700; padding: 12px 14px; background: var(--sage-mist);
+    }
+    .sheet td { padding: 12px 14px; border-top: 1px solid var(--line); font-size: 13px; vertical-align: middle; }
+    .sheet tr:hover td { background: #FBF8F1; }
+    .who { display: flex; align-items: center; gap: 8px; }
+    .who img, .thumb {
+      width: 36px; height: 36px; border-radius: 10px; object-fit: cover; background: var(--cream-2);
+    }
+    .pill {
+      display: inline-flex; align-items: center; height: 22px; padding: 0 8px;
+      border-radius: 999px; font-size: 11px; font-weight: 700;
+      background: var(--sage-mist); color: var(--sage-deep);
+    }
+    .pill.wait { background: var(--cream-2); color: var(--muted); }
+    .pill.bad { background: #F3DDD4; color: #A15B48; }
+    .pill.ok { background: var(--sage); color: #fff; }
+    .linkish { background: none; border: none; color: var(--sage-deep); font-weight: 700; font-size: 12px; }
+
+    .page-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px; gap: 12px; }
+    .page-head h2 { font-family: "Noto Serif SC", serif; font-size: 24px; font-weight: 900; }
+    .page-head p { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .btn-sage, .btn-ink, .btn-ghost { padding: 0 16px; height: 38px; font-size: 13px; }
+
+    .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+    .badge-card {
+      background: var(--paper); border-radius: 16px; padding: 16px 8px; text-align: center;
+      box-shadow: 0 4px 12px rgba(60,52,44,0.04);
+    }
+    .stamp {
+      width: 48px; height: 48px; border-radius: 50%; margin: 0 auto 8px;
+      background: var(--sage-mist); display: grid; place-items: center;
+      font-family: "Noto Serif SC", serif; font-weight: 900; color: var(--sage-deep); font-size: 16px;
+    }
+    .banner-card { display: grid; grid-template-columns: 160px 1fr auto; gap: 14px; padding: 12px; }
+    .banner-card img { width: 160px; height: 86px; object-fit: cover; border-radius: 14px; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-grid .span2 { grid-column: span 2; }
+    .moods { display: flex; gap: 8px; flex-wrap: wrap; }
+    .check {
+      display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
+      background: var(--cream-2); padding: 6px 10px; border-radius: 999px;
+    }
+    .switch {
+      width: 40px; height: 22px; border-radius: 999px; background: var(--cream-2); border: none; position: relative;
+    }
+    .switch.on { background: var(--sage); }
+    .switch i {
+      position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff;
+      transition: left .18s ease;
+    }
+    .switch.on i { left: 21px; }
+
+    .funnel { display: grid; gap: 8px; }
+    .funnel-row { display: grid; grid-template-columns: 88px 1fr 64px; gap: 10px; align-items: center; font-size: 12px; }
+    .bar { height: 12px; background: var(--cream-2); border-radius: 999px; overflow: hidden; }
+    .bar b { display: block; height: 100%; background: var(--sage); border-radius: 999px; }
+    .donut-wrap { display: flex; align-items: center; gap: 16px; }
+    .donut {
+      width: 92px; height: 92px; border-radius: 50%;
+      background: conic-gradient(var(--sage) 0 46%, var(--sage-soft) 46% 74%, var(--bread) 74% 100%);
+      mask: radial-gradient(circle 28px, transparent 98%, #000 100%);
+      -webkit-mask: radial-gradient(circle 28px, transparent 98%, #000 100%);
+    }
+    .legend { font-size: 12px; color: var(--muted); line-height: 1.8; }
+    .legend b { color: var(--ink); font-weight: 700; }
+
+    .swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+    .swatch {
+      border-radius: 16px; overflow: hidden; background: var(--paper);
+      box-shadow: 0 4px 12px rgba(60,52,44,0.04);
+      border: 1px solid var(--line);
+      display: flex; flex-direction: column;
+    }
+    .swatch i { display: block; width: 100%; height: 72px; flex-shrink: 0; }
+    .swatch p { padding: 8px 10px 10px; font-size: 12px; font-weight: 700; }
+    .swatch span { display: block; font-size: 10px; color: var(--muted); font-weight: 500; letter-spacing: 0.06em; }
+    .type-card .cursive { font-size: 40px; }
+    .type-card .shop-title { font-size: 28px; margin: 8px 0; }
+    .type-card p { font-size: 13px; color: var(--muted); }
+
+    .drawer-mask {
+      position: fixed; inset: 0; background: rgba(60,52,44,0.28); z-index: 50;
+      display: none; align-items: stretch; justify-content: flex-end;
+    }
+    .drawer-mask.on { display: flex; }
+    .drawer {
+      width: min(480px, 100%); background: var(--cream); height: 100%;
+      padding: 22px 22px 28px; overflow: auto;
+      box-shadow: -16px 0 40px rgba(60,52,44,0.12);
+    }
+    .drawer h3 { font-family: "Noto Serif SC", serif; font-size: 22px; font-weight: 900; margin-bottom: 4px; }
+    .kv { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
+    .kv span { color: var(--muted); }
+
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--paper); border: 1.4px solid var(--ink); border-radius: 14px 14px 14px 4px;
+      padding: 10px 16px; font-size: 13px; font-weight: 600; z-index: 70;
+      box-shadow: 3px 3px 0 rgba(60,52,44,0.06); opacity: 0; pointer-events: none;
+      transition: .25s ease;
+    }
+    .toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .empty { text-align: center; padding: 36px 12px; color: var(--muted); font-size: 13px; }
+    .lamp { position: absolute; right: 168px; top: -6px; z-index: 1; pointer-events: none; }
+
+    @container stage (max-width: 860px) {
+      .special-block, .two-col { grid-template-columns: 1fr; }
+      .special-photo { min-height: 220px; }
+      .cat-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 1100px) {
+      :root { --side: 196px; }
+      .mascot-mini, .lamp { display: none; }
+    }
+    @media (max-width: 980px) {
+      body:not(.app-on) { overflow: auto; }
+      .login-stage, .login-card { height: auto; min-height: 100%; }
+      .login-card { grid-template-columns: 1fr; }
+      .login-hero { height: auto; }
+      .login-art { grid-template-columns: 1fr; }
+      .login-shot-main { min-height: 220px; }
+      .login-mascot { display: none; }
+      .login-pane::before { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-stage" id="loginStage">
+    <div class="login-card">
+      <section class="login-hero">
+        <svg class="login-lamp" width="44" height="64" viewBox="0 0 40 54" fill="none" aria-hidden="true">
+          <path d="M20 0v18" stroke="#6C7E58" stroke-width="1.6"/>
+          <path d="M8 26c2-8 24-8 24 0-2 10-22 10-24 0z" fill="#6C7E58"/>
+          <path d="M12 26c1.5 6 14.5 6 16 0" stroke="#E4EDD8" stroke-width="1.2"/>
+          <circle cx="20" cy="32" r="2.2" fill="#E8C9A0"/>
+        </svg>
+        <header class="login-brand">
+          <div class="cursive-row">
+            <div class="cursive" id="loginHello">Good Morning!</div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8EA47C" stroke-width="1.7"><path d="M5 19c8-1 12-8 14-16-7 2-13 7-14 16z"/><path d="M5 19c4-4 8-6 12-7"/></svg>
+          </div>
+          <div class="shop-title">途个惊喜</div>
+          <div class="slogan">随盒出发，途个好心情
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#8EA47C"><path d="M12 21s-7-4.4-9.5-9.2C.6 8.2 2.2 5 5.4 5c1.8 0 3.2 1 3.9 2.4C10 6 11.4 5 13.2 5c3.2 0 4.8 3.2 2.9 6.8C19 16.6 12 21 12 21z"/></svg>
+          </div>
+        </header>
+
+        <div class="login-art">
+          <figure class="login-shot login-shot-main">
+            <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1400&q=80" alt="今日特选线路" />
+            <div class="v-label">FRESH JOURNEY</div>
+            <div class="photo-tag">BAKERY<br>HANDMADE</div>
+            <div class="fresh-orb">今日<br>新鲜出炉</div>
+          </figure>
+
+          <div class="login-stack">
+            <div class="login-ticket">
+              <div class="eyebrow">TODAY'S SPECIAL</div>
+              <h3>隐世古村慢生活盒</h3>
+              <p>青石古街 · 票面保底 120%</p>
+              <span class="link-cta">去货架看看 →</span>
+            </div>
+            <figure class="login-shot login-shot-side">
+              <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80" alt="湖畔线路" />
+            </figure>
+            <div class="login-mascot">
+              <div class="speech">今天也要把盒子烤好呀！</div>
+              <svg width="132" height="84" viewBox="0 0 154 96" fill="none" aria-hidden="true">
+                <ellipse cx="118" cy="86" rx="28" ry="6" fill="#E4D8C6" opacity=".75"/>
+                <ellipse cx="118" cy="26" rx="9" ry="15" fill="#C5D4B5" stroke="#3C342C" stroke-width="1.2"/>
+                <ellipse cx="130" cy="34" rx="8" ry="13" fill="#E4EDD8" stroke="#3C342C" stroke-width="1.2"/>
+                <rect x="108" y="44" width="26" height="34" rx="3" fill="#EFE0C4" stroke="#3C342C" stroke-width="1.5"/>
+                <text x="113" y="66" font-size="7.5" font-weight="700" fill="#3C342C" font-family="Noto Sans SC,sans-serif">TRIP</text>
+                <circle cx="52" cy="38" r="20" fill="#FFFDF8" stroke="#3C342C" stroke-width="1.6"/>
+                <ellipse cx="36" cy="34" rx="5" ry="8" fill="#FFFDF8" stroke="#3C342C" stroke-width="1.4" transform="rotate(-22 36 34)"/>
+                <ellipse cx="68" cy="34" rx="5" ry="8" fill="#3C342C" transform="rotate(18 68 34)"/>
+                <ellipse cx="52" cy="14" rx="13" ry="7" fill="#FFFDF8" stroke="#3C342C" stroke-width="1.5"/>
+                <circle cx="46" cy="36" r="1.7" fill="#3C342C"/>
+                <circle cx="58" cy="36" r="1.7" fill="#3C342C"/>
+                <ellipse cx="52" cy="41.5" rx="2.2" ry="1.5" fill="#3C342C"/>
+                <path d="M48 46c1.4 2 6.6 2 8 0" stroke="#3C342C" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                <ellipse cx="52" cy="70" rx="22" ry="16" fill="#FFFDF8" stroke="#3C342C" stroke-width="1.6"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="login-pane">
+        <form class="login-form" id="loginForm">
+          <div class="cursive" style="font-size:28px;margin-bottom:4px;">Welcome in</div>
+          <h2>进入后厨</h2>
+          <p class="hint">运营、客服、财务走同一扇门。原型任意账号可进，进去后再切换演示身份。</p>
+          <div class="login-roles" id="loginRoles">
+            <button class="chip on" type="button" data-role="超级管理员">超级管理员</button>
+            <button class="chip" type="button" data-role="运营">运营</button>
+            <button class="chip" type="button" data-role="客服">客服</button>
+          </div>
+          <div class="field">
+            <label>PHONE</label>
+            <input id="loginPhone" value="13800000000" autocomplete="username" />
+          </div>
+          <div class="field">
+            <label>PASSWORD</label>
+            <div class="pass-wrap">
+              <input id="loginPass" type="password" value="tuge" autocomplete="current-password" />
+              <button class="pass-toggle" type="button" id="togglePass" aria-label="显示密码">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="login-extra">
+            <label><input type="checkbox" checked /> 记住档口</label>
+            <span>验证码登录稍后接</span>
+          </div>
+          <button class="btn-sage btn-block" type="submit">开启今日档口 →</button>
+          <div class="login-foot">今日特选已放到左侧橱窗。进门后可在系统设置里改演示角色。</div>
+        </form>
+      </aside>
+    </div>
+  </div>
+
+  <div id="app" hidden>
+    <aside class="side">
+      <div class="side-brand">
+        <div class="cursive" style="font-size:22px;">Tuge Oven</div>
+        <div class="shop-title">途个惊喜</div>
+        <div class="slogan" style="margin-top:4px;font-size:11px;">运营后厨</div>
+      </div>
+      <nav class="nav-scroll" id="nav"></nav>
+      <div class="side-foot">
+        <div class="ava" id="roleAva"></div>
+        <div>
+          <strong id="roleName">林烘烘</strong>
+          <small id="roleTitle">超级管理员</small>
+        </div>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="cloud-head">
+        <svg class="lamp" width="40" height="54" viewBox="0 0 40 54" fill="none">
+          <path d="M20 0v18" stroke="#6C7E58" stroke-width="1.6"/>
+          <path d="M8 26c2-8 24-8 24 0-2 10-22 10-24 0z" fill="#6C7E58"/>
+          <path d="M12 26c1.5 6 14.5 6 16 0" stroke="#E4EDD8" stroke-width="1.2"/>
+          <circle cx="20" cy="32" r="2.2" fill="#E8C9A0"/>
+        </svg>
+        <div class="scallop-row" id="scallops"></div>
+        <div class="head-row">
+          <div class="greet">
+            <div class="cursive-wrap" style="display:flex;align-items:flex-start;gap:6px;">
+              <div class="cursive" id="helloScript">Good Morning!</div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8EA47C" stroke-width="1.7"><path d="M5 19c8-1 12-8 14-16-7 2-13 7-14 16z"/><path d="M5 19c4-4 8-6 12-7"/></svg>
+            </div>
+            <h1 id="pageTitle">工作台</h1>
+            <div class="sub" id="pageSub">今日出炉数据，像看橱窗一样扫一眼</div>
+          </div>
+          <div class="head-tools">
+            <div class="search-box">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B3A698" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+              <input id="globalSearch" placeholder="今天想找什么盒子 / 订单？" />
+              <button class="btn-search" type="button" id="globalSearchBtn">搜索</button>
+            </div>
+            <button class="icon-btn" type="button" title="待办" id="todoBell">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18"/><path d="M12 8c-2-3 2-5 4-3s0 3-4 3z"/></svg>
+            </button>
+            <div class="mascot-mini">
+              <div class="speech">今天也要好好出发呀！</div>
+              <svg width="92" height="44" viewBox="0 0 92 48" fill="none">
+                <circle cx="28" cy="28" r="16" fill="#FFFDF8" stroke="#3C342C" stroke-width="1.5"/>
+                <ellipse cx="15" cy="24" rx="4" ry="7" fill="#FFFDF8" stroke="#3C342C" stroke-width="1.3" transform="rotate(-20 15 24)"/>
+                <ellipse cx="41" cy="24" rx="4" ry="7" fill="#3C342C" transform="rotate(16 41 24)"/>
+                <circle cx="23" cy="27" r="1.4" fill="#3C342C"/>
+                <circle cx="33" cy="27" r="1.4" fill="#3C342C"/>
+                <ellipse cx="70" cy="30" rx="16" ry="10" fill="#EFE0C4" stroke="#3C342C" stroke-width="1.3"/>
+                <text x="60" y="33" font-size="8" font-weight="700" fill="#3C342C" font-family="Noto Sans SC,sans-serif">TRIP</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="main">
+        <section class="view on" id="view-dash"></section>
+        <section class="view" id="view-boxes"></section>
+        <section class="view" id="view-routes"></section>
+        <section class="view" id="view-badges"></section>
+        <section class="view" id="view-banners"></section>
+        <section class="view" id="view-ai"></section>
+        <section class="view" id="view-quiz"></section>
+        <section class="view" id="view-orders"></section>
+        <section class="view" id="view-refunds"></section>
+        <section class="view" id="view-trips"></section>
+        <section class="view" id="view-users"></section>
+        <section class="view" id="view-stats"></section>
+        <section class="view" id="view-settings"></section>
+        <section class="view" id="view-tokens"></section>
+      </main>
+    </div>
+  </div>
+
+  <div class="drawer-mask" id="drawerMask">
+    <aside class="drawer" id="drawer"></aside>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script src="管理端页面原型.js"></script>
+</body>
+</html>
