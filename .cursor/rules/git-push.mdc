@@ -1,14 +1,32 @@
 ---
-description: Default git push goes to test; main only when the user explicitly asks
+description: Push only test-<topic> branches; never push test or main directly; rebase before merge
 alwaysApply: true
 ---
 
-# Git 推送目标
+# Git 推送与冲突
 
-默认远程分支是 `test`，不是 `main` / `master`。
+禁止直推 `test`、`main`、`master`。每次提交推送都走 **test 的子分支**。
 
-- 用户说「提交」「推送」「同步仓库」、或只说 push，**一律** `git push origin HEAD:test`（或当前分支跟踪 `origin/test`）。
-- **禁止** `git push origin main`、`git push origin master`、`--force` 推主分支。
-- 只有用户明确说「推送到主分支」「推 main」「合并到 main」时，才 `git push origin HEAD:main`。
-- 「提交」若同时要推送：先 commit，再推 `test`。不要顺便推 `main`。
-- 新建功能分支也可以，但默认上游仍是 `test`，不要把 `main` 设成默认跟踪分支。
+Git 不能同时存在分支 `test` 和 `test/foo`（`test` 会占住 refs），所以子分支命名为 `test-<主题>`，例如 `test-fix-pay-docs`。
+
+## 默认流程（用户说「提交」「推送」）
+
+1. `git fetch origin`
+2. 从最新 `origin/test` 建分支：`test-<简短主题>`（英文短横线，不要用 `test/` 前缀）。
+3. 在该分支 commit。
+4. `git push -u origin test-<主题>`。**不要** `git push origin test` 或 `git push origin main`。
+5. 已在某个 `test-*` 上则继续推这个分支，不要改推到 `test`。
+
+## 合入 test / main（必须用户明确说）
+
+- 「合并到测试分支 / 合进 test」：先 `fetch`，把该 `test-*` **rebase 到 `origin/test`**，冲突解决后再合并进 `test` 并 push `test`。
+- 「推送到主分支 / 推 main」：只把 **已在 `origin/test` 上的内容** 合进 `main`，不要拿未合入 test 的子分支直推 main。
+- 未说合并时，推完子分支即可，不要自行合 `test`/`main`。
+
+## 多分支并行（防冲突）
+
+- 新分支必须基于 **刚 fetch 的 `origin/test`**，不要基于过期的本地 `test` 或 `main`。
+- 合入前再 rebase 一次 `origin/test`。多个 `test-*` 要合时 **一个一个来**：合完 A 并 push `test` 后，B 再 rebase 新的 `origin/test`。
+- 出现冲突：停下来，列出冲突文件，留双方意图，解决后 `git add` + `rebase --continue`。禁止为过冲突而 `--force` 推 `test`/`main`，禁止丢弃别人已推送的提交。
+- 只允许 `git push --force-with-lease` 推 **自己的** `test-<主题>`（且仅该分支只有自己在用时）。
+- 不要用 `git pull` 在共享的 `test`/`main` 上造无意义的 merge commit；用 rebase。
