@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>途个惊喜 - 盲盒式惊喜旅行</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF6B35',
+                        secondary: '#1A1A2E',
+                        warm: '#FFF1EB',
+                        soft: '#F8F9FF',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f8f9fa; margin: 0; padding: 0; }
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.2s ease; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-6deg); }
+            75% { transform: rotate(6deg); }
+        }
+        .shake-animation { animation: shake 0.15s ease-in-out infinite; }
+        
+        @keyframes flipIn {
+            0% { transform: rotateY(90deg); opacity: 0; }
+            100% { transform: rotateY(0deg); opacity: 1; }
+        }
+        .flip-in { animation: flipIn 0.4s ease-out forwards; }
+
+        .badge-locked { filter: grayscale(100%); opacity: 0.3; }
+        .progress-bar { transition: width 0.3s ease; }
+        .modal-overlay { background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass { background: rgba(255,255,255,0.9); backdrop-filter: blur(6px); }
+        .chat-bubble { max-width: 80%; word-break: break-word; }
+        .mood-card.active { border-color: #FF6B35; background: #FFF1EB; }
+    </style>
+</head>
+<body class="pb-20 max-w-md mx-auto bg-soft min-h-screen">
+
+    <!-- 顶部品牌栏 -->
+    <header class="bg-gradient-to-r from-primary to-orange-400 text-white px-5 py-4 sticky top-0 z-40 shadow-md">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="ri-gift-line text-2xl"></i>
+                <h1 class="text-xl font-bold">途个惊喜</h1>
+            </div>
+            <div class="text-xs bg-white/20 px-3 py-1 rounded-full">
+                <span id="userLevel">旅行新手</span>
+            </div>
+        </div>
+        <p class="text-xs mt-1 text-white/90">随盒出发，途个好心情</p>
+    </header>
+
+    <!-- 首页 -->
+    <div id="homePage" class="page active px-4 pt-4">
+        <!-- AI情绪匹配区 -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm mb-5">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-gray-800 text-sm">
+                    <i class="ri-ai-generate text-primary mr-1"></i>AI心情匹配
+                </h3>
+                <span class="text-xs text-gray-400">选心情，配盲盒</span>
+            </div>
+            <div class="grid grid-cols-4 gap-2">
+                <div class="mood-card text-center p-2 rounded-xl border-2 border-transparent cursor-pointer" data-mood="happy">
+                    <div class="text-2xl mb-1">😄</div>
+                    <p class="text-xs text-gray-600">开心</p>
+                </div>
+                <div class="mood-card text-center p-2 rounded-xl border-2 border-transparent cursor-pointer" data-mood="emo">
+                    <div class="text-2xl mb-1">😔</div>
+                    <p class="text-xs text-gray-600">emo</p>
+                </div>
+                <div class="mood-card text-center p-2 rounded-xl border-2 border-transparent cursor-pointer" data-mood="bored">
+                    <div class="text-2xl mb-1">😶</div>
+                    <p class="text-xs text-gray-600">无聊</p>
+                </div>
+                <div class="mood-card text-center p-2 rounded-xl border-2 border-transparent cursor-pointer" data-mood="curious">
+                    <div class="text-2xl mb-1">🤔</div>
+                    <p class="text-xs text-gray-600">迷茫</p>
+                </div>
+            </div>
+            <p id="moodTip" class="text-xs text-gray-400 text-center mt-3">点击心情，AI为你推荐专属盲盒</p>
+        </div>
+
+        <!-- 横幅 -->
+        <div class="bg-gradient-to-br from-secondary to-gray-800 rounded-2xl p-5 text-white mb-5 shadow-lg">
+            <h2 class="text-lg font-bold mb-1">暑期限定盲盒上线</h2>
+            <p class="text-sm text-gray-300 mb-3">全系列票面价值保底120%</p>
+            <div class="inline-block bg-primary px-3 py-1 rounded-full text-xs font-medium">
+                惊喜随行 · 品质保障
+            </div>
+        </div>
+
+        <!-- 分类标签 -->
+        <div class="flex gap-2 overflow-x-auto hide-scrollbar mb-4">
+            <button class="category-btn bg-primary text-white px-4 py-1.5 rounded-full text-sm whitespace-nowrap" data-cat="all">全部盲盒</button>
+            <button class="category-btn bg-white text-gray-600 px-4 py-1.5 rounded-full text-sm whitespace-nowrap shadow-sm" data-cat="nearby">周边微度假</button>
+            <button class="category-btn bg-white text-gray-600 px-4 py-1.5 rounded-full text-sm whitespace-nowrap shadow-sm" data-cat="province">省内深度游</button>
+            <button class="category-btn bg-white text-gray-600 px-4 py-1.5 rounded-full text-sm whitespace-nowrap shadow-sm" data-cat="cross">跨省限定</button>
+            <button class="category-btn bg-white text-gray-600 px-4 py-1.5 rounded-full text-sm whitespace-nowrap shadow-sm" data-cat="theme">主题专线</button>
+        </div>
+
+        <!-- 盲盒列表 -->
+        <div id="blindBoxList" class="space-y-4"></div>
+    </div>
+
+    <!-- AI搭子页 -->
+    <div id="aiPage" class="page px-4 pt-4">
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden flex flex-col" style="height: calc(100vh - 140px)">
+            <div class="p-4 border-b border-gray-100 flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-primary to-orange-300 rounded-full flex items-center justify-center text-white">
+                    <i class="ri-robot-line"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">小途 · AI旅行搭子</h3>
+                    <p class="text-xs text-green-500">在线中</p>
+                </div>
+            </div>
+            
+            <div id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-primary to-orange-300 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xs">AI</div>
+                    <div class="chat-bubble bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700">
+                        嗨～我是你的旅行搭子小途，不知道去哪玩都可以问我哦！
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-4 py-2 border-t border-gray-100 flex gap-2 overflow-x-auto hide-scrollbar">
+                <button class="quick-question text-xs bg-warm text-primary px-3 py-1.5 rounded-full whitespace-nowrap">推荐散心的地方</button>
+                <button class="quick-question text-xs bg-warm text-primary px-3 py-1.5 rounded-full whitespace-nowrap">周末一日游推荐</button>
+                <button class="quick-question text-xs bg-warm text-primary px-3 py-1.5 rounded-full whitespace-nowrap">一个人旅行安全吗</button>
+            </div>
+
+            <div class="p-3 border-t border-gray-100 flex gap-2">
+                <input type="text" id="chatInput" placeholder="和小途说点什么..." class="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm outline-none">
+                <button id="sendChat" class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="ri-send-plane-2-line"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图鉴页 -->
+    <div id="badgePage" class="page px-4 pt-4">
+        <div class="bg-gradient-to-r from-purple-500 to-indigo-500 rounded-2xl p-4 text-white mb-4 shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold mb-1">AI旅行人格测试</h3>
+                    <p class="text-xs text-white/80">30秒测出你的旅行DNA</p>
+                </div>
+                <button id="startTestBtn" class="bg-white/20 px-3 py-1.5 rounded-full text-xs">去测试 →</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 shadow-sm mb-4">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-gray-800">旅行收集图鉴</h3>
+                <span class="text-xs text-gray-500" id="badgeProgress">0 / 12</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2 mb-2">
+                <div id="progressBar" class="progress-bar bg-primary h-2 rounded-full" style="width: 0%"></div>
+            </div>
+            <p class="text-xs text-gray-500">集齐主题徽章解锁限定惊喜</p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3" id="badgeGrid"></div>
+    </div>
+
+    <!-- 行程页 -->
+    <div id="tripPage" class="page px-4 pt-4">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-gray-800">我的行程</h3>
+            <span class="text-xs text-gray-400" id="tripCountTip">0次出行</span>
+        </div>
+        <div id="tripList" class="space-y-3">
+            <div class="text-center py-16 text-gray-400">
+                <i class="ri-suitcase-line text-4xl block mb-2"></i>
+                <p class="text-sm">还没有开启旅程</p>
+                <p class="text-xs mt-1">去首页开一个盲盒吧</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 我的页 -->
+    <div id="minePage" class="page px-4 pt-4">
+        <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-primary to-orange-300 rounded-full flex items-center justify-center text-white text-2xl">
+                    <i class="ri-user-line"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800">旅行探险家</h3>
+                    <p class="text-xs text-gray-500">已解锁 <span id="unlockCount">0</span> 条线路</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-4 text-center border-t border-gray-100 pt-3">
+                <div>
+                    <p class="text-lg font-bold text-primary" id="tripCountNum">0</p>
+                    <p class="text-xs text-gray-500">出行次数</p>
+                </div>
+                <div>
+                    <p class="text-lg font-bold text-primary" id="saveAmount">0</p>
+                    <p class="text-xs text-gray-500">累计省钱</p>
+                </div>
+                <div>
+                    <p class="text-lg font-bold text-primary">Lv.1</p>
+                    <p class="text-xs text-gray-500">当前等级</p>
+                </div>
+                <div>
+                    <p class="text-lg font-bold text-primary">0</p>
+                    <p class="text-xs text-gray-500">公益里程</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-100">
+                <h4 class="font-medium text-gray-800 text-sm">服务说明</h4>
+            </div>
+            <div class="divide-y divide-gray-100 text-sm text-gray-600">
+                <div class="px-4 py-3">
+                    <p class="font-medium text-gray-700 mb-1">价值保底规则</p>
+                    <p class="text-xs text-gray-500">所有盲盒对应线路票面价值均不低于售价的120%，符合保障规则可申请退换。</p>
+                </div>
+                <div class="px-4 py-3">
+                    <p class="font-medium text-gray-700 mb-1">AI情绪匹配</p>
+                    <p class="text-xs text-gray-500">基于当下心情状态，智能匹配最适配的旅行主题与线路。</p>
+                </div>
+                <div class="px-4 py-3">
+                    <p class="font-medium text-gray-700 mb-1">乡村文旅扶持</p>
+                    <p class="text-xs text-gray-500">每售出1份盲盒，提取1元纳入乡村文旅扶持金。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 max-w-md mx-auto glass">
+        <div class="grid grid-cols-5 h-16">
+            <button class="nav-btn flex flex-col items-center justify-center text-primary" data-page="homePage">
+                <i class="ri-home-4-line text-xl"></i>
+                <span class="text-xs mt-0.5">首页</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center justify-center text-gray-400" data-page="aiPage">
+                <i class="ri-robot-line text-xl"></i>
+                <span class="text-xs mt-0.5">AI搭子</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center justify-center text-gray-400" data-page="badgePage">
+                <i class="ri-medal-line text-xl"></i>
+                <span class="text-xs mt-0.5">图鉴</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center justify-center text-gray-400" data-page="tripPage">
+                <i class="ri-map-pin-line text-xl"></i>
+                <span class="text-xs mt-0.5">行程</span>
+            </button>
+            <button class="nav-btn flex flex-col items-center justify-center text-gray-400" data-page="minePage">
+                <i class="ri-user-line text-xl"></i>
+                <span class="text-xs mt-0.5">我的</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 开盒弹窗 -->
+    <div id="openModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-6">
+            <div class="bg-white rounded-3xl w-full max-w-sm p-6 relative">
+                <button id="closeModal" class="absolute top-4 right-4 text-gray-400 text-xl">
+                    <i class="ri-close-line"></i>
+                </button>
+
+                <div id="beforeOpen" class="text-center py-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-1" id="modalBoxName">周边微度假盲盒</h3>
+                    <p class="text-sm text-gray-500 mb-6">售价 <span class="text-primary font-bold">¥99</span> · 价值保底 ¥120</p>
+                    <div id="boxIcon" class="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-primary to-orange-300 rounded-2xl flex items-center justify-center shadow-lg">
+                        <i class="ri-gift-2-line text-6xl text-white"></i>
+                    </div>
+                    <button id="confirmOpenBtn" class="w-full bg-primary text-white py-3 rounded-xl font-medium">立即开启惊喜</button>
+                    <p class="text-xs text-gray-400 mt-3">开启即代表同意服务规则</p>
+                </div>
+
+                <div id="afterOpen" class="hidden text-center py-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">恭喜解锁专属旅程</h3>
+                    <div id="resultCard" class="flip-in bg-gradient-to-br from-secondary to-gray-700 rounded-2xl p-5 text-white text-left mb-4">
+                        <span class="inline-block bg-primary/90 text-xs px-2 py-0.5 rounded mb-2" id="resultTag">周边游</span>
+                        <h4 class="text-xl font-bold mb-1" id="resultName">古村落探秘一日游</h4>
+                        <p class="text-sm text-gray-300 mb-3" id="resultLocation">吉安 · 渼陂古村</p>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-300 text-xs">包含：往返交通+向导+午餐</span>
+                            <span class="text-primary font-bold" id="resultValue">价值 ¥158</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-4" id="resultMoodText">愿这场旅途，治愈你所有的不开心</p>
+                    <div class="flex gap-3">
+                        <button id="viewTripBtn" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-medium text-sm">查看行程</button>
+                        <button id="acceptBtn" class="flex-1 bg-primary text-white py-3 rounded-xl font-medium text-sm">收下惊喜</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 行程详情弹窗 -->
+    <div id="tripDetailModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeTripDetail()"></div>
+        <div class="absolute bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-3xl p-6 max-h-[80vh] overflow-y-auto">
+            <div class="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-4"></div>
+            <h3 class="text-xl font-bold text-gray-800 mb-1" id="detailName">线路名称</h3>
+            <p class="text-sm text-gray-500 mb-4" id="detailLocation">目的地</p>
+            
+            <div class="bg-warm rounded-xl p-4 mb-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600">票面价值</span>
+                    <span class="text-primary font-bold text-lg" id="detailValue">¥0</span>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="font-medium text-gray-800 mb-2 text-sm">线路亮点</h4>
+                <p class="text-sm text-gray-600 leading-relaxed" id="detailHighlight"></p>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="font-medium text-gray-800 mb-2 text-sm">服务包含</h4>
+                <ul class="text-sm text-gray-600 space-y-1" id="detailInclude"></ul>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="font-medium text-gray-800 mb-2 text-sm">AI生成旅行日记</h4>
+                <button id="generateDiaryBtn" class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-2.5 rounded-xl text-sm font-medium">一键生成旅行日记</button>
+            </div>
+
+            <div id="diaryResult" class="hidden mb-4 bg-purple-50 rounded-xl p-4">
+                <p class="text-sm text-gray-700 leading-relaxed" id="diaryContent"></p>
+                <p class="text-xs text-gray-400 mt-2 text-right">—— AI生成</p>
+            </div>
+
+            <button class="w-full bg-primary text-white py-3 rounded-xl font-medium" onclick="closeTripDetail()">我知道了</button>
+        </div>
+    </div>
+
+    <!-- 人格测试弹窗 -->
+    <div id="testModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-6">
+            <div class="bg-white rounded-3xl w-full max-w-sm p-6 relative">
+                <button id="closeTest" class="absolute top-4 right-4 text-gray-400 text-xl">
+                    <i class="ri-close-line"></i>
+                </button>
+                
+                <div id="testContent">
+                    <h3 class="text-lg font-bold text-gray-800 text-center mb-1">AI旅行人格测试</h3>
+                    <p class="text-xs text-gray-500 text-center mb-5">第 <span id="questionNum">1</span> / 5 题</p>
+                    <div class="w-full bg-gray-100 rounded-full h-1.5 mb-5">
+                        <div id="testProgress" class="bg-primary h-1.5 rounded-full" style="width: 20%"></div>
+                    </div>
+                    <p id="questionText" class="text-gray-800 font-medium mb-4 text-center"></p>
+                    <div id="optionList" class="space-y-2"></div>
+                </div>
+
+                <div id="testResult" class="hidden text-center">
+                    <div class="text-5xl mb-3" id="resultEmoji">🏕️</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-1" id="resultTitle">山野治愈家</h3>
+                    <p class="text-sm text-gray-500 mb-4" id="resultDesc"></p>
+                    <div class="bg-warm rounded-xl p-3 mb-4 text-left">
+                        <p class="text-xs text-gray-600"><span class="text-primary font-medium">AI推荐：</span><span id="recommendText"></span></p>
+                    </div>
+                    <button id="finishTestBtn" class="w-full bg-primary text-white py-3 rounded-xl font-medium">去解锁适合我的盲盒</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== 基础数据 ==========
+        const blindBoxes = [
+            { id: 1, name: '周边微度假盲盒', price: 99, minValue: 120, category: 'nearby', tag: '周边游', desc: '1天短途 · 周末说走就走', mood: ['happy', 'bored'] },
+            { id: 2, name: '省内深度游盲盒', price: 299, minValue: 360, category: 'province', tag: '省内游', desc: '2天1晚 · 解锁小众秘境', mood: ['curious', 'bored'] },
+            { id: 3, name: '跨省限定盲盒', price: 999, minValue: 1200, category: 'cross', tag: '跨省游', desc: '3-4天 · 远方不期而遇', mood: ['curious', 'happy'] },
+            { id: 4, name: '乡村治愈主题盲盒', price: 199, minValue: 240, category: 'theme', tag: '主题专线', desc: '古村慢生活 · 治愈emo', mood: ['emo'] },
+            { id: 5, name: '红色研学盲盒', price: 159, minValue: 190, category: 'theme', tag: '主题专线', desc: '井冈山线路 · 研学实践', mood: ['curious'] },
+            { id: 6, name: '城市探店盲盒', price: 89, minValue: 110, category: 'nearby', tag: '周边游', desc: '本地美食 · 宝藏小店', mood: ['happy', 'bored'] },
+            { id: 7, name: '山野露营盲盒', price: 259, minValue: 320, category: 'nearby', tag: '周边游', desc: '星空露营 · 逃离城市', mood: ['emo', 'bored'] },
+        ];
+
+        const routes = {
+            nearby: [
+                { name: '渼陂古村非遗体验一日游', location: '吉安 · 青原区', value: 158, badge: '古村', highlight: '探访千年庐陵古村，体验油纸伞非遗制作，品尝地道农家宴席。', include: ['往返大巴', '非遗体验', '农家午餐', '向导讲解', '意外险'], moodText: '古村的风会吹走所有烦恼' },
+                { name: '武功山轻徒步一日线', location: '萍乡 · 武功山', value: 188, badge: '山野', highlight: '精选轻徒步路线，高山草甸绝美风光，新手友好无压力。', include: ['往返大巴', '登山向导', '登山杖', '意外险'], moodText: '去山顶，把烦恼喊给风听' },
+                { name: '赣江古镇美食探店', location: '吉安 · 永和镇', value: 136, badge: '美食', highlight: '逛千年吉州窑遗址，吃遍本地特色小吃，打卡网红书店。', include: ['往返交通', '美食基金', '讲解耳机', '意外险'], moodText: '美食和风景，都不可辜负' },
+                { name: '星空露营山野夜', location: '吉安 · 大冈山', value: 328, badge: '露营', highlight: '远离城市灯光，在山野里看银河星空，篝火旁聊天唱歌。', include: ['往返交通', '露营装备', '烧烤晚餐', '星空讲解'], moodText: '星空下，你不需要很坚强' },
+            ],
+            province: [
+                { name: '婺源篁岭晒秋两日游', location: '上饶 · 婺源', value: 458, badge: '徽派', highlight: '秋日限定晒秋景观，入住古村民宿，清晨漫步无人石板路。', include: ['往返高铁', '民宿住宿', '景区门票', '早餐', '向导'], moodText: '慢下来，生活本来就该很美' },
+                { name: '景德镇陶艺深度体验', location: '景德镇 · 三宝村', value: 398, badge: '文艺', highlight: '三宝国际陶艺村驻场体验，亲手拉坯烧制，逛小众博物馆。', include: ['往返交通', '陶艺体验', '民宿一晚', '烧制邮费'], moodText: '亲手做的礼物，最有温度' },
+            ],
+            cross: [
+                { name: '厦门鼓浪屿三日慢游', location: '福建 · 厦门', value: 1480, badge: '海滨', highlight: '慢节奏海岛生活，避开人流打卡小众机位，吃遍闽南美食。', include: ['往返机票', '海景酒店', '船票', '半自由行'], moodText: '海的那边，是新的开始' },
+                { name: '长沙美食特种兵之旅', location: '湖南 · 长沙', value: 1350, badge: '美食', highlight: '三天吃遍长沙老字号，打卡网红地标，住五一广场核心区。', include: ['往返高铁', '市中心酒店', '美食攻略', '意外险'], moodText: '快乐就是，吃很多很多好吃的' },
+            ],
+            theme: [
+                { name: '井冈山红色研学两日行', location: '吉安 · 井冈山', value: 268, badge: '红色', highlight: '重走红军路，参观革命旧址，沉浸式红色文化学习。', include: ['往返大巴', '景区门票', '讲解服务', '住宿餐饮'], moodText: '以史为鉴，奔赴更好的未来' },
+                { name: '坝上村乡村治愈之旅', location: '吉安 · 坝上村', value: 258, badge: '乡村', highlight: '深入帮扶村落，参与农事体验，助力乡村文旅发展。', include: ['往返交通', '农家食宿', '实践证书', '公益捐赠'], moodText: '回到田野，回到最初的自己' },
+            ]
+        };
+
+        const badgeList = ['古村', '山野', '美食', '徽派', '文艺', '海滨', '红色', '乡村', '探险', '露营', '研学', '摄影'];
+
+        const aiReplies = {
+            '散心': '如果想散心的话，特别推荐「乡村治愈主题盲盒」或者「山野露营盲盒」～远离城市喧嚣，在古村或者山野待上一天，坏情绪会慢慢被治愈的✨',
+            '周末': '周末一日游的话，周边微度假盲盒超合适！不用提前做攻略，说走就走，古村探秘、美食探店、轻徒步都有满满的惊喜感～',
+            '一个人': '一个人旅行超酷的！我们的盲盒线路都很安全，一个人反而更自由，还能在路上认识新朋友。担心孤单的话随时找我聊天呀😉',
+            'default': [
+                '其实旅行的意义，就是从熟悉的生活里暂时逃开，去遇见新的风景和新的自己呀',
+                '不如就开个盲盒吧！把选择权交给运气，说不定会遇见意想不到的惊喜呢～',
+                '开心也是一天，不开心也是一天，不如收拾收拾出发呀，路上的风会治愈一切的',
+                '我一直都在哦，不管是想聊旅行，还是想吐槽发泄，都可以跟我说～'
+            ]
+        };
+
+        const testQuestions = [
+            {
+                question: '周末有空你更倾向于？',
+                options: [
+                    { text: '宅家躺平，哪儿也不想去', score: { nature: 2, quiet: 2 } },
+                    { text: '约朋友逛街吃美食', score: { city: 2, social: 2 } },
+                    { text: '去周边爬爬山逛公园', score: { nature: 3, active: 1 } },
+                    { text: '打卡网红景点拍照', score: { city: 2, art: 1 } }
+                ]
+            },
+            {
+                question: '旅行时你最看重什么？',
+                options: [
+                    { text: '风景好，人少安静', score: { nature: 3, quiet: 2 } },
+                    { text: '美食多，吃得开心', score: { city: 2, food: 2 } },
+                    { text: '有文化底蕴，能涨见识', score: { culture: 3, art: 2 } },
+                    { text: '刺激好玩，有挑战性', score: { active: 3, adventure: 2 } }
+                ]
+            },
+            {
+                question: '心情不好你会怎么调节？',
+                options: [
+                    { text: '找个没人的地方发呆', score: { quiet: 3, nature: 1 } },
+                    { text: '大吃一顿治愈自己', score: { food: 3, city: 1 } },
+                    { text: '出去走走散散心', score: { nature: 2, active: 1 } },
+                    { text: '找朋友聊天吐槽', score: { social: 3, city: 1 } }
+                ]
+            },
+            {
+                question: '你喜欢什么样的旅行节奏？',
+                options: [
+                    { text: '慢节奏，睡到自然醒', score: { quiet: 3, nature: 1 } },
+                    { text: '紧凑点，多逛几个地方', score: { active: 2, city: 2 } },
+                    { text: '随心所欲，走到哪算哪', score: { adventure: 3, nature: 1 } },
+                    { text: '提前做好详细攻略', score: { culture: 2, art: 1 } }
+                ]
+            },
+            {
+                question: '你理想的旅行伙伴是？',
+                options: [
+                    { text: '独自一人，享受自由', score: { quiet: 2, adventure: 2 } },
+                    { text: '和最好的朋友一起', score: { social: 3, food: 1 } },
+                    { text: '和家人一起', score: { culture: 2, quiet: 1 } },
+                    { text: '认识新朋友也不错', score: { social: 2, adventure: 2 } }
+                ]
+            }
+        ];
+
+        const personalityResults = [
+            { type: 'nature', name: '山野治愈家', emoji: '🏕️', desc: '你偏爱安静自然的旅行，在山水间找回内心的平静。', recommend: '山野徒步、古村慢游、露营观星类盲盒最适合你' },
+            { type: 'city', name: '城市探险家', emoji: '🏙️', desc: '你热爱城市的烟火气，在美食与探店中收获快乐。', recommend: '城市探店、美食专线、都市潮玩类盲盒最适合你' },
+            { type: 'adventure', name: '追风冒险者', emoji: '🚀', desc: '你喜欢未知与挑战，永远对下一站充满期待。', recommend: '跨省限定、户外探险、小众秘境类盲盒最适合你' },
+            { type: 'culture', name: '人文记录者', emoji: '📜', desc: '你钟情于历史与文化，在旅途中探索精神的厚度。', recommend: '红色研学、非遗体验、古镇人文类盲盒最适合你' }
+        ];
+
+        // ========== 全局状态 ==========
+        let state = {
+            unlockedBadges: [],
+            trips: [],
+            currentBox: null,
+            currentMood: null,
+            currentQuestionIndex: 0,
+            testScores: {}
+        };
+
+        const $ = id => document.getElementById(id);
+
+        // ========== 初始化 ==========
+        window.onload = function() {
+            loadState();
+            bindEvents();
+            renderAll();
+        };
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem('tujingxi_data');
+                if (saved) state = Object.assign(state, JSON.parse(saved));
+            } catch(e) {}
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem('tujingxi_data', JSON.stringify(state));
+            } catch(e) {}
+        }
+
+        // ========== 事件绑定 ==========
+        function bindEvents() {
+            // 底部导航
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => switchPage(btn.dataset.page));
+            });
+
+            // 心情卡片
+            document.querySelectorAll('.mood-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const mood = card.dataset.mood;
+                    state.currentMood = mood;
+                    document.querySelectorAll('.mood-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    const tips = {
+                        happy: '开心就要加倍！美食探店类盲盒超配你～',
+                        emo: '别不开心啦，给你推荐治愈系线路',
+                        bored: '无聊就该出去浪！惊喜盲盒拯救你',
+                        curious: '保持好奇！小众秘境等着你探索'
+                    };
+                    $('moodTip').textContent = tips[mood];
+                    renderBlindBoxes(getCurrentCat());
+                });
+            });
+
+            // 分类切换
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.category-btn').forEach(b => {
+                        b.classList.remove('bg-primary', 'text-white');
+                        b.classList.add('bg-white', 'text-gray-600', 'shadow-sm');
+                    });
+                    btn.classList.remove('bg-white', 'text-gray-600', 'shadow-sm');
+                    btn.classList.add('bg-primary', 'text-white');
+                    renderBlindBoxes(btn.dataset.cat);
+                });
+            });
+
+            // 盲盒开盒
+            $('blindBoxList').addEventListener('click', e => {
+                const btn = e.target.closest('.open-box-btn');
+                if (btn) openBoxModal(parseInt(btn.dataset.boxId));
+            });
+
+            // 行程详情
+            $('tripList').addEventListener('click', e => {
+                const card = e.target.closest('.trip-card');
+                if (card) showTripDetail(parseInt(card.dataset.tripId));
+            });
+
+            // 开盒弹窗
+            $('closeModal').addEventListener('click', () => $('openModal').classList.add('hidden'));
+            $('confirmOpenBtn').addEventListener('click', doOpenBox);
+            $('acceptBtn').addEventListener('click', () => $('openModal').classList.add('hidden'));
+            $('viewTripBtn').addEventListener('click', () => {
+                $('openModal').classList.add('hidden');
+                switchPage('tripPage');
+            });
+
+            // AI生成日记
+            $('generateDiaryBtn').addEventListener('click', generateDiary);
+
+            // AI聊天
+            $('sendChat').addEventListener('click', sendChat);
+            $('chatInput').addEventListener('keydown', e => { if(e.key === 'Enter') sendChat(); });
+
+            // 快捷问题
+            document.querySelectorAll('.quick-question').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    $('chatInput').value = btn.textContent;
+                    sendChat();
+                });
+            });
+
+            // 人格测试
+            $('startTestBtn').addEventListener('click', startTest);
+            $('closeTest').addEventListener('click', () => $('testModal').classList.add('hidden'));
+            $('finishTestBtn').addEventListener('click', () => {
+                $('testModal').classList.add('hidden');
+                switchPage('homePage');
+            });
+            $('optionList').addEventListener('click', e => {
+                const opt = e.target.closest('.test-option');
+                if (opt) selectTestOption(parseInt(opt.dataset.index));
+            });
+        }
+
+        // ========== 页面切换 ==========
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            $(pageId).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('text-primary');
+                b.classList.add('text-gray-400');
+            });
+            document.querySelector(`[data-page="${pageId}"]`).classList.remove('text-gray-400');
+            document.querySelector(`[data-page="${pageId}"]`).classList.add('text-primary');
+        }
+
+        function getCurrentCat() {
+            const active = document.querySelector('.category-btn.bg-primary');
+            return active ? active.dataset.cat : 'all';
+        }
+
+        // ========== 盲盒渲染 ==========
+        function renderBlindBoxes(category = 'all') {
+            let list = category === 'all' ? [...blindBoxes] : blindBoxes.filter(b => b.category === category);
+            if (state.currentMood) list = list.filter(b => b.mood.includes(state.currentMood));
+
+            const container = $('blindBoxList');
+            if (list.length === 0) {
+                container.innerHTML = '<div class="text-center py-10 text-gray-400"><p class="text-sm">暂无匹配的盲盒</p></div>';
+                return;
+            }
+
+            container.innerHTML = list.map(box => `
+                <div class="bg-white rounded-2xl p-4 shadow-sm flex items-center gap-4">
+                    <div class="w-20 h-20 bg-gradient-to-br from-primary/10 to-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i class="ri-gift-2-line text-3xl text-primary"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="font-bold text-gray-800 truncate">${box.name}</h4>
+                            <span class="text-[10px] bg-orange-100 text-primary px-1.5 py-0.5 rounded">${box.tag}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-2">${box.desc}</p>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-primary font-bold">¥${box.price}</span>
+                                <span class="text-xs text-gray-400 line-through ml-1">保底¥${box.minValue}</span>
+                            </div>
+                            <button class="open-box-btn bg-primary text-white text-xs px-3 py-1.5 rounded-full" data-box-id="${box.id}">开盒</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ========== 开盒逻辑 ==========
+        function openBoxModal(boxId) {
+            const box = blindBoxes.find(b => b.id === boxId);
+            state.currentBox = box;
+            $('modalBoxName').textContent = box.name;
+            document.querySelector('#beforeOpen .text-primary').textContent = `¥${box.price}`;
+            document.querySelector('#beforeOpen .text-gray-500 span:last-child').textContent = `保底¥${box.minValue}`;
+            $('beforeOpen').classList.remove('hidden');
+            $('afterOpen').classList.add('hidden');
+            $('boxIcon').classList.remove('shake-animation');
+            $('openModal').classList.remove('hidden');
+        }
+
+        function doOpenBox() {
+            $('boxIcon').classList.add('shake-animation');
+            setTimeout(() => {
+                $('boxIcon').classList.remove('shake-animation');
+                showBoxResult();
+            }, 1200);
+        }
+
+        function showBoxResult() {
+            const box = state.currentBox;
+            const pool = routes[box.category];
+            const valid = pool.filter(r => r.value >= box.minValue);
+            const selected = valid[Math.floor(Math.random() * valid.length)];
+
+            const trip = {
+                ...selected,
+                boxName: box.name,
+                price: box.price,
+                date: new Date().toLocaleDateString(),
+                id: Date.now()
+            };
+            state.trips.unshift(trip);
+
+            if (!state.unlockedBadges.includes(selected.badge)) {
+                state.unlockedBadges.push(selected.badge);
+            }
+            saveState();
+
+            $('resultTag').textContent = box.tag;
+            $('resultName').textContent = selected.name;
+            $('resultLocation').textContent = selected.location;
+            $('resultValue').textContent = `价值 ¥${selected.value}`;
+            $('resultMoodText').textContent = selected.moodText;
+
+            $('beforeOpen').classList.add('hidden');
+            $('afterOpen').classList.remove('hidden');
+
+            const card = $('resultCard');
+            card.classList.remove('flip-in');
+            void card.offsetWidth;
+            card.classList.add('flip-in');
+
+            renderAll();
+        }
+
+        // ========== 图鉴渲染 ==========
+        function renderBadges() {
+            $('badgeGrid').innerHTML = badgeList.map(badge => {
+                const unlocked = state.unlockedBadges.includes(badge);
+                return `
+                    <div class="bg-white rounded-xl p-3 text-center shadow-sm ${unlocked ? '' : 'badge-locked'}">
+                        <div class="w-10 h-10 mx-auto mb-1 rounded-full bg-orange-100 flex items-center justify-center">
+                            <i class="ri-medal-2-line text-primary text-lg"></i>
+                        </div>
+                        <p class="text-xs text-gray-700">${badge}</p>
+                    </div>
+                `;
+            }).join('');
+
+            const progress = (state.unlockedBadges.length / badgeList.length) * 100;
+            $('progressBar').style.width = `${progress}%`;
+            $('badgeProgress').textContent = `${state.unlockedBadges.length} / ${badgeList.length}`;
+        }
+
+        // ========== 行程渲染 ==========
+        function renderTrips() {
+            const list = $('tripList');
+            if (state.trips.length === 0) {
+                list.innerHTML = '<div class="text-center py-16 text-gray-400"><i class="ri-suitcase-line text-4xl block mb-2"></i><p class="text-sm">还没有开启旅程</p><p class="text-xs mt-1">去首页开一个盲盒吧</p></div>';
+                $('tripCountTip').textContent = '0次出行';
+                return;
+            }
+
+            $('tripCountTip').textContent = `${state.trips.length}次出行`;
+            list.innerHTML = state.trips.map(trip => `
+                <div class="bg-white rounded-xl p-4 shadow-sm trip-card cursor-pointer" data-trip-id="${trip.id}">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm">${trip.name}</h4>
+                            <p class="text-xs text-gray-500 mt-0.5">${trip.location} · ${trip.date}</p>
+                        </div>
+                        <span class="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded">已解锁</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-500">购入价 ¥${trip.price}</span>
+                        <span class="text-primary font-medium">价值 ¥${trip.value}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showTripDetail(tripId) {
+            const trip = state.trips.find(t => t.id === tripId);
+            if (!trip) return;
+
+            $('detailName').textContent = trip.name;
+            $('detailLocation').textContent = trip.location;
+            $('detailValue').textContent = `¥${trip.value}`;
+            $('detailHighlight').textContent = trip.highlight;
+            $('detailInclude').innerHTML = trip.include.map(i => `<li>· ${i}</li>`).join('');
+
+            $('diaryResult').classList.add('hidden');
+            $('generateDiaryBtn').classList.remove('hidden');
+            $('generateDiaryBtn').textContent = '一键生成旅行日记';
+            $('generateDiaryBtn').disabled = false;
+
+            $('tripDetailModal').classList.remove('hidden');
+        }
+
+        function closeTripDetail() {
+            $('tripDetailModal').classList.add('hidden');
+        }
+
+        function generateDiary() {
+            const btn = $('generateDiaryBtn');
+            btn.textContent = 'AI生成中...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                const name = $('detailName').textContent;
+                const loc = $('detailLocation').textContent;
+                const templates = [
+                    `今天去了${loc}的${name}，风是温柔的，阳光是刚好的。不用刻意规划的旅途，反而遇见了最多的惊喜。`,
+                    `很庆幸开了这个盲盒，遇见了${name}。在${loc}的时光像被放慢了一样，不用赶时间，只是安安静静感受当下。`,
+                    `今日份快乐来自${name}。${loc}比想象中还要美，吃到了好吃的，看到了好看的风景。`
+                ];
+                $('diaryContent').textContent = templates[Math.floor(Math.random() * templates.length)];
+                $('diaryResult').classList.remove('hidden');
+                btn.classList.add('hidden');
+            }, 1000);
+        }
+
+        // ========== AI聊天 ==========
+        function sendChat() {
+            const input = $('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            addChatMsg(text, true);
+            input.value = '';
+
+            setTimeout(() => {
+                let reply;
+                if (text.includes('散心') || text.includes('不好') || text.includes('emo')) {
+                    reply = aiReplies['散心'];
+                } else if (text.includes('周末') || text.includes('一日游')) {
+                    reply = aiReplies['周末'];
+                } else if (text.includes('一个人') || text.includes('安全')) {
+                    reply = aiReplies['一个人'];
+                } else {
+                    const arr = aiReplies['default'];
+                    reply = arr[Math.floor(Math.random() * arr.length)];
+                }
+                addChatMsg(reply, false);
+            }, 600);
+        }
+
+        function addChatMsg(content, isUser) {
+            const container = $('chatContainer');
+            const html = isUser
+                ? `<div class="flex gap-2 justify-end"><div class="chat-bubble bg-primary text-white p-3 rounded-2xl rounded-tr-none text-sm">${content}</div></div>`
+                : `<div class="flex gap-2"><div class="w-8 h-8 bg-gradient-to-br from-primary to-orange-300 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xs">AI</div><div class="chat-bubble bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-700">${content}</div></div>`;
+            container.insertAdjacentHTML('beforeend', html);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // ========== 人格测试 ==========
+        function startTest() {
+            state.currentQuestionIndex = 0;
+            state.testScores = {};
+            $('testContent').classList.remove('hidden');
+            $('testResult').classList.add('hidden');
+            renderQuestion();
+            $('testModal').classList.remove('hidden');
+        }
+
+        function renderQuestion() {
+            const q = testQuestions[state.currentQuestionIndex];
+            $('questionNum').textContent = state.currentQuestionIndex + 1;
+            $('testProgress').style.width = `${((state.currentQuestionIndex + 1) / testQuestions.length) * 100}%`;
+            $('questionText').textContent = q.question;
+
+            $('optionList').innerHTML = q.options.map((opt, i) => `
+                <div class="test-option p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-primary text-sm text-gray-700" data-index="${i}">
+                    ${opt.text}
+                </div>
+            `).join('');
+        }
+
+        function selectTestOption(index) {
+            const q = testQuestions[state.currentQuestionIndex];
+            const scores = q.options[index].score;
+            
+            for (let key in scores) {
+                state.testScores[key] = (state.testScores[key] || 0) + scores[key];
+            }
+
+            if (state.currentQuestionIndex < testQuestions.length - 1) {
+                state.currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                showTestResult();
+            }
+        }
+
+        function showTestResult() {
+            let maxType = 'nature';
+            let maxScore = 0;
+            for (let key in state.testScores) {
+                if (state.testScores[key] > maxScore) {
+                    maxScore = state.testScores[key];
+                    maxType = key;
+                }
+            }
+
+            const result = personalityResults.find(r => r.type === maxType) || personalityResults[0];
+            $('resultEmoji').textContent = result.emoji;
+            $('resultTitle').textContent = result.name;
+            $('resultDesc').textContent = result.desc;
+            $('recommendText').textContent = result.recommend;
+
+            $('testContent').classList.add('hidden');
+            $('testResult').classList.remove('hidden');
+        }
+
+        // ========== 我的页渲染 ==========
+        function renderMine() {
+            $('tripCountNum').textContent = state.trips.length;
+            $('unlockCount').textContent = state.unlockedBadges.length;
+            
+            let save = 0;
+            state.trips.forEach(t => save += (t.value - t.price));
+            $('saveAmount').textContent = save;
+
+            let level = '旅行新手';
+            if (state.trips.length >= 3) level = '探索者';
+            if (state.trips.length >= 8) level = '旅行家';
+            $('userLevel').textContent = level;
+        }
+
+        // ========== 统一渲染 ==========
+        function renderAll() {
+            renderBlindBoxes();
+            renderBadges();
+            renderTrips();
+            renderMine();
+        }
+    </script>
+</body>
+</html>
