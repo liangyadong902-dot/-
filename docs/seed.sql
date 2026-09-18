@@ -1,6 +1,6 @@
 -- 途个惊喜 · 种子数据
--- 产品数据以 prototype/index.html 为准（7 盲盒、10 线路、价格地名禁止手改）
--- 视觉角标 / 封面仅作演示，不改售价与目的地
+-- 产品数据以 docs/页面原型.html 为准（6 盲盒、6 线路、12 徽章）
+-- 标价 / 地名 / 保底禁止手改：改数据要同步改原型
 --
 -- 执行：
 --   mysql -uroot -p < docs/schema.sql
@@ -9,6 +9,12 @@
 -- 分两部分：
 --   A. 配置种子（必须，没内容无法演示）
 --   B. 演示数据（可选；正式部署可整段删掉）
+--
+-- 筛选维度共四个（都不影响开盒随机，开盒只看 category + 保底）：
+--   category 分类   nearby / province / cross / theme
+--   mood     心情   happy / emo / bored / curious
+--   scene    景点类型 mountain / water / ancient_town / camp / food / art ...
+--   price    价格档位 0-99 / 100-199 / 200-399 / 400+  （区间定义在 sys_config）
 
 SET NAMES utf8mb4;
 SET time_zone = '+08:00';
@@ -36,86 +42,78 @@ INSERT INTO `badge` (`id`, `name`, `mark`, `description`, `sort_weight`) VALUES
   (11, '研学', '学', '非遗与人文实践',       15),
   (12, '摄影', '影', '为出片而出发',         10);
 
--- ── A2. 线路池（prototype/index.html routes） ──
+-- ── A2. 线路池 6 条（docs/页面原型.html TUGE_ROUTES） ──
+-- scene 为该线路的主要景点类型，仅用于管理端筛选与池覆盖度提示，**不参与开盒随机**。
 -- 保底校验（同分类启用线路须盖过盲盒 min_value_cent）：
---   nearby   99/120、89/110、259/320 → 158/188/136/328 元
---   province 299/360                 → 458/398 元
---   cross    999/1200                → 1480/1350 元
---   theme    199/240、159/190        → 268/258 元
+--   nearby   120/160/200 → 线路 148/135/218。box_2(160) 仅 r3 合格；box_3(200) 仅 r3 合格
+--   province 380         → r4 420 合格
+--   cross    750         → r5 880 合格
+--   theme    150         → r6 168 合格
 DELETE FROM `travel_route`;
 INSERT INTO `travel_route`
-  (`id`, `name`, `category`, `location`, `value_cent`, `cost_cent`, `badge_id`,
+  (`id`, `name`, `category`, `location`, `scene`, `value_cent`, `cost_cent`, `badge_id`,
    `highlight`, `include_json`, `mood_text`, `status`) VALUES
-  (1, '渼陂古村非遗体验一日游', 'nearby',   '吉安 · 青原区',  15800, NULL, 1,
-      '探访千年庐陵古村，体验油纸伞非遗制作，品尝地道农家宴席。',
-      CAST('["往返大巴","非遗体验","农家午餐","向导讲解","意外险"]' AS JSON),
+  (1, '渼陂古村非遗一日游', 'nearby',   '吉安 · 青原区', 'ancient_town', 14800, NULL, 1,
+      '青石街、打糍粑、老樟树',
+      CAST('["交通","午餐","向导"]' AS JSON),
       '古村的风会吹走所有烦恼', 'on'),
-  (2, '武功山轻徒步一日线',     'nearby',   '萍乡 · 武功山',  18800, NULL, 2,
-      '精选轻徒步路线，高山草甸绝美风光，新手友好无压力。',
-      CAST('["往返大巴","登山向导","登山杖","意外险"]' AS JSON),
-      '去山顶，把烦恼喊给风听', 'on'),
-  (3, '赣江古镇美食探店',       'nearby',   '吉安 · 永和镇',  13600, NULL, 3,
-      '逛千年吉州窑遗址，吃遍本地特色小吃，打卡网红书店。',
-      CAST('["往返交通","美食基金","讲解耳机","意外险"]' AS JSON),
-      '美食和风景，都不可辜负', 'on'),
-  (4, '星空露营山野夜',         'nearby',   '吉安 · 大冈山',  32800, NULL, 10,
-      '远离城市灯光，在山野里看银河星空，篝火旁聊天唱歌。',
-      CAST('["往返交通","露营装备","烧烤晚餐","星空讲解"]' AS JSON),
-      '星空下，你不需要很坚强', 'on'),
-  (5, '婺源篁岭晒秋两日游',     'province', '上饶 · 婺源',    45800, NULL, 4,
-      '秋日限定晒秋景观，入住古村民宿，清晨漫步无人石板路。',
-      CAST('["往返高铁","民宿住宿","景区门票","早餐","向导"]' AS JSON),
-      '慢下来，生活本来就该很美', 'on'),
-  (6, '景德镇陶艺深度体验',     'province', '景德镇 · 三宝村',39800, NULL, 5,
-      '三宝国际陶艺村驻场体验，亲手拉坯烧制，逛小众博物馆。',
-      CAST('["往返交通","陶艺体验","民宿一晚","烧制邮费"]' AS JSON),
-      '亲手做的礼物，最有温度', 'on'),
-  (7, '厦门鼓浪屿三日慢游',     'cross',    '福建 · 厦门',   148000, NULL, 6,
-      '慢节奏海岛生活，避开人流打卡小众机位，吃遍闽南美食。',
-      CAST('["往返机票","海景酒店","船票","半自由行"]' AS JSON),
-      '海的那边，是新的开始', 'on'),
-  (8, '长沙美食特种兵之旅',     'cross',    '湖南 · 长沙',   135000, NULL, 3,
-      '三天吃遍长沙老字号，打卡网红地标，住五一广场核心区。',
-      CAST('["往返高铁","市中心酒店","美食攻略","意外险"]' AS JSON),
-      '快乐就是，吃很多很多好吃的', 'on'),
-  (9, '井冈山红色研学两日行',   'theme',    '吉安 · 井冈山',  26800, NULL, 7,
-      '重走红军路，参观革命旧址，沉浸式红色文化学习。',
-      CAST('["往返大巴","景区门票","讲解服务","住宿餐饮"]' AS JSON),
-      '以史为鉴，奔赴更好的未来', 'on'),
-  (10,'坝上村乡村治愈之旅',     'theme',    '吉安 · 坝上村',  25800, NULL, 8,
-      '深入帮扶村落，参与农事体验，助力乡村文旅发展。',
-      CAST('["往返交通","农家食宿","实践证书","公益捐赠"]' AS JSON),
-      '回到田野，回到最初的自己', 'on');
+  (2, '云雾茶山徒步采风',   'nearby',   '武夷山周边',   'mountain',     13500, NULL, 2,
+      '茶垄步道、云海',
+      CAST('["交通","茶歇","向导"]' AS JSON),
+      '穿过云雾，听见心跳', 'on'),
+  (3, '湖畔星空营地之夜',   'nearby',   '仙女湖畔',     'camp',         21800, NULL, 10,
+      '星空、篝火、湖岸',
+      CAST('["帐篷","晚餐","向导"]' AS JSON),
+      '星空不说话，但够温暖', 'on'),
+  (4, '三清山松云问道二日', 'province', '上饶 · 玉山',  'mountain',     42000, NULL, 4,
+      '栈道、云海日出',
+      CAST('["大巴","住宿","门票"]' AS JSON),
+      '站在高处，天地开朗', 'on'),
+  (5, '大理苍山洱海',       'cross',    '云南 · 大理',  'water',        88000, NULL, 5,
+      '苍山索道、海东日落',
+      CAST('["往返交通","一晚民宿"]' AS JSON),
+      '去有风的地方重新开始', 'on'),
+  (6, '西关深巷寻味记',     'theme',    '广州 · 西关',  'food',         16800, NULL, 3,
+      '早茶、骑楼、糖水',
+      CAST('["向导","三餐打卡"]' AS JSON),
+      '烟火气是最好的良药', 'off');
 
--- ── A3. 盲盒 7 个 + 心情（prototype/index.html blindBoxes） ──
+-- ── A3. 盲盒 6 个 + 适配心情 + 适配景点类型（docs/页面原型.html TUGE_BOXES） ──
+-- box_6 默认下架，与原型一致（管理端提示「上架美食专线」）
+DELETE FROM `blind_box_scene`;
 DELETE FROM `blind_box_mood`;
 DELETE FROM `blind_box`;
 INSERT INTO `blind_box`
   (`id`, `name`, `category`, `tag`, `rank_tag`, `intro`, `price_cent`, `min_value_cent`,
    `cover_url`, `sort_weight`, `status`) VALUES
-  (1, '周边微度假盲盒', 'nearby',   '周边游',   'TOP1', '1天短途 · 周末说走就走',
+  (1, '周边微度假盲盒',   'nearby',   '周边游',   'TOP1', '1天短途，周末说走就走',
       9900,  12000, 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80', 90, 'on'),
-  (2, '省内深度游盲盒', 'province', '省内游',   'HOT',  '2天1晚 · 解锁小众秘境',
-      29900, 36000, 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80', 80, 'on'),
-  (3, '跨省限定盲盒',   'cross',    '跨省游',   'NEW',  '3-4天 · 远方不期而遇',
-      99900, 120000,'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80', 70, 'on'),
-  (4, '乡村治愈主题盲盒','theme',   '主题专线', NULL,   '古村慢生活 · 治愈emo',
-      19900, 24000, 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80', 60, 'on'),
-  (5, '红色研学盲盒',   'theme',    '主题专线', NULL,   '井冈山线路 · 研学实践',
-      15900, 19000, 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80', 50, 'on'),
-  (6, '城市探店盲盒',   'nearby',   '周边游',   'TOP2', '本地美食 · 宝藏小店',
-      8900,  11000, 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', 40, 'on'),
-  (7, '山野露营盲盒',   'nearby',   '周边游',   'TOP3', '星空露营 · 逃离城市',
-      25900, 32000, 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80', 30, 'on');
+  (2, '隐世古村慢生活盒', 'nearby',   '周边游',   'TOP2', '青石古街，非遗打糍粑',
+      12900, 16000, 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80', 80, 'on'),
+  (3, '山野露营观星盲盒', 'nearby',   '周边游',   'TOP3', '湖畔星空，篝火治愈夜',
+      15900, 20000, 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80', 70, 'on'),
+  (4, '省内仙山问道二日', 'province', '省内游',   'HOT',  '云海奇峰，探秘古建',
+      29900, 38000, 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80', 60, 'on'),
+  (5, '跨省限定冒险盲盒', 'cross',    '跨省游',   'NEW',  '大山大河，说走就走',
+      59900, 75000, 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80', 50, 'on'),
+  (6, '老城寻味美食专线', 'theme',    '主题专线', 'HOT',  '街角早茶，烟火气',
+      11900, 15000, 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', 40, 'off');
 
 INSERT INTO `blind_box_mood` (`box_id`, `mood`) VALUES
-  (1, 'happy'), (1, 'bored'),
-  (2, 'curious'), (2, 'bored'),
-  (3, 'curious'), (3, 'happy'),
-  (4, 'emo'),
-  (5, 'curious'),
-  (6, 'happy'), (6, 'bored'),
-  (7, 'emo'), (7, 'bored');
+  (1, 'happy'), (1, 'emo'),   (1, 'bored'),
+  (2, 'emo'),   (2, 'curious'),
+  (3, 'emo'),   (3, 'curious'), (3, 'bored'),
+  (4, 'happy'), (4, 'curious'),
+  (5, 'bored'), (5, 'curious'),
+  (6, 'happy'), (6, 'bored');
+
+INSERT INTO `blind_box_scene` (`box_id`, `scene`) VALUES
+  (1, 'mountain'), (1, 'ancient_town'),
+  (2, 'ancient_town'), (2, 'village'),
+  (3, 'mountain'), (3, 'camp'),
+  (4, 'mountain'), (4, 'ancient_town'),
+  (5, 'water'),
+  (6, 'food'), (6, 'ancient_town');
 
 -- ── A4. 运营位 ──
 DELETE FROM `banner`;
@@ -124,7 +122,7 @@ INSERT INTO `banner`
   (1, '暑期限定盲盒上线', '全系列票面价值保底120%', '价值保底',
       'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80',
       'none', NULL, 90, 'on'),
-  (2, 'emo 日专场', '乡村治愈与山野露营，把皱抚平', '心情匹配',
+  (2, 'emo 日专场', '隐世古村与山野露营，把皱抚平', '心情匹配',
       'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80',
       'none', NULL, 80, 'on');
 
@@ -172,6 +170,7 @@ INSERT INTO `personality_result` (`id`, `type`, `name`, `mark`, `description`, `
       '红色研学、非遗体验、古镇人文类盲盒最适合你');
 
 -- ── A6. 小途：快捷问题 / 降级话术 / 默认回复 / 日记模板 ──
+-- recommend_box_ids 必须指向 A3 里真实存在的上架盲盒（下表引用的都是 id ≤ 5 的在架盒子）
 DELETE FROM `ai_quick_question`;
 INSERT INTO `ai_quick_question` (`text`, `sort_weight`, `status`) VALUES
   ('推荐散心的地方',   90, 'on'),
@@ -181,10 +180,10 @@ INSERT INTO `ai_quick_question` (`text`, `sort_weight`, `status`) VALUES
 DELETE FROM `ai_keyword_rule`;
 INSERT INTO `ai_keyword_rule` (`keywords_json`, `reply_text`, `recommend_box_ids`, `sort_weight`, `status`) VALUES
   (CAST('["散心","不好","emo"]' AS JSON),
-   '如果想散心的话，特别推荐「乡村治愈主题盲盒」或者「山野露营盲盒」～远离城市喧嚣，在古村或者山野待上一天，坏情绪会慢慢被治愈的。',
-   CAST('[4,7]' AS JSON), 90, 'on'),
+   '如果想散心的话，特别推荐「隐世古村慢生活盒」或者「山野露营观星盲盒」～远离城市喧嚣，在古村或者湖畔待上一天，坏情绪会慢慢被治愈的。',
+   CAST('[2,3]' AS JSON), 90, 'on'),
   (CAST('["周末","一日游"]' AS JSON),
-   '周末一日游的话，周边微度假盲盒超合适！不用提前做攻略，说走就走，古村探秘、美食探店、轻徒步都有满满的惊喜感。',
+   '周末一日游的话，周边微度假盲盒超合适！不用提前做攻略，说走就走，古村探秘、露营观星都有满满的惊喜感。',
    CAST('[1]' AS JSON), 80, 'on'),
   (CAST('["一个人","安全"]' AS JSON),
    '一个人旅行超酷的！我们的盲盒线路都很安全，一个人反而更自由，还能在路上认识新朋友。担心孤单的话随时找我聊天。',
@@ -224,7 +223,9 @@ INSERT INTO `sys_config` (`cfg_key`, `cfg_value`, `remark`) VALUES
   ('copy.value_guard',       '票面价值不低于售价 120%，符合保障规则可申请退换。', '「我的」服务说明 1'),
   ('copy.mood_match',        '基于心情智能匹配旅行主题与线路。', '「我的」服务说明 2'),
   ('copy.village',           '每售出 1 份盲盒提取 1 元纳入扶持金。', '「我的」服务说明 3'),
-  ('badge.total',            '12',     '徽章总数，用户端进度分母');
+  ('badge.total',            '12',     '徽章总数，用户端进度分母'),
+  ('price.tiers',            '[{"label":"¥99 以下","min":0,"max":99},{"label":"¥100-199","min":100,"max":199},{"label":"¥200-399","min":200,"max":399},{"label":"¥400 以上","min":400,"max":null}]', '价格档位筛选；改档位不动代码与数据'),
+  ('scene.tags',             '[{"key":"mountain","label":"山野"},{"key":"water","label":"江河湖海"},{"key":"ancient_town","label":"古镇"},{"key":"sea","label":"海滨"},{"key":"forest","label":"森林"},{"key":"camp","label":"露营"},{"key":"village","label":"乡村"},{"key":"food","label":"美食"},{"key":"art","label":"文艺"},{"key":"red","label":"红色"},{"key":"study","label":"研学"},{"key":"photography","label":"摄影"}]', '景点类型词表；与 blind_box_scene.scene / travel_route.scene 取值一致');
 
 -- ── A8. 管理端账号（演示密码均为 tuge，正式环境必须改） ──
 -- BCrypt(10) of "tuge"
@@ -269,45 +270,47 @@ INSERT INTO `app_user`
   (10063, '18700006608', '米粒', 'phone',  'normal', 'happy',   NULL,
    '2026-09-17 11:22:00.000', '2026-09-17 11:22:00.000', '');
 
--- ── B2. 订单（覆盖 5 种状态；金额/盲盒名与 A3 一致） ──
+-- ── B2. 订单（覆盖 5 种状态；box_id / 名称 / 金额必须与 A3 一致） ──
+-- 7 号单刻意停在 paid：用来演示管理端「补单」入口（paid 且 trip_id 为空）
+-- 5 号单对应的 box_6 已下架：演示「历史订单不受下架影响」
 INSERT INTO `biz_order`
   (`id`, `order_no`, `user_id`, `box_id`, `box_name`, `box_category`, `price_cent`, `paid_cent`,
    `min_value_cent`, `status`, `pay_channel`, `expire_at`, `paid_at`, `opened_at`, `cancelled_at`,
    `route_id`, `trip_id`, `created_at`) VALUES
   (1, 'T20260917001', 10021, 1, '周边微度假盲盒',   'nearby',    9900,  9900,  12000, 'opened',
       'alipay', '2026-09-17 08:27:00.000', '2026-09-17 08:14:00.000', '2026-09-17 08:14:05.000', NULL, 1, 1, '2026-09-17 08:12:00.000'),
-  (2, 'T20260917002', 10044, 2, '省内深度游盲盒',   'province', 29900,     0,  36000, 'pending_pay',
+  (2, 'T20260917002', 10044, 2, '隐世古村慢生活盒', 'nearby',   12900,     0,  16000, 'pending_pay',
       NULL,     '2026-09-17 09:55:00.000', NULL, NULL, NULL, NULL, NULL, '2026-09-17 09:40:00.000'),
-  (3, 'T20260917003', 10007, 7, '山野露营盲盒',     'nearby',   25900, 25900,  32000, 'opened',
-      'alipay', '2026-09-17 10:20:00.000', '2026-09-17 10:07:00.000', '2026-09-17 10:07:06.000', NULL, 4, 2, '2026-09-17 10:05:00.000'),
-  (4, 'T20260917004', 10058, 3, '跨省限定盲盒',     'cross',    99900, 99900, 120000, 'refunded',
+  (3, 'T20260917003', 10007, 3, '山野露营观星盲盒', 'nearby',   15900, 15900,  20000, 'opened',
+      'alipay', '2026-09-17 10:20:00.000', '2026-09-17 10:07:00.000', '2026-09-17 10:07:06.000', NULL, 3, 2, '2026-09-17 10:05:00.000'),
+  (4, 'T20260917004', 10058, 5, '跨省限定冒险盲盒', 'cross',    59900, 59900,  75000, 'refunded',
       'alipay', '2026-09-16 21:33:00.000', '2026-09-16 21:20:00.000', NULL, NULL, NULL, NULL, '2026-09-16 21:18:00.000'),
-  (5, 'T20260917005', 10063, 6, '城市探店盲盒',     'nearby',    8900,  8900,  11000, 'opened',
-      'alipay', '2026-09-17 11:37:00.000', '2026-09-17 11:24:00.000', '2026-09-17 11:24:06.000', NULL, 3, 3, '2026-09-17 11:22:00.000'),
-  (6, 'T20260917006', 10044, 4, '乡村治愈主题盲盒', 'theme',    19900,     0,  24000, 'cancelled',
+  (5, 'T20260917005', 10063, 6, '老城寻味美食专线', 'theme',    11900, 11900,  15000, 'opened',
+      'alipay', '2026-09-17 11:37:00.000', '2026-09-17 11:24:00.000', '2026-09-17 11:24:06.000', NULL, 6, 3, '2026-09-17 11:22:00.000'),
+  (6, 'T20260917006', 10044, 4, '省内仙山问道二日', 'province', 29900,     0,  38000, 'cancelled',
       NULL,     '2026-09-16 19:17:00.000', NULL, NULL, '2026-09-16 19:17:30.000', NULL, NULL, '2026-09-16 19:02:00.000'),
   (7, 'T20260917007', 10063, 1, '周边微度假盲盒',   'nearby',    9900,  9900,  12000, 'paid',
       'alipay', '2026-09-17 12:05:00.000', '2026-09-17 11:52:00.000', NULL, NULL, NULL, NULL, '2026-09-17 11:50:00.000');
 
--- ── B3. 支付流水 ──
+-- ── B3. 支付流水（金额与 B2 对齐；2 号单演示失败路径） ──
 INSERT INTO `payment_flow` (`id`, `flow_no`, `order_id`, `order_no`, `channel`, `channel_trade_no`, `amount_cent`, `result`, `notify_id`) VALUES
   (1, 'F20260917001', 1, 'T20260917001', 'alipay', '2026091722001400000001',  9900, 'success', 'N2026091700001'),
-  (2, 'F20260917002', 3, 'T20260917003', 'alipay', '2026091722001400000002', 25900, 'success', 'N2026091700002'),
-  (3, 'F20260917003', 4, 'T20260917004', 'alipay', '2026091722001400000003', 99900, 'success', 'N2026091700003'),
-  (4, 'F20260917004', 5, 'T20260917005', 'alipay', '2026091722001400000004',  8900, 'success', 'N2026091700004'),
+  (2, 'F20260917002', 3, 'T20260917003', 'alipay', '2026091722001400000002', 15900, 'success', 'N2026091700002'),
+  (3, 'F20260917003', 4, 'T20260917004', 'alipay', '2026091722001400000003', 59900, 'success', 'N2026091700003'),
+  (4, 'F20260917004', 5, 'T20260917005', 'alipay', '2026091722001400000004', 11900, 'success', 'N2026091700004'),
   (5, 'F20260917005', 7, 'T20260917007', 'alipay', '2026091722001400000005',  9900, 'success', 'N2026091700005'),
-  (6, 'F20260917006', 2, 'T20260917002', 'alipay', NULL,                     29900, 'fail',    NULL);
+  (6, 'F20260917006', 2, 'T20260917002', 'alipay', NULL,                     12900, 'fail',    NULL);
 
 -- ── B4. 退款单 ──
--- 订单 4：演示抽奖失败自动退（当前线路池实际能盖过保底，此单只为状态机展示）
+-- 订单 4：演示抽奖失败自动退（当前池实际能盖过保底，此单只为状态机展示）
 INSERT INTO `refund_order`
   (`id`, `refund_no`, `order_id`, `order_no`, `user_id`, `amount_cent`, `reason`, `kind`, `status`,
    `channel_refund_no`, `reviewer_id`, `reject_reason`, `reviewed_at`) VALUES
-  (1, 'R20260917001', 4, 'T20260917004', 10058, 99900, '池中无线路满足保底',    'draw_fail',   'auto',
+  (1, 'R20260917001', 4, 'T20260917004', 10058, 59900, '池中无线路满足保底',    'draw_fail',   'auto',
       '2026091722001400000099', NULL, NULL, NULL),
   (2, 'R20260917002', 1, 'T20260917001', 10021,  9900, '未出行退换 · 行程冲突', 'unused',      'pending_review',
       NULL, NULL, NULL, NULL),
-  (3, 'R20260917003', 3, 'T20260917003', 10007, 25900, '计划变更',             'unused',      'pending_review',
+  (3, 'R20260917003', 3, 'T20260917003', 10007, 15900, '计划变更',             'unused',      'pending_review',
       NULL, NULL, NULL, NULL),
   (4, 'R20260916008', 1, 'T20260917001', 10021,  9900, '重复申请',             'unused',      'rejected',
       NULL, 1, '已超出可退期限', '2026-09-16 18:00:00.000');
@@ -317,21 +320,21 @@ INSERT INTO `trip`
   (`id`, `user_id`, `order_id`, `route_id`, `box_id`, `box_name`, `box_category`, `price_cent`,
    `route_name`, `location`, `value_cent`, `highlight`, `include_json`, `mood_text`, `badge_name`,
    `validity`, `opened_date`, `created_at`) VALUES
-  (1, 10021, 1, 1, 1, '周边微度假盲盒', 'nearby',  9900,
-      '渼陂古村非遗体验一日游', '吉安 · 青原区', 15800,
-      '探访千年庐陵古村，体验油纸伞非遗制作，品尝地道农家宴席。',
-      CAST('["往返大巴","非遗体验","农家午餐","向导讲解","意外险"]' AS JSON),
+  (1, 10021, 1, 1, 1, '周边微度假盲盒',   'nearby',  9900,
+      '渼陂古村非遗一日游', '吉安 · 青原区', 14800,
+      '青石街、打糍粑、老樟树',
+      CAST('["交通","午餐","向导"]' AS JSON),
       '古村的风会吹走所有烦恼', '古村', 'valid', '2026-09-17', '2026-09-17 08:14:05.000'),
-  (2, 10007, 3, 4, 7, '山野露营盲盒',   'nearby', 25900,
-      '星空露营山野夜', '吉安 · 大冈山', 32800,
-      '远离城市灯光，在山野里看银河星空，篝火旁聊天唱歌。',
-      CAST('["往返交通","露营装备","烧烤晚餐","星空讲解"]' AS JSON),
-      '星空下，你不需要很坚强', '露营', 'valid', '2026-09-17', '2026-09-17 10:07:06.000'),
-  (3, 10063, 5, 3, 6, '城市探店盲盒',   'nearby',  8900,
-      '赣江古镇美食探店', '吉安 · 永和镇', 13600,
-      '逛千年吉州窑遗址，吃遍本地特色小吃，打卡网红书店。',
-      CAST('["往返交通","美食基金","讲解耳机","意外险"]' AS JSON),
-      '美食和风景，都不可辜负', '美食', 'valid', '2026-09-17', '2026-09-17 11:24:06.000');
+  (2, 10007, 3, 3, 3, '山野露营观星盲盒', 'nearby', 15900,
+      '湖畔星空营地之夜', '仙女湖畔', 21800,
+      '星空、篝火、湖岸',
+      CAST('["帐篷","晚餐","向导"]' AS JSON),
+      '星空不说话，但够温暖', '露营', 'valid', '2026-09-17', '2026-09-17 10:07:06.000'),
+  (3, 10063, 5, 6, 6, '老城寻味美食专线', 'theme',  11900,
+      '西关深巷寻味记', '广州 · 西关', 16800,
+      '早茶、骑楼、糖水',
+      CAST('["向导","三餐打卡"]' AS JSON),
+      '烟火气是最好的良药', '美食', 'valid', '2026-09-17', '2026-09-17 11:24:06.000');
 
 INSERT INTO `user_badge` (`user_id`, `badge_id`, `source_trip_id`, `unlocked_at`) VALUES
   (10021, 1,  1, '2026-09-17 08:14:05.000'),
@@ -341,15 +344,15 @@ INSERT INTO `user_badge` (`user_id`, `badge_id`, `source_trip_id`, `unlocked_at`
 -- ── B6. 聊天 / 心情 / 测试 ──
 INSERT INTO `chat_message` (`user_id`, `conversation_id`, `sender`, `content`, `via_quick`, `token_in`, `token_out`, `fallback`, `created_at`) VALUES
   (10021, 'user:10021', 'user', '推荐散心的地方', 1, 0, 0, 1, '2026-09-17 08:10:00.000'),
-  (10021, 'user:10021', 'ai',   '如果想散心的话，特别推荐「乡村治愈主题盲盒」或者「山野露营盲盒」～远离城市喧嚣，在古村或者山野待上一天，坏情绪会慢慢被治愈的。', 0, 0, 0, 1, '2026-09-17 08:10:01.000'),
+  (10021, 'user:10021', 'ai',   '如果想散心的话，特别推荐「隐世古村慢生活盒」或者「山野露营观星盲盒」～远离城市喧嚣，在古村或者湖畔待上一天，坏情绪会慢慢被治愈的。', 0, 0, 0, 1, '2026-09-17 08:10:01.000'),
   (10044, 'user:10044', 'user', '一个人旅行安全吗', 1, 120, 86, 0, '2026-09-17 09:38:00.000'),
   (10044, 'user:10044', 'ai',   '一个人旅行超酷的！我们的盲盒线路都很安全，一个人反而更自由，还能在路上认识新朋友。担心孤单的话随时找我聊天。', 0, 0, 0, 0, '2026-09-17 09:38:02.000');
 
 INSERT INTO `mood_log` (`user_id`, `mood`, `box_id`, `created_at`) VALUES
-  (10021, 'emo',     4, '2026-09-17 08:09:00.000'),
-  (10044, 'curious', 2, '2026-09-17 09:37:00.000'),
+  (10021, 'emo',     2, '2026-09-17 08:09:00.000'),
+  (10044, 'curious', 4, '2026-09-17 09:37:00.000'),
   (10007, 'happy',   1, '2026-09-17 10:04:00.000'),
-  (10058, 'bored',   7, '2026-09-16 21:16:00.000'),
+  (10058, 'bored',   3, '2026-09-16 21:16:00.000'),
   (10063, 'happy',   6, '2026-09-17 11:21:00.000');
 
 INSERT INTO `personality_test` (`user_id`, `result_type`, `score_json`, `answers_json`, `duration_ms`, `created_at`) VALUES
@@ -377,3 +380,139 @@ UPDATE `blind_box` b SET `open_count` = (
 UPDATE `travel_route` r SET `draw_count` = (
   SELECT COUNT(*) FROM `trip` t WHERE t.`route_id` = r.`id` AND t.`validity` = 'valid'
 );
+
+
+-- ═══════════════════════════════════════════════════════
+-- 新增功能种子数据（打卡/成就/社区/商家）
+-- 更新时间：2026-09-18
+-- ═══════════════════════════════════════════════════════
+
+-- ── C1. 成就定义 ──
+DELETE FROM `user_achievement`;
+DELETE FROM `achievement`;
+INSERT INTO `achievement` (`id`, `code`, `name`, `description`, `requirement_type`, `requirement_value`, `reward_type`, `reward_value`, `level`, `sort_weight`, `status`) VALUES
+  (1,  'checkin_1',   '初次打卡',     '完成首次景点打卡',     'checkin_count', 1,  'coupon',   '{"coupon_id": 1}', 1, 100, 'on'),
+  (2,  'checkin_5',   '打卡达人',     '打卡5个不同景点',     'checkin_count', 5,  'coupon',   '{"coupon_id": 2}', 2, 90, 'on'),
+  (3,  'checkin_10',  '金牌打卡者',   '打卡10个景点',        'checkin_count', 10, 'blind_box', '{"box_id": 1}', 3, 80, 'on'),
+  (4,  'checkin_20',  '钻石收藏家',   '打卡20个景点',        'checkin_count', 20, 'blind_box', '{"box_id": 4}', 4, 70, 'on'),
+  (5,  'checkin_50',  '终极王者',     '打卡50个景点，解锁隐藏盲盒', 'checkin_count', 50, 'blind_box', '{"box_id": 5}', 5, 60, 'on'),
+  (6,  'trip_3',      '旅行新手',     '完成3次行程',        'trip_count',    3,  'coupon',   '{"coupon_id": 3}', 1, 95, 'on'),
+  (7,  'trip_8',      '旅行家',       '完成8次行程',        'trip_count',    8,  'badge',    '{"badge_id": 12}', 3, 75, 'on'),
+  (8,  'badge_all',   '徽章收藏家',   '集齐全部12枚徽章',   'badge_count',   12, 'blind_box', '{"box_id": 5}', 4, 65, 'on'),
+  (9,  'post_10',     '内容创作者',   '发布10篇帖子',       'post_count',    10, 'coupon',   '{"coupon_id": 4}', 2, 85, 'on'),
+  (10, 'expense_500', '资深玩家',     '累计消费满500元',    'expense_sum',   50000, 'coupon', '{"coupon_id": 5}', 3, 70, 'on');
+
+-- ── C2. 商家联盟 ──
+DELETE FROM `user_coupon`;
+DELETE FROM `coupon`;
+DELETE FROM `partner`;
+INSERT INTO `partner` (`id`, `name`, `type`, `contact`, `phone`, `address`, `description`, `commission_rate`, `settlement_type`, `status`, `contract_start`, `total_orders`, `total_amount_cent`) VALUES
+  (1, '渼陂古村景区',     'ticket',      '李经理', '13800001101', '吉安市青原区渼陂古村', '国家4A级景区，红色文化与古建筑交相辉映', 0.0500, 'coupon', 'on', '2026-01-01', 156, 2340000),
+  (2, '仙女湖度假酒店',   'hotel',       '王总',   '13800001102', '新余市仙女湖区湖畔路88号', '五星级湖畔度假酒店，星空帐篷与豪华客房', 0.0800, 'coupon', 'on', '2026-01-01', 89, 4450000),
+  (3, '武夷云雾茶庄',     'meal',        '张老板', '13800001103', '南平市武夷山星村镇', '百年老字号茶庄，体验采茶制茶乐趣', 0.0600, 'coupon', 'on', '2026-03-01', 234, 1170000),
+  (4, '三清山索道公司',   'ticket',      '刘经理', '13800001104', '上饶市玉山县三清山', '世界自然遗产，江西最高峰', 0.0500, 'commission', 'on', '2026-01-01', 312, 9360000),
+  (5, '大理洱海民宿联盟', 'hotel',       '杨掌柜', '13800001105', '大理市双廊镇洱海边', '海景民宿，面朝洱海春暖花开', 0.1000, 'coupon', 'on', '2026-02-01', 178, 7120000),
+  (6, '途个文创工作室',   'merchandise', '小林',   '13800001106', '南昌市红谷滩区', '原创旅行文创，冰箱贴/明信片/钥匙扣', 0.0000, 'coupon', 'on', '2026-01-01', 456, 456000);
+
+-- ── C3. 优惠券 ──
+INSERT INTO `coupon` (`id`, `code`, `name`, `type`, `partner_id`, `discount_amount`, `min_order_amount`, `valid_days`, `total_count`, `remain_count`, `status`) VALUES
+  (1,  'FIRST10',     '新手打卡券',     'deduction', NULL,   1000,  0,     30, 1000, 850,  'on'),
+  (2,  'CHECKIN20',   '打卡达人券',     'deduction', NULL,   2000,  5000,  60, 500,  420,  'on'),
+  (3,  'TRIP15',      '行程优惠券',     'deduction', NULL,   1500,  3000,  30, 800,  680,  'on'),
+  (4,  'POST50',      '创作激励券',     'deduction', NULL,   5000,  10000, 90, 200,  180,  'on'),
+  (5,  'VIP100',      '资深玩家专属',   'deduction', NULL,  10000, 20000, 180, 50,   45,   'on'),
+  (10, 'ANCIENT20',   '渼陂古村门票券', 'gift',      1,      NULL,  NULL,  30, 200,  180,  'on'),
+  (11, 'LAKE50',      '仙女湖住宿抵扣', 'deduction', 2,      5000, 20000,  30, 100,  85,   'on'),
+  (12, 'TEA30',        '云雾茶庄品鉴券', 'gift',      3,      NULL,  NULL,  30, 150,  130,  'on');
+
+-- ── C4. 话题广场 ──
+DELETE FROM `user_topic_follow`;
+DELETE FROM `topic`;
+INSERT INTO `topic` (`id`, `name`, `cover_url`, `description`, `post_count`, `follow_count`, `热度权重`, `sort_weight`, `status`) VALUES
+  (1,  '周末去哪儿',    'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=400&q=80', '周末就要出去玩！分享你的周末目的地', 328, 1256, 100, 100, 'on'),
+  (2,  '美食探店',      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80', '吃货必看！发现各地特色美食', 256, 892, 90, 90, 'on'),
+  (3,  '情侣出游',      'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=400&q=80', '和TA一起走过的地方', 189, 654, 80, 80, 'on'),
+  (4,  '带娃旅行',      'https://images.unsplash.com/photo-1476703993599-0035a21b17a9?auto=format&fit=crop&w=400&q=80', '亲子游攻略，让带娃旅行更轻松', 145, 423, 70, 70, 'on'),
+  (5,  '小众秘境',      'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80', '发现那些不为人知的美景', 98, 367, 60, 60, 'on'),
+  (6,  '盲盒开箱',      'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=400&q=80', '分享你的盲盒开箱体验', 412, 1589, 110, 95, 'on');
+
+-- ── C5. 盲盒奖品配置 ──
+DELETE FROM `blind_box_prize`;
+-- 周边微度假盲盒（id=1，售价99元）的奖品
+INSERT INTO `blind_box_prize` (`blind_box_id`, `prize_type`, `prize_name`, `prize_value_cent`, `quantity`, `probability`, `partner_id`, `description`, `status`) VALUES
+  (1, 'coupon',      '渼陂古村门票券',      2000,  100, 0.2000, 1,  '免费游览渼陂古村', 'on'),
+  (1, 'coupon',      '餐饮抵用券10元',      1000,  200, 0.3000, 3,  '茶庄消费满30可用', 'on'),
+  (1, 'merchandise', '途个惊喜冰箱贴',       500,  300, 0.3500, 6,  '限量文创周边', 'on'),
+  (1, 'coupon',      '仙女湖住宿抵扣券',    5000,   50, 0.1000, 2,  '满200抵50', 'on'),
+  (1, 'coupon',      '云雾茶庄体验券',      3000,   30, 0.0500, 3,  '采茶体验一次', 'on');
+-- 隐世古村慢生活盒（id=2，售价129元）
+INSERT INTO `blind_box_prize` (`blind_box_id`, `prize_type`, `prize_name`, `prize_value_cent`, `quantity`, `probability`, `partner_id`, `description`, `status`) VALUES
+  (2, 'coupon',      '渼陂古村门票券×2',   4000,   80, 0.2000, 1,  '双人免费游览', 'on'),
+  (2, 'coupon',      '餐饮抵用券20元',      2000,  150, 0.3000, 3,  '茶庄消费满50可用', 'on'),
+  (2, 'merchandise', '古村明信片套装',       800,  200, 0.2500, 6,  '手工制作', 'on'),
+  (2, 'coupon',      '住宿抵用券30元',      3000,   40, 0.1500, 2,  '满100抵30', 'on'),
+  (2, 'badge',       '古村徽章',            0,    NULL, 0.1000, NULL, '集齐可兑换盲盒', 'on');
+
+-- ── C6. 社区帖子演示数据 ──
+DELETE FROM `post_interaction`;
+DELETE FROM `community_post`;
+INSERT INTO `community_post` (`id`, `user_id`, `content`, `images`, `topic`, `location_tag`, `linked_blind_box_id`, `like_count`, `comment_count`, `share_count`, `status`, `created_at`) VALUES
+  (1, 10021, '带娃必去！渼陂古村超出预期，孩子玩得超开心，还学会了打糍粑！这份盲盒让我省了200块门票～',
+   'https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=400&q=80,https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?auto=format&fit=crop&w=400&q=80',
+   '带娃旅行', '吉安·渼陂古村', 1, 328, 45, 89, 'on', '2026-09-16 14:30:00.000'),
+  (2, 10044, '盲盒开出意外惊喜！抽到了仙女湖度假酒店，海景房太美了，日落绝绝子！下次还要抽',
+   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80',
+   '盲盒开箱', '新余·仙女湖', 1, 892, 67, 234, 'on', '2026-09-15 18:45:00.000'),
+  (3, 10007, '周末逃离城市！武夷山徒步真的绝了，云海日出美哭，强烈推荐大家去！抽这个盲盒太值了',
+   'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=400&q=80,https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?auto=format&fit=crop&w=400&q=80,https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=400&q=80',
+   '小众秘境', '南平·武夷山', 2, 567, 89, 156, 'on', '2026-09-14 09:20:00.000'),
+  (4, 10058, '三清山的云海日出，我这辈子一定要看一次！这次终于实现了😭 攻略附上：建议早上4点起床爬上去',
+   'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80,https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&w=400&q=80',
+   '周末去哪儿', '上饶·三清山', 4, 1234, 178, 456, 'on', '2026-09-13 07:15:00.000'),
+  (5, 10063, '大理三天两夜，洱海边发呆真的太治愈了！抽到这家民宿超满意，老板人超好，还送了我们自制酸奶🥛',
+   'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=400&q=80,https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=400&q=80',
+   '情侣出游', '大理·洱海', 5, 2156, 234, 678, 'on', '2026-09-12 16:40:00.000'),
+  (6, 10021, '打卡成就达成！已经打卡10个景点了，离集齐徽章还差2个，加油💪',
+   'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=400&q=80',
+   NULL, '江西·多地', NULL, 456, 34, 78, 'on', '2026-09-11 20:00:00.000');
+
+-- ── C7. 打卡记录演示数据 ──
+DELETE FROM `checkin_like`;
+DELETE FROM `checkin`;
+INSERT INTO `checkin` (`id`, `user_id`, `route_id`, `location`, `photo_url`, `note`, `like_count`, `created_at`) VALUES
+  (1, 10021, 1, '渼陂古村', 'https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=400&q=80', '第一次带孩子来古村，超开心！', 45, '2026-09-10 11:30:00.000'),
+  (2, 10021, 2, '武夷山茶园', 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=400&q=80', '云雾缭绕，像仙境一样', 67, '2026-09-08 15:20:00.000'),
+  (3, 10044, 4, '三清山', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80', '日出云海，值了！', 123, '2026-09-06 06:00:00.000'),
+  (4, 10007, 3, '仙女湖', 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80', '星空露营太浪漫了', 89, '2026-09-04 21:30:00.000'),
+  (5, 10058, 5, '大理洱海', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=400&q=80', '面朝大海，春暖花开', 234, '2026-09-02 18:00:00.000');
+
+-- ── C8. 用户积分演示 ──
+DELETE FROM `point_log`;
+DELETE FROM `user_point`;
+INSERT INTO `user_point` (`user_id`, `balance`, `total_earned`, `total_spent`) VALUES
+  (10021, 1250, 1500, 250),
+  (10044, 890, 1000, 110),
+  (10007, 2100, 2500, 400),
+  (10058, 680,  800, 120),
+  (10063, 450,  500,  50);
+
+INSERT INTO `point_log` (`user_id`, `change`, `balance_after`, `type`, `biz_id`, `description`) VALUES
+  (10021, 100, 100, 'signin', NULL, '每日签到'),
+  (10021, 50, 150, 'checkin', 1, '打卡奖励'),
+  (10021, 500, 650, 'achievement', NULL, '成就解锁奖励'),
+  (10021, -250, 400, 'exchange', NULL, '积分兑换优惠券'),
+  (10021, 100, 500, 'order', 1, '购买盲盒赠送'),
+  (10021, 750, 1250, 'achievement', NULL, '成就解锁奖励');
+
+-- ── C9. 用户成就演示 ──
+INSERT INTO `user_achievement` (`user_id`, `achievement_id`, `progress`, `unlocked`, `unlocked_at`, `reward_sent`) VALUES
+  (10021, 1, 1, 1, '2026-09-10 11:30:00.000', 1),
+  (10021, 2, 5, 1, '2026-09-14 10:00:00.000', 1),
+  (10021, 3, 10, 1, '2026-09-16 20:00:00.000', 1),
+  (10021, 6, 3, 1, '2026-09-15 18:00:00.000', 1),
+  (10044, 1, 1, 1, '2026-09-06 06:00:00.000', 1),
+  (10044, 4, 1, 0, NULL, 0),
+  (10007, 1, 1, 1, '2026-09-04 21:30:00.000', 1),
+  (10007, 2, 5, 1, '2026-09-12 09:00:00.000', 1),
+  (10007, 3, 10, 1, '2026-09-15 15:00:00.000', 1),
+  (10007, 5, 4, 0, NULL, 0);

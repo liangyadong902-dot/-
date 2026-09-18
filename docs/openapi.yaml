@@ -1,0 +1,3040 @@
+openapi: 3.0.3
+
+info:
+  title: 途个惊喜 API
+  version: 1.0.0
+  description: |
+    用户端「原生微信小程序」与管理端「Vue3 Web」共用的业务 API。
+
+    ## 约定
+    - 用户端前缀 `/api/v1`，标注「需登录」的接口带用户 JWT。
+    - 管理端前缀 `/api/v1/admin`，需管理员 JWT + 角色校验。
+    - 统一响应体 `{ code, message, data }`，`code=0` 为成功。
+    - **金额在接口层一律用「元」**（最多两位小数，`number` 类型）；
+      数据库内部用「分」（`INT UNSIGNED`），换算只发生在适配层。
+    - **时间一律用字符串**，格式 `yyyy-MM-dd HH:mm:ss`（北京时间，不用 UTC）。
+    - 列表统一返回 `data: { list, total, page, pageSize }`。
+
+    ## 与文档的关系
+    本文件是接口契约的唯一真相（single source of truth）。
+    `docs/接口设计.md` 是它的中文说明，两者必须同步修改。
+    后端用 springdoc 从代码生成后与本文件比对，避免漂移。
+
+servers:
+  - url: http://localhost:8080
+    description: 本地开发
+
+tags:
+  - name: 约定
+    description: 公共响应结构与错误码
+  - name: 用户端-账号
+  - name: 用户端-内容
+  - name: 用户端-订单与支付
+  - name: 用户端-行程与我的
+  - name: 用户端-AI
+  - name: 管理端-鉴权
+  - name: 管理端-配置
+  - name: 管理端-订单支付用户
+  - name: 管理端-工作台与统计
+  - name: 支付回调
+    description: 第三方异步通知，不走统一响应体
+
+paths:
+  /api/v1/health:
+    get:
+      tags: [约定]
+      summary: 健康检查
+      security: []
+      responses:
+        '200':
+          description: 服务正常
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultString'
+  # ═══════════════════════════════════════════════════════
+  # 用户端 · 账号  （接口设计.md §2）
+  # ═══════════════════════════════════════════════════════
+  /api/v1/auth/sms:
+    post:
+      tags: [用户端-账号]
+      summary: 发送短信验证码
+      description: |
+        第一期可固定码（`sys_config` 配置）或直接返回 mock。
+        真实环境下同一手机号 60 秒内不允许重发。
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone:
+                  type: string
+                  pattern: '^1[3-9]\d{9}$'
+                  example: '13800138000'
+      responses:
+        '200':
+          description: 发送成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/auth/login/phone:
+    post:
+      tags: [用户端-账号]
+      summary: 手机号登录（登录即注册）
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, code]
+              properties:
+                phone:
+                  type: string
+                  example: '13800138000'
+                code:
+                  type: string
+                  example: '123456'
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/LoginResult'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/auth/login/wechat:
+    post:
+      tags: [用户端-账号]
+      summary: 微信登录
+      description: |
+        小程序 `wx.login` 拿到的 code → 后端 `code2session` → 换取 openid → 签发 JWT。
+        需要 AppID + AppSecret；测试号可在开发者工具中跑通。
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  type: string
+                  description: wx.login 返回的 code
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/LoginResult'
+
+  /api/v1/auth/logout:
+    post:
+      tags: [用户端-账号]
+      summary: 退出登录
+      description: 可选：把当前 Token 加入 Redis 黑名单直到自然过期。
+      responses:
+        '200':
+          description: 已退出
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  /api/v1/me:
+    get:
+      tags: [用户端-账号]
+      summary: 当前用户资料
+      description: 含称号（按出行次数套 `level.rules` 计算，不入库）。
+      responses:
+        '200':
+          description: 用户资料
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags: [用户端-账号]
+      summary: 修改我的资料
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nickname:
+                  type: string
+                  maxLength: 64
+                avatarUrl:
+                  type: string
+                  maxLength: 512
+                gender:
+                  type: integer
+                  enum: [0, 1, 2]
+                  description: 0 未知 / 1 男 / 2 女
+                city:
+                  type: string
+                  maxLength: 64
+      responses:
+        '200':
+          description: 更新后的资料
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserProfile'
+
+  /api/v1/me/bind-phone:
+    post:
+      tags: [用户端-账号]
+      summary: 微信用户补绑手机号
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, code]
+              properties:
+                phone:
+                  type: string
+                code:
+                  type: string
+      responses:
+        '200':
+          description: 绑定成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+        '409':
+          description: 该手机号已被其他账号绑定
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  # ═══════════════════════════════════════════════════════
+  # 用户端 · 内容  （接口设计.md §3）
+  # ═══════════════════════════════════════════════════════
+  /api/v1/banners:
+    get:
+      tags: [用户端-内容]
+      summary: 当前有效 Banner
+      description: 按 `status=on` 且在 `start_at`~`end_at` 区间内、按 `sort_weight` 倒序。
+      security: []
+      responses:
+        '200':
+          description: Banner 列表（不分页）
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Banner'
+
+  /api/v1/boxes:
+    get:
+      tags: [用户端-内容]
+      summary: 上架盲盒列表
+      description: |
+        `category` 与 `mood` 可叠加过滤。
+        心情过滤走 `blind_box_mood` 关联表；分类过滤走 `blind_box.category`。
+      security: []
+      parameters:
+        - name: category
+          in: query
+          schema:
+            $ref: '#/components/schemas/Category'
+          description: 不传或传 all 表示全部
+        - name: mood
+          in: query
+          schema:
+            $ref: '#/components/schemas/Mood'
+          description: 不传或传 all 表示不按心情过滤
+      responses:
+        '200':
+          description: 盲盒列表（不分页，首页一次性返回）
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BlindBox'
+
+  /api/v1/boxes/{id}:
+    get:
+      tags: [用户端-内容]
+      summary: 盲盒详情
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: 盲盒详情
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/BlindBox'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/badges:
+    get:
+      tags: [用户端-内容]
+      summary: 全部徽章定义
+      description: 未登录时 `unlocked` 全为 false；登录时按 `user_badge` 标记。
+      security: []
+      responses:
+        '200':
+          description: 徽章列表（含总数，供进度条分母）
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                            example: 12
+                          list:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Badge'
+
+  /api/v1/mood-logs:
+    post:
+      tags: [用户端-内容]
+      summary: 记录心情选择
+      description: 游客也记（`user_id` 可空），用于管理端心情分布统计。
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mood]
+              properties:
+                mood:
+                  $ref: '#/components/schemas/Mood'
+                boxId:
+                  type: integer
+                  nullable: true
+                  description: 当时是否连带筛选了某个盲盒
+      responses:
+        '200':
+          description: 记录成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  /api/v1/personality/questions:
+    get:
+      tags: [用户端-内容]
+      summary: 人格测试题目
+      description: 返回题干与选项；**不下发 `score_json` 明细**，计分在服务端做。
+      security: []
+      responses:
+        '200':
+          description: 题目列表
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PersonalityQuestion'
+
+  /api/v1/personality/submit:
+    post:
+      tags: [用户端-内容]
+      summary: 提交人格测试
+      description: |
+        登录时落库 `personality_test` 并更新 `app_user.personality_type`；
+        游客仅返回结果不落库（`user_id` 为空时也不写行）。
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [answers]
+              properties:
+                answers:
+                  type: array
+                  description: 每题所选选项的序号（从 0 开始），与题目顺序一致
+                  items:
+                    type: integer
+                  example: [0, 2, 1, 3, 0]
+                durationMs:
+                  type: integer
+                  nullable: true
+                  description: 作答耗时，用于统计
+      responses:
+        '200':
+          description: 人格结果
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PersonalityResult'
+  # ═══════════════════════════════════════════════════════
+  # 用户端 · AI
+  # ═══════════════════════════════════════════════════════
+  /api/v1/ai/config:
+    get:
+      tags: [用户端-AI]
+      summary: 获取小途配置
+      security: []
+      responses:
+        '200':
+          description: 开场白与快捷问句
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AiConfig'
+
+  /api/v1/ai/messages:
+    get:
+      tags: [用户端-AI]
+      summary: 获取最近对话
+      description: 登录用户返回最近 16 条；游客不落库。
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 16
+            maximum: 50
+      responses:
+        '200':
+          description: 消息列表
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ChatMessage'
+
+  /api/v1/ai/chat:
+    post:
+      tags: [用户端-AI]
+      summary: 与小途对话
+      description: |
+        Spring AI 成功时返回模型回复；失败时走关键词降级并将 `fallback` 设为 true。
+        原生小程序主路径使用整段响应，前端按字符展示打字机效果，不依赖 EventSource。
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
+                  maxLength: 2000
+                viaQuick:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: 回复
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AiReply'
+
+  /api/v1/ai/chat/stream:
+    get:
+      tags: [用户端-AI]
+      summary: AI 流式对话（H5 增强接口）
+      description: |
+        保留给 H5 / 管理端调试使用。原生小程序不依赖此接口，优先使用 `POST /ai/chat`。
+        后续若验证 `enableChunked` 稳定，再单独启用小程序分块传输。
+      parameters:
+        - name: text
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: viaQuick
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: SSE 流
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  # ═══════════════════════════════════════════════════════
+  # 用户端 · 订单与支付
+  # ═══════════════════════════════════════════════════════
+  /api/v1/orders:
+    get:
+      tags: [用户端-订单与支付]
+      summary: 我的订单列表
+      parameters:
+        - $ref: '#/components/parameters/StatusQuery'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: 订单列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedOrderResult'
+    post:
+      tags: [用户端-订单与支付]
+      summary: 创建待支付订单
+      description: |
+        一单一盒。同一用户对同一盲盒存在 `pending_pay` / `paid` 订单时返回 409。
+        盲盒下单时写入名称、售价、保底、分类快照；默认 15 分钟过期。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [boxId]
+              properties:
+                boxId:
+                  type: integer
+                  format: int64
+      responses:
+        '200':
+          description: 订单创建成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/OrderCreated'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: 已有未完成订单
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          orderNo:
+                            type: string
+
+  /api/v1/orders/{orderNo}:
+    get:
+      tags: [用户端-订单与支付]
+      summary: 查询订单详情与开盒结果
+      description: 支付回站后由小程序轮询，直到 `opened` 或 `refunded`。
+      parameters:
+        - $ref: '#/components/parameters/OrderNo'
+      responses:
+        '200':
+          description: 订单详情
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/OrderDetail'
+
+  /api/v1/orders/{orderNo}/cancel:
+    post:
+      tags: [用户端-订单与支付]
+      summary: 取消待支付订单
+      parameters:
+        - $ref: '#/components/parameters/OrderNo'
+      responses:
+        '200':
+          description: 已取消
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/orders/{orderNo}/pay:
+    post:
+      tags: [用户端-订单与支付]
+      summary: 创建支付宝沙箱支付跳转信息
+      description: |
+        返回 `payForm` / 支付跳转 URL；此接口**不**把订单改为已支付。
+        原生小程序不能把 payForm 放进页面自动提交，也不能直接调起支付宝。
+        本期确定采用「沙箱 + 外部浏览器/二维码」：小程序展示订单与支付二维码或支付链接，
+        演示者在浏览器完成沙箱付款；小程序回到前台后继续轮询订单。
+      parameters:
+        - $ref: '#/components/parameters/OrderNo'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [channel]
+              properties:
+                channel:
+                  type: string
+                  enum: [alipay]
+                  default: alipay
+      responses:
+        '200':
+          description: 支付跳转信息
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PayRedirect'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/pay/notify/alipay:
+    post:
+      tags: [支付回调]
+      summary: 支付宝异步通知
+      description: RSA2 验签、核对订单与金额、记录幂等 notify_id，成功后订单 paid 并执行开盒事务。
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: { type: string }
+      responses:
+        '200':
+          description: 必须返回纯文本 success
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: success
+
+  /api/v1/orders/{orderNo}/refund:
+    post:
+      tags: [用户端-订单与支付]
+      summary: 申请退换
+      parameters:
+        - $ref: '#/components/parameters/OrderNo'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason, kind]
+              properties:
+                reason:
+                  type: string
+                  maxLength: 255
+                kind:
+                  type: string
+                  enum: [value_guard, unused]
+      responses:
+        '200':
+          description: 已提交审核
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  # ═══════════════════════════════════════════════════════
+  # 用户端 · 行程与我的
+  # ═══════════════════════════════════════════════════════
+  /api/v1/trips:
+    get:
+      tags: [用户端-行程与我的]
+      summary: 我的有效行程列表
+      parameters:
+        - name: validity
+          in: query
+          schema:
+            type: string
+            enum: [valid, invalid]
+            default: valid
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: 行程列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedTripResult'
+
+  /api/v1/trips/{id}:
+    get:
+      tags: [用户端-行程与我的]
+      summary: 行程详情
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: 行程快照
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Trip'
+
+  /api/v1/trips/{id}/diary:
+    post:
+      tags: [用户端-行程与我的]
+      summary: 生成旅行日记
+      description: 已生成时可直接返回已有日记，或按业务约定返回 409。
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: 日记内容
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          diaryText:
+                            type: string
+                          fallback:
+                            type: boolean
+
+  /api/v1/me/stats:
+    get:
+      tags: [用户端-行程与我的]
+      summary: 我的真实统计
+      responses:
+        '200':
+          description: 统计口径见数据库设计 §5
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserStats'
+
+  # ═══════════════════════════════════════════════════════
+  # 管理端 · 鉴权  （接口设计.md §6）
+  # ═══════════════════════════════════════════════════════
+  /api/v1/admin/login:
+    post:
+      tags: [管理端-鉴权]
+      summary: 管理员登录
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [account, password]
+              properties:
+                account:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          token:
+                            type: string
+                          admin:
+                            $ref: '#/components/schemas/AdminProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/admin/me:
+    get:
+      tags: [管理端-鉴权]
+      summary: 当前管理员信息
+      responses:
+        '200':
+          description: 管理员信息
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AdminProfile'
+
+  # ═══════════════════════════════════════════════════════
+  # 管理端 · 内容配置 CRUD  （接口设计.md §7）
+  # ═══════════════════════════════════════════════════════
+  /api/v1/admin/boxes:
+    get:
+      tags: [管理端-配置]
+      summary: 盲盒列表（含下架）
+      parameters:
+        - name: category
+          in: query
+          schema:
+            $ref: '#/components/schemas/Category'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [on, off]
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: 盲盒分页
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedBoxResult'
+    post:
+      tags: [管理端-配置]
+      summary: 新增盲盒
+      description: 保存时校验同分类启用线路中是否存在满足保底的线路，不满足时返回告警字段但允许保存。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BoxUpsert'
+      responses:
+        '200':
+          description: 新建成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AdminBox'
+
+  /api/v1/admin/boxes/{id}:
+    put:
+      tags: [管理端-配置]
+      summary: 修改盲盒
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BoxUpsert'
+      responses:
+        '200':
+          description: 修改成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AdminBox'
+    delete:
+      tags: [管理端-配置]
+      summary: 删除盲盒
+      description: 存在未完成订单时返回 409，禁止删除。
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: 已删除
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/admin/boxes/{id}/status:
+    patch:
+      tags: [管理端-配置]
+      summary: 盲盒上/下架
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [on, off]
+      responses:
+        '200':
+          description: 已切换
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  /api/v1/admin/boxes/{id}/pool:
+    get:
+      tags: [管理端-配置]
+      summary: 盲盒可抽线路池预览
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: 线路池及是否满足保底
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          ok:
+                            type: boolean
+                            description: 是否存在 value_cent >= min_value_cent 的启用线路
+                          routes:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/AdminRoute'
+
+  /api/v1/admin/routes:
+    get:
+      tags: [管理端-配置]
+      summary: 线路列表
+      parameters:
+        - name: category
+          in: query
+          schema:
+            $ref: '#/components/schemas/Category'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [on, off]
+        - name: badgeId
+          in: query
+          schema:
+            type: integer
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: 线路分页
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedRouteResult'
+    post:
+      tags: [管理端-配置]
+      summary: 新增线路
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteUpsert'
+      responses:
+        '200':
+          description: 新建成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AdminRoute'
+
+  /api/v1/admin/routes/{id}:
+    put:
+      tags: [管理端-配置]
+      summary: 修改线路
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteUpsert'
+      responses:
+        '200':
+          description: 修改成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AdminRoute'
+    delete:
+      tags: [管理端-配置]
+      summary: 删除线路
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: 已删除
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  /api/v1/admin/routes/{id}/status:
+    patch:
+      tags: [管理端-配置]
+      summary: 线路上/下架
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [on, off]
+      responses:
+        '200':
+          description: 已切换
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  /api/v1/admin/badges:
+    get:
+      tags: [管理端-配置]
+      summary: 徽章列表
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: 徽章分页
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedBadgeResult'
+    post:
+      tags: [管理端-配置]
+      summary: 新增徽章
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BadgeUpsert'
+      responses:
+        '200':
+          description: 新建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  /api/v1/admin/badges/{id}:
+    put:
+      tags: [管理端-配置]
+      summary: 修改徽章
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BadgeUpsert'
+      responses:
+        '200':
+          description: 修改成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  /api/v1/admin/banners:
+    get:
+      tags: [管理端-配置]
+      summary: 运营位列表
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: 运营位分页
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedBannerResult'
+    post:
+      tags: [管理端-配置]
+      summary: 新增运营位
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BannerUpsert'
+      responses:
+        '200':
+          description: 新建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  /api/v1/admin/banners/{id}:
+    put:
+      tags: [管理端-配置]
+      summary: 修改运营位
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BannerUpsert'
+      responses:
+        '200':
+          description: 修改成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+    delete:
+      tags: [管理端-配置]
+      summary: 删除运营位
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: 已删除
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  /api/v1/admin/banners/{id}/status:
+    patch:
+      tags: [管理端-配置]
+      summary: 运营位上/下架
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [on, off]
+      responses:
+        '200':
+          description: 已切换
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  # ═══════════════════════════════════════════════════════
+  # 管理端 · 订单 / 退款 / 流水 / 行程 / 用户  （接口设计.md §8）
+  # ═══════════════════════════════════════════════════════
+  /api/v1/admin/orders:
+    get:
+      tags: [管理端-订单支付用户]
+      summary: 订单列表
+      parameters:
+        - $ref: '#/components/parameters/StatusQuery'
+        - name: keyword
+          in: query
+          schema:
+            type: string
+            description: 订单号 / 用户昵称 / 手机号
+        - name: boxId
+          in: query
+          schema:
+            type: integer
+        - name: channel
+          in: query
+          schema:
+            type: string
+            enum: [alipay, mock]
+        - name: begin
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: end
+          in: query
+          schema:
+            type: string
+            format: date
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: 订单分页
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedAdminOrderResult'
+
+  /api/v1/admin/orders/export:
+    get:
+      tags: [管理端-订单支付用户]
+      summary: 导出订单明细
+      description: 仅 finance / super_admin / analyst 可下载。
+      parameters:
+        - $ref: '#/components/parameters/StatusQuery'
+        - name: begin
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: end
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: CSV 文件流
+          content:
+            text/csv:
+              schema:
+                type: string
+
+  /api/v1/admin/orders/{orderNo}:
+    get:
+      tags: [管理端-订单支付用户]
+      summary: 订单详情
+      parameters:
+        - $ref: '#/components/parameters/OrderNo'
+      responses:
+        '200':
+          description: 订单详情（含支付、开盒、退款）
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AdminOrderDetail'
+
+  /api/v1/admin/orders/{orderNo}/reopen:
+    post:
+      tags: [管理端-订单支付用户]
+      summary: 补单
+      description: 仅 `paid` 且 `trip_id` 为空时可补抽。
+      parameters:
+        - $ref: '#/components/parameters/OrderNo'
+      responses:
+        '200':
+          description: 补抽完成
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/admin/refunds:
+    get:
+      tags: [管理端-订单支付用户]
+      summary: 退款单列表
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending_review, refunding, refunded, rejected]
+        - name: kind
+          in: query
+          schema:
+            type: string
+            enum: [value_guard, unused, draw_fail]
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: 退款单分页
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedRefundResult'
+
+  /api/v1/admin/refunds/{refundNo}:
+    get:
+      tags: [管理端-订单支付用户]
+      summary: 退款单详情
+      parameters:
+        - $ref: '#/components/parameters/RefundNo'
+      responses:
+        '200':
+          description: 退款单详情
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RefundDetail'
+
+  /api/v1/admin/refunds/{refundNo}/approve:
+    post:
+      tags: [管理端-订单支付用户]
+      summary: 退款审核通过（原路退回）
+      description: 通过后订单 `refunded`，关联行程 `invalid`；不改动已发放徽章与已计里程。
+      parameters:
+        - $ref: '#/components/parameters/RefundNo'
+      responses:
+        '200':
+          description: 已通过
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/admin/refunds/{refundNo}/reject:
+    post:
+      tags: [管理端-订单支付用户]
+      summary: 退款驳回
+      parameters:
+        - $ref: '#/components/parameters/RefundNo'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+                  maxLength: 255
+      responses:
+        '200':
+          description: 已驳回
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  /api/v1/admin/pay-flows:
+    get:
+      tags: [管理端-订单支付用户]
+      summary: 支付流水列表
+      parameters:
+        - name: orderNo
+          in: query
+          schema:
+            type: string
+        - name: result
+          in: query
+          schema:
+            type: string
+            enum: [success, fail]
+        - name: channel
+          in: query
+          schema:
+            type: string
+            enum: [alipay, mock]
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: 支付流水分页
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedPayFlowResult'
+
+  /api/v1/admin/trips:
+    get:
+      tags: [管理端-订单支付用户]
+      summary: 行程记录（只读）
+      parameters:
+        - name: validity
+          in: query
+          schema:
+            type: string
+            enum: [valid, invalid]
+        - name: routeId
+          in: query
+          schema:
+            type: integer
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: 行程分页
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedAdminTripResult'
+
+  /api/v1/admin/users:
+    get:
+      tags: [管理端-订单支付用户]
+      summary: 用户列表
+      parameters:
+        - name: keyword
+          in: query
+          schema:
+            type: string
+            description: 昵称 / 手机号 / 微信昵称
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, disabled]
+        - name: channel
+          in: query
+          schema:
+            type: string
+            enum: [phone, wechat]
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: 用户分页
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedAdminUserResult'
+
+  /api/v1/admin/users/export:
+    get:
+      tags: [管理端-订单支付用户]
+      summary: 导出用户明细
+      responses:
+        '200':
+          description: CSV 文件流
+          content:
+            text/csv:
+              schema:
+                type: string
+
+  /api/v1/admin/users/{id}:
+    get:
+      tags: [管理端-订单支付用户]
+      summary: 用户详情（四层档案）
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: 身份 / 资料偏好 / 资产行为 / 成长统计 / 内部
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AdminUserDetail'
+
+  /api/v1/admin/users/{id}/status:
+    patch:
+      tags: [管理端-订单支付用户]
+      summary: 禁用 / 启用用户
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [active, disabled]
+                reason:
+                  type: string
+                  description: 禁用时必填
+      responses:
+        '200':
+          description: 已切换
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  # ═══════════════════════════════════════════════════════
+  # 管理端 · 工作台 / 统计 / 配置 / 账号  （接口设计.md §9）
+  # ═══════════════════════════════════════════════════════
+  /api/v1/admin/dashboard:
+    get:
+      tags: [管理端-工作台与统计]
+      summary: 工作台聚合
+      parameters:
+        - name: range
+          in: query
+          schema:
+            type: string
+            enum: [today, 7d, 30d]
+            default: today
+      responses:
+        '200':
+          description: 指标卡 + 趋势 + 待办 + 榜单
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Dashboard'
+
+  /api/v1/admin/stats/users:
+    get:
+      tags: [管理端-工作台与统计]
+      summary: 用户统计（规模 / 漏斗 / 留存 / 复购 / 结构 / 价值 / 偏好）
+      parameters:
+        - $ref: '#/components/parameters/DateRangeBegin'
+        - $ref: '#/components/parameters/DateRangeEnd'
+      responses:
+        '200':
+          description: 用户统计聚合
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        additionalProperties: true
+
+  /api/v1/admin/stats/pay:
+    get:
+      tags: [管理端-工作台与统计]
+      summary: 支付与收入统计
+      parameters:
+        - $ref: '#/components/parameters/DateRangeBegin'
+        - $ref: '#/components/parameters/DateRangeEnd'
+      responses:
+        '200':
+          description: 渠道构成 / 失败原因 / 退款构成 / 对账差异
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        additionalProperties: true
+
+  /api/v1/admin/stats/content:
+    get:
+      tags: [管理端-工作台与统计]
+      summary: 开盒与内容统计
+      parameters:
+        - $ref: '#/components/parameters/DateRangeBegin'
+        - $ref: '#/components/parameters/DateRangeEnd'
+      responses:
+        '200':
+          description: 按盲盒 / 分类 / 时间的开盒量与转化、线路被抽中次数与占比
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        additionalProperties: true
+
+  /api/v1/admin/configs:
+    get:
+      tags: [管理端-工作台与统计]
+      summary: 读取系统配置
+      responses:
+        '200':
+          description: 系统配置键值
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        additionalProperties: true
+    put:
+      tags: [管理端-工作台与统计]
+      summary: 更新系统配置
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  /api/v1/admin/admins:
+    get:
+      tags: [管理端-工作台与统计]
+      summary: 后台账号列表
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: 账号分页
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedAdminAccountResult'
+    post:
+      tags: [管理端-工作台与统计]
+      summary: 新增后台账号
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [account, password, role]
+              properties:
+                account:
+                  type: string
+                password:
+                  type: string
+                role:
+                  $ref: '#/components/schemas/AdminRole'
+                name:
+                  type: string
+      responses:
+        '200':
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  /api/v1/admin/admins/{id}:
+    put:
+      tags: [管理端-工作台与统计]
+      summary: 修改后台账号（含角色与启停）
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                role:
+                  $ref: '#/components/schemas/AdminRole'
+                status:
+                  type: string
+                  enum: [active, disabled]
+                password:
+                  type: string
+                  description: 传了就改密，不传则不动
+      responses:
+        '200':
+          description: 已修改
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultVoid'
+
+  /api/v1/admin/audit-logs:
+    get:
+      tags: [管理端-工作台与统计]
+      summary: 操作日志
+      parameters:
+        - name: adminId
+          in: query
+          schema:
+            type: integer
+        - name: action
+          in: query
+          schema:
+            type: string
+            description: 如 box_update / route_update / refund_approve / user_disable
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: 操作日志分页
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedAuditLogResult'
+
+components:
+  securitySchemes:
+    UserToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 用户端 JWT，前缀 /api/v1
+    AdminToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 管理端 JWT，前缀 /api/v1/admin
+
+  parameters:
+    PathId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    OrderNo:
+      name: orderNo
+      in: path
+      required: true
+      schema:
+        type: string
+        example: T20260917001234
+    RefundNo:
+      name: refundNo
+      in: path
+      required: true
+      schema:
+        type: string
+        example: R20260917001001
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    StatusQuery:
+      name: status
+      in: query
+      schema:
+        type: string
+        enum: [pending_pay, paid, opened, cancelled, refunded]
+    DateRangeBegin:
+      name: begin
+      in: query
+      schema:
+        type: string
+        format: date
+        example: '2026-09-01'
+    DateRangeEnd:
+      name: end
+      in: query
+      schema:
+        type: string
+        format: date
+        example: '2026-09-18'
+
+  responses:
+    BadRequest:
+      description: 参数错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultVoid'
+    Unauthorized:
+      description: 未登录或 Token 失效
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultVoid'
+    Forbidden:
+      description: 无权限或账号被禁用
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultVoid'
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultVoid'
+    Conflict:
+      description: 状态冲突，当前状态不允许该操作
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResultVoid'
+
+  schemas:
+    # ── 公共 ──
+    Result:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: ok
+        data:
+          nullable: true
+    ResultVoid:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+        data:
+          nullable: true
+    ResultString:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          type: string
+
+    Category:
+      type: string
+      description: 周边游 / 省内游 / 跨省游 / 主题专线
+      enum: [nearby, province, cross, theme]
+    Mood:
+      type: string
+      description: 开心 / emo / 无聊 / 迷茫
+      enum: [happy, emo, bored, curious]
+
+    # ── 用户端 ──
+    LoginResult:
+      type: object
+      properties:
+        token:
+          type: string
+        isNewUser:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/UserProfile'
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nickname:
+          type: string
+        avatarUrl:
+          type: string
+          nullable: true
+        gender:
+          type: integer
+          enum: [0, 1, 2]
+        city:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+          description: 脱敏，如 138****8000
+        hasPhone:
+          type: boolean
+        wechatOpenidBound:
+          type: boolean
+        title:
+          type: string
+          description: 称号，按出行次数套 level.rules 算出，不落库
+          example: 探索者
+        personalityType:
+          type: string
+          nullable: true
+          enum: [nature, city, adventure, culture, null]
+
+    Banner:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        subTitle:
+          type: string
+        tag:
+          type: string
+        imageUrl:
+          type: string
+        jumpType:
+          type: string
+          enum: [none, category, box, url]
+        jumpTarget:
+          type: string
+          nullable: true
+
+    BlindBox:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        tag:
+          type: string
+          description: 展示用分类标签，如「周边游」
+        rankTag:
+          type: string
+          nullable: true
+          description: 角标，如 TOP1 / HOT / NEW
+        intro:
+          type: string
+        price:
+          type: number
+          description: 售价（元）
+          example: 99
+        minValue:
+          type: number
+          description: 保底票面（元）
+          example: 120
+        coverUrl:
+          type: string
+        moods:
+          type: array
+          items:
+            $ref: '#/components/schemas/Mood'
+        status:
+          type: string
+          enum: [on, off]
+
+    Badge:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          example: 古村
+        mark:
+          type: string
+          description: 印章内的单字
+          example: 村
+        description:
+          type: string
+        unlocked:
+          type: boolean
+        unlockedAt:
+          type: string
+          nullable: true
+
+    PersonalityQuestion:
+      type: object
+      properties:
+        id:
+          type: integer
+        sortNo:
+          type: integer
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              text:
+                type: string
+
+    PersonalityResult:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [nature, city, adventure, culture]
+        name:
+          type: string
+          example: 山野治愈家
+        mark:
+          type: string
+          example: 野
+        description:
+          type: string
+        recommend:
+          type: string
+
+    AiConfig:
+      type: object
+      properties:
+        greet:
+          type: string
+        quickQuestions:
+          type: array
+          items:
+            type: string
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        fallback:
+          type: boolean
+        createdAt:
+          type: string
+
+    AiReply:
+      type: object
+      properties:
+        content:
+          type: string
+        fallback:
+          type: boolean
+          description: true 表示走了关键词 / 默认话术降级
+        recommendBoxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/BlindBox'
+        sessionId:
+          type: string
+          nullable: true
+
+    OrderCreated:
+      type: object
+      properties:
+        orderNo:
+          type: string
+        amount:
+          type: number
+        expireAt:
+          type: string
+
+    PayRedirect:
+      type: object
+      properties:
+        channel:
+          type: string
+          enum: [alipay, mock]
+        payUrl:
+          type: string
+          description: 沙箱收银台地址，供外部浏览器 / 二维码使用
+        payForm:
+          type: string
+          nullable: true
+          description: 支付宝返回的表单 HTML；H5 场景可直接提交
+        qrCodeUrl:
+          type: string
+          nullable: true
+          description: 后端渲染的支付二维码图片地址
+        expireAt:
+          type: string
+
+    OrderDetail:
+      type: object
+      properties:
+        orderNo:
+          type: string
+        status:
+          type: string
+          enum: [pending_pay, paid, opened, cancelled, refunded]
+        boxId:
+          type: integer
+        boxName:
+          type: string
+          description: 下单时快照
+        boxCategory:
+          $ref: '#/components/schemas/Category'
+        amount:
+          type: number
+        payChannel:
+          type: string
+          nullable: true
+          enum: [alipay, mock, null]
+        paidAt:
+          type: string
+          nullable: true
+        expireAt:
+          type: string
+        createdAt:
+          type: string
+        trip:
+          allOf:
+            - $ref: '#/components/schemas/Trip'
+          nullable: true
+        refundStatus:
+          type: string
+          nullable: true
+          enum: [pending_review, refunding, refunded, rejected, null]
+
+    Trip:
+      type: object
+      properties:
+        id:
+          type: integer
+        orderNo:
+          type: string
+        boxName:
+          type: string
+        boxCategory:
+          $ref: '#/components/schemas/Category'
+        routeName:
+          type: string
+          description: 开盒时快照
+        destination:
+          type: string
+        value:
+          type: number
+          description: 票面价值（元）
+        price:
+          type: number
+          description: 购入价（元）
+        badgeName:
+          type: string
+        badgeMark:
+          type: string
+        moodText:
+          type: string
+        highlights:
+          type: string
+        includes:
+          type: array
+          items:
+            type: string
+        openedAt:
+          type: string
+        validity:
+          type: boolean
+          description: false 表示已随退款失效
+        diaryText:
+          type: string
+          nullable: true
+
+    UserStats:
+      type: object
+      description: 口径见数据库设计 §5
+      properties:
+        tripCount:
+          type: integer
+          description: 有效行程数
+        savedTotal:
+          type: number
+          description: 累计省钱 = Σ(票面 − 购入价)，仅有效行程
+        title:
+          type: string
+        welfareKm:
+          type: number
+          description: 公益里程，按有效行程累计
+        badgeUnlocked:
+          type: integer
+        badgeTotal:
+          type: integer
+        personalityType:
+          type: string
+          nullable: true
+        destinations:
+          type: array
+          items:
+            type: string
+        spendTotal:
+          type: number
+          description: 累计消费，仅支付成功且未退款
+        recentMood:
+          $ref: '#/components/schemas/Mood'
+          nullable: true
+        favoriteCategory:
+          $ref: '#/components/schemas/Category'
+          nullable: true
+        monthTrips:
+          type: integer
+        diaryCount:
+          type: integer
+
+    # ── 管理端 ──
+    AdminRole:
+      type: string
+      enum: [super_admin, operator, cs, finance, analyst]
+
+    AdminProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        account:
+          type: string
+        name:
+          type: string
+        role:
+          $ref: '#/components/schemas/AdminRole'
+
+    AdminBox:
+      allOf:
+        - $ref: '#/components/schemas/BlindBox'
+        - type: object
+          properties:
+            sortWeight:
+              type: integer
+            openCount:
+              type: integer
+            createdAt:
+              type: string
+            updatedAt:
+              type: string
+
+    BoxUpsert:
+      type: object
+      required: [name, category, price, minValue]
+      properties:
+        name:
+          type: string
+          maxLength: 64
+        category:
+          $ref: '#/components/schemas/Category'
+        tag:
+          type: string
+        rankTag:
+          type: string
+          nullable: true
+        intro:
+          type: string
+          maxLength: 255
+        price:
+          type: number
+          description: 元，最多两位小数
+        minValue:
+          type: number
+        coverUrl:
+          type: string
+        moods:
+          type: array
+          items:
+            $ref: '#/components/schemas/Mood'
+        sortWeight:
+          type: integer
+        status:
+          type: string
+          enum: [on, off]
+
+    AdminRoute:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        destination:
+          type: string
+        value:
+          type: number
+        cost:
+          type: number
+          nullable: true
+          description: 采购结算价，本期可空
+        badgeId:
+          type: integer
+        badgeName:
+          type: string
+        badges:
+          type: array
+          description: 管理端详情可展示多位徽章
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              mark:
+                type: string
+        highlight:
+          type: string
+        includes:
+          type: array
+          items:
+            type: string
+        moodText:
+          type: string
+        status:
+          type: string
+          enum: [on, off]
+        drawCount:
+          type: integer
+
+    RouteUpsert:
+      type: object
+      required: [name, category, destination, value]
+      properties:
+        name:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        destination:
+          type: string
+        value:
+          type: number
+        cost:
+          type: number
+          nullable: true
+        badgeId:
+          type: integer
+        highlight:
+          type: string
+        includes:
+          type: array
+          items:
+            type: string
+        moodText:
+          type: string
+        status:
+          type: string
+          enum: [on, off]
+
+    BadgeUpsert:
+      type: object
+      required: [name, mark]
+      properties:
+        name:
+          type: string
+          maxLength: 32
+        mark:
+          type: string
+          maxLength: 4
+        description:
+          type: string
+          maxLength: 255
+        sortWeight:
+          type: integer
+
+    BannerUpsert:
+      type: object
+      required: [title, jumpType]
+      properties:
+        title:
+          type: string
+        subTitle:
+          type: string
+        tag:
+          type: string
+        imageUrl:
+          type: string
+        jumpType:
+          type: string
+          enum: [none, category, box, url]
+        jumpTarget:
+          type: string
+          nullable: true
+        startAt:
+          type: string
+          nullable: true
+        endAt:
+          type: string
+          nullable: true
+        sortWeight:
+          type: integer
+        status:
+          type: string
+          enum: [on, off]
+
+    AdminOrder:
+      type: object
+      properties:
+        orderNo:
+          type: string
+        userName:
+          type: string
+        phone:
+          type: string
+          description: 脱敏
+        boxName:
+          type: string
+        amount:
+          type: number
+        paidAmount:
+          type: number
+          nullable: true
+        channel:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [pending_pay, paid, opened, cancelled, refunded]
+        routeName:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+
+    AdminOrderDetail:
+      allOf:
+        - $ref: '#/components/schemas/AdminOrder'
+        - type: object
+          properties:
+            userId:
+              type: integer
+            boxSnapshot:
+              type: object
+              properties:
+                boxId:
+                  type: integer
+                name:
+                  type: string
+                category:
+                  $ref: '#/components/schemas/Category'
+                price:
+                  type: number
+                minValue:
+                  type: number
+            payment:
+              allOf:
+                - $ref: '#/components/schemas/PayFlow'
+              nullable: true
+            trip:
+              allOf:
+                - $ref: '#/components/schemas/Trip'
+              nullable: true
+            refund:
+              allOf:
+                - $ref: '#/components/schemas/RefundDetail'
+              nullable: true
+
+    PayFlow:
+      type: object
+      properties:
+        flowNo:
+          type: string
+        orderNo:
+          type: string
+        channel:
+          type: string
+          enum: [alipay, mock]
+        outerTradeNo:
+          type: string
+          nullable: true
+        amount:
+          type: number
+        result:
+          type: string
+          enum: [success, fail]
+        failReason:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+
+    RefundDetail:
+      type: object
+      properties:
+        refundNo:
+          type: string
+        orderNo:
+          type: string
+        userName:
+          type: string
+        kind:
+          type: string
+          enum: [value_guard, unused, draw_fail]
+        reason:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+          enum: [pending_review, refunding, refunded, rejected]
+        rejectReason:
+          type: string
+          nullable: true
+        handledBy:
+          type: string
+          nullable: true
+        handledAt:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+
+    AdminTrip:
+      allOf:
+        - $ref: '#/components/schemas/Trip'
+        - type: object
+          properties:
+            userName:
+              type: string
+            userId:
+              type: integer
+
+    AdminUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        nickname:
+          type: string
+        avatarUrl:
+          type: string
+          nullable: true
+        phone:
+          type: string
+        wechatNickname:
+          type: string
+          nullable: true
+        channel:
+          type: string
+          enum: [phone, wechat]
+        tripCount:
+          type: integer
+        title:
+          type: string
+        spendTotal:
+          type: number
+        savedTotal:
+          type: number
+        status:
+          type: string
+          enum: [active, disabled]
+        personalityType:
+          type: string
+          nullable: true
+        lastLoginAt:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+
+    AdminUserDetail:
+      allOf:
+        - $ref: '#/components/schemas/AdminUser'
+        - type: object
+          properties:
+            recentMood:
+              $ref: '#/components/schemas/Mood'
+              nullable: true
+            city:
+              type: string
+              nullable: true
+            gender:
+              type: integer
+            stats:
+              $ref: '#/components/schemas/UserStats'
+            badges:
+              type: array
+              items:
+                $ref: '#/components/schemas/Badge'
+            recentOrders:
+              type: array
+              items:
+                $ref: '#/components/schemas/AdminOrder'
+            csNote:
+              type: string
+              nullable: true
+            disableReason:
+              type: string
+              nullable: true
+
+    Dashboard:
+      type: object
+      properties:
+        metrics:
+          type: object
+          properties:
+            openCount:
+              type: integer
+            gmv:
+              type: number
+            paySuccessRate:
+              type: number
+            newUsers:
+              type: integer
+            activeUsers:
+              type: integer
+        trend:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              openCount:
+                type: integer
+              gmv:
+                type: number
+              newUsers:
+                type: integer
+        todos:
+          type: object
+          properties:
+            pendingPayExpired:
+              type: integer
+            pendingRefundReview:
+              type: integer
+            drawFailRefunds:
+              type: integer
+        topBoxes:
+          type: array
+          items:
+            type: object
+            properties:
+              boxId:
+                type: integer
+              name:
+                type: string
+              openCount:
+                type: integer
+        topRoutes:
+          type: array
+          items:
+            type: object
+            properties:
+              routeId:
+                type: integer
+              name:
+                type: string
+              drawCount:
+                type: integer
+        badgeUnlockRates:
+          type: array
+          items:
+            type: object
+            properties:
+              badgeId:
+                type: integer
+              name:
+                type: string
+              rate:
+                type: number
+
+    AdminAccount:
+      type: object
+      properties:
+        id:
+          type: integer
+        account:
+          type: string
+        name:
+          type: string
+        role:
+          $ref: '#/components/schemas/AdminRole'
+        status:
+          type: string
+          enum: [active, disabled]
+        lastLoginAt:
+          type: string
+          nullable: true
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        adminId:
+          type: integer
+        adminName:
+          type: string
+        action:
+          type: string
+        target:
+          type: string
+        detail:
+          type: string
+        ip:
+          type: string
+        createdAt:
+          type: string
+
+    # ── 分页包装 ──
+    PagedOrderResult:
+      allOf:
+        - $ref: '#/components/schemas/Result'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PageMeta'
+                - type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/OrderDetail'
+
+    PagedTripResult:
+      allOf:
+        - $ref: '#/components/schemas/Result'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PageMeta'
+                - type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Trip'
+
+    PagedBoxResult:
+      allOf:
+        - $ref: '#/components/schemas/Result'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PageMeta'
+                - type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/AdminBox'
+
+    PagedRouteResult:
+      allOf:
+        - $ref: '#/components/schemas/Result'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PageMeta'
+                - type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/AdminRoute'
+
+    PagedBadgeResult:
+      allOf:
+        - $ref: '#/components/schemas/Result'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PageMeta'
+                - type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        allOf:
+                          - $ref: '#/components/schemas/Badge'
+                          - type: object
+                            properties:
+                              sortWeight:
+                                type: integer
+                              unlockCount:
+                                type: integer
+                              routeCount:
+                                type: integer
+
+    PagedBannerResult:
+      allOf:
+        - $ref: '#/components/schemas/Result'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PageMeta'
+                - type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        allOf:
+                          - $ref: '#/components/schemas/Banner'
+                          - type: object
+                            properties:
+                              sortWeight:
+                                type: integer
+                              status:
+                                type: string
+                                enum: [on, off]
+
+    PagedAdminOrderResult:
+      allOf:
+        - $ref: '#/components/schemas/Result'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PageMeta'
+                - type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/AdminOrder'
+
+    PagedRefundResult:
+      allOf:
+        - $ref: '#/components/schemas/Result'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PageMeta'
+                - type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/RefundDetail'
+
+    PagedPayFlowResult:
+      allOf:
+        - $ref: '#/components/schemas/Result'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PageMeta'
+                - type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/PayFlow'
+
+    PagedAdminTripResult:
+      allOf:
+        - $ref: '#/components/schemas/Result'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PageMeta'
+                - type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/AdminTrip'
+
+    PagedAdminUserResult:
+      allOf:
+        - $ref: '#/components/schemas/Result'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PageMeta'
+                - type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/AdminUser'
+
+    PagedAdminAccountResult:
+      allOf:
+        - $ref: '#/components/schemas/Result'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PageMeta'
+                - type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/AdminAccount'
+
+    PagedAuditLogResult:
+      allOf:
+        - $ref: '#/components/schemas/Result'
+        - type: object
+          properties:
+            data:
+              allOf:
+                - $ref: '#/components/schemas/PageMeta'
+                - type: object
+                  properties:
+                    list:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/AuditLog'
+
+    PageMeta:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+
+
