@@ -97,7 +97,7 @@ INSERT INTO `blind_box`
   (5, '跨省限定冒险盲盒', 'cross',    '跨省游',   'NEW',  '大山大河，说走就走',
       59900, 75000, 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80', 50, 'on'),
   (6, '老城寻味美食专线', 'theme',    '主题专线', 'HOT',  '街角早茶，烟火气',
-      11900, 15000, 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', 40, 'off');
+      11900, 15000, 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', 40, 'on');
 
 INSERT INTO `blind_box_mood` (`box_id`, `mood`) VALUES
   (1, 'happy'), (1, 'emo'),   (1, 'bored'),
@@ -451,7 +451,7 @@ INSERT INTO `blind_box_prize` (`blind_box_id`, `prize_type`, `prize_name`, `priz
   (2, 'coupon',      '餐饮抵用券20元',      2000,  150, 0.3000, 3,  '茶庄消费满50可用', 'on'),
   (2, 'merchandise', '古村明信片套装',       800,  200, 0.2500, 6,  '手工制作', 'on'),
   (2, 'coupon',      '住宿抵用券30元',      3000,   40, 0.1500, 2,  '满100抵30', 'on'),
-  (2, 'badge',       '古村徽章',            0,    NULL, 0.1000, NULL, '集齐可兑换盲盒', 'on');
+  (2, 'badge',       '古村徽章',            0,      0, 0.1000, NULL, '集齐可兑换盲盒', 'on');
 
 -- ── C6. 社区帖子演示数据 ──
 DELETE FROM `post_interaction`;

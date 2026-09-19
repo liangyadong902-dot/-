@@ -1,0 +1,134 @@
+<view class="page-ai tab-view active" style="height: {{pageH}}px;">
+  <view class="ai-stage">
+    <view class="cloud-head ai-cloud">
+      <view class="scallop-row">
+        <view class="scallop"></view>
+        <view class="scallop"></view>
+        <view class="scallop"></view>
+        <view class="scallop"></view>
+        <view class="scallop"></view>
+        <view class="scallop"></view>
+        <view class="scallop"></view>
+      </view>
+      <view class="ai-hero">
+        <view class="ai-hero-dog">
+          <image class="ai-hero-dog-img" src="/assets/mascot/ai-dog.png" mode="aspectFit" />
+        </view>
+        <view class="ai-hero-copy">
+          <view class="speech">今天想吹吹山风，还是找个古村坐下来？</view>
+          <view class="ai-name">小途</view>
+          <view class="ai-sub">
+            <view class="online-dot"></view>
+            <text>随行搭子 · 在线倾听中</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="ai-body {{aiHistCollapsed ? 'hist-collapsed' : ''}}">
+      <view class="ai-history" catchtap="onAiHistRailClick">
+        <view class="ai-hist-head">
+          <text class="ai-hist-label">旅途手札</text>
+          <view class="ai-hist-toggle" catchtap="toggleAiHistory">
+            <image class="ai-hist-chevron" src="/assets/mascot/chevron.png" mode="aspectFit" />
+          </view>
+        </view>
+        <scroll-view class="ai-hist-panel" scroll-y enhanced show-scrollbar="{{false}}">
+          <view class="ai-hist-new" catchtap="newAiChat">＋ 新对话</view>
+          <view
+            wx:for="{{aiHistory}}"
+            wx:key="id"
+            class="ai-hist-item {{item.on ? 'on' : ''}}"
+            data-id="{{item.id}}"
+            catchtap="openAiChat"
+          >
+            <text class="b">{{item.title}}</text>
+            <text class="small">{{item.time}}</text>
+          </view>
+        </scroll-view>
+      </view>
+
+      <view class="ai-chat-col">
+        <scroll-view
+          class="chat-scroll-area"
+          style="height: {{chatH}}px;"
+          scroll-y
+          enhanced
+          show-scrollbar="{{false}}"
+          scroll-into-view="{{chatAnchor}}"
+          scroll-with-animation
+        >
+          <view class="chat-inner">
+            <block wx:for="{{chatRows}}" wx:key="key">
+              <view wx:if="{{item.kind === 'bubble'}}" class="chat-row {{item.role}}">
+                <view wx:if="{{item.role === 'bot'}}" class="bot-ava">
+                  <image class="bot-ava-img" src="/assets/mascot/ai-dog.png" mode="aspectFit" />
+                </view>
+                <view wx:if="{{item.role === 'bot'}}" class="chat-col">
+                  <view class="chat-bubble-box">{{item.text}}</view>
+                </view>
+                <view wx:else class="chat-bubble-box">{{item.text}}</view>
+              </view>
+
+              <view wx:elif="{{item.kind === 'recs'}}" class="chat-row bot">
+                <view class="bot-ava">
+                  <image class="bot-ava-img" src="/assets/mascot/ai-dog.png" mode="aspectFit" />
+                </view>
+                <view class="chat-col">
+                  <view class="rec-card" wx:for="{{item.recs}}" wx:for-item="box" wx:key="id">
+                    <image class="rec-thumb" src="{{box.img}}" mode="aspectFill" />
+                    <view class="rec-info">
+                      <view class="rec-name">{{box.name}}</view>
+                      <view class="rec-meta">¥{{box.price}} · 保底 ¥{{box.guarantee}}</view>
+                      <view class="rec-cta" data-id="{{box.id}}" bindtap="openUnbox">立即开启 →</view>
+                    </view>
+                  </view>
+                </view>
+              </view>
+
+              <view wx:else class="chat-row bot">
+                <view class="bot-ava">
+                  <image class="bot-ava-img" src="/assets/mascot/ai-dog.png" mode="aspectFit" />
+                </view>
+                <view class="chat-col">
+                  <view class="chat-bubble-box typing-dots">
+                    <view class="dot"></view>
+                    <view class="dot"></view>
+                    <view class="dot"></view>
+                  </view>
+                </view>
+              </view>
+            </block>
+          </view>
+          <view id="chat-end" class="chat-end"></view>
+        </scroll-view>
+
+        <view class="ai-dock">
+          <view class="ai-quick">
+            <view class="mood-chip" data-text="推荐散心的地方" bindtap="sendQuick">推荐散心的地方</view>
+            <view class="mood-chip" data-text="周末一日游推荐" bindtap="sendQuick">周末一日游推荐</view>
+            <view class="mood-chip" data-text="一个人旅行安全吗" bindtap="sendQuick">一个人旅行安全吗</view>
+          </view>
+          <view class="ai-compose">
+            <view class="ai-input-wrap">
+              <input
+                placeholder="把心情告诉小途…"
+                placeholder-class="ph"
+                value="{{draft}}"
+                bindinput="onDraft"
+                confirm-type="send"
+                bindconfirm="sendChat"
+                disabled="{{aiBusy}}"
+              />
+            </view>
+            <view class="btn-search {{aiBusy ? 'is-off' : ''}}" bindtap="sendChat">发送</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="tab-safe"></view>
+  <root-portal>
+    <tuge-overlay />
+  </root-portal>
+</view>

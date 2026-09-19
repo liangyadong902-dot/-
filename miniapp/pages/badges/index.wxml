@@ -1,0 +1,38 @@
+<view class="page-badges tab-view active">
+  <view class="cloud-head sub-cloud">
+    <view class="scallop-row">
+      <view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view>
+    </view>
+    <view class="sub-cloud-copy">
+      <view class="sub-kicker">Collect & know</view>
+      <view class="sub-title">旅行图鉴</view>
+      <view class="sub-desc">集章，也认识自己</view>
+    </view>
+  </view>
+  <view class="page-pad">
+    <view class="quiz-banner">
+      <view>
+        <view class="kicker">PERSONALITY</view>
+        <view class="h3">AI 旅行人格测试</view>
+        <view class="p">{{quizHint}}</view>
+      </view>
+      <view class="ink-pill" bindtap="startTest">{{quizBtn}}</view>
+    </view>
+    <view class="progress-card">
+      <view class="row">
+        <text class="strong">徽章收集</text>
+        <text class="view-more">{{badgeProgressDisplay}}</text>
+      </view>
+      <view class="progress-track"><view class="progress-fill" style="width: {{badgeProgress}}%;"></view></view>
+    </view>
+    <view class="badge-grid-view">
+      <view class="badge-card-item {{item.on ? '' : 'locked'}}" wx:for="{{badges}}" wx:key="name">
+        <view class="stamp">{{item.mark}}</view>
+        <view class="badge-name">{{item.name}}</view>
+        <view class="badge-st">{{item.status}}</view>
+      </view>
+    </view>
+  </view>
+  <view class="tab-safe"></view>
+  <tuge-overlay />
+</view>

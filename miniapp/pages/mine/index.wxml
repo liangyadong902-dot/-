@@ -1,0 +1,47 @@
+<view class="page-mine tab-view active">
+  <view class="cloud-head sub-cloud">
+    <view class="scallop-row">
+      <view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view>
+    </view>
+    <view class="mine-hero">
+      <view class="avatar-ring">
+        <image wx:if="{{mineAvatar}}" src="{{mineAvatar}}" mode="aspectFill" class="mine-avatar" binderror="onAvatarError" />
+        <view wx:else class="avatar-fallback"></view>
+      </view>
+      <view class="mine-copy">
+        <view class="ai-name">{{mineNick}}</view>
+        <view class="ai-sub mine-sub">{{minePhone}}</view>
+        <view class="rank-pill">{{profileRankText}}</view>
+        <view class="sub-desc mine-hint">{{mineBadgeHint}}</view>
+      </view>
+    </view>
+  </view>
+  <view class="page-pad">
+    <view class="stats-4grid">
+      <view class="stat-tile"><text class="strong">{{statTrips}}</text><text class="span">出行次数</text></view>
+      <view class="stat-tile"><text class="strong">{{statSaved}}</text><text class="span">累计省钱</text></view>
+      <view class="stat-tile"><text class="strong">{{statLevel}}</text><text class="span">当前等级</text></view>
+      <view class="stat-tile"><text class="strong">{{statWelfare}}</text><text class="span">公益里程</text></view>
+    </view>
+    <view class="menu-list">
+      <view class="menu-row" wx:for="{{mineMenu}}" wx:key="key" data-action="{{item.action}}" bindtap="onMenu">
+        <text class="b">{{item.b}}</text>
+        <text class="small">{{item.small}}</text>
+      </view>
+    </view>
+    <view class="service-block">
+      <view class="h4">价值保底规则</view>
+      <view class="p">票面价值不低于售价 120%，符合保障规则可申请退换。</view>
+    </view>
+    <view class="service-block">
+      <view class="h4">AI 情绪匹配</view>
+      <view class="p">按心情匹配旅行主题与线路，不替你指定抽中哪一条。</view>
+    </view>
+    <view class="service-block">
+      <view class="h4">乡村文旅扶持</view>
+      <view class="p">每售出 1 份盲盒，提取 1 元纳入乡村文旅扶持金。</view>
+    </view>
+  </view>
+  <view class="tab-safe"></view>
+  <tuge-overlay />
+</view>

@@ -55,7 +55,7 @@ paths:
   # ═══════════════════════════════════════════════════════
   # 用户端 · 账号  （接口设计.md §2）
   # ═══════════════════════════════════════════════════════
-  /api/v1/auth/sms:
+  /api/v1/auth/sms/send:
     post:
       tags: [用户端-账号]
       summary: 发送短信验证码
@@ -138,6 +138,18 @@ paths:
                 code:
                   type: string
                   description: wx.login 返回的 code
+                nickname:
+                  type: string
+                  description: 用户授权或主动填写的昵称
+                avatarUrl:
+                  type: string
+                  format: uri
+                  description: 可公网访问的 HTTPS 头像地址
+                gender:
+                  type: integer
+                  enum: [0, 1, 2]
+                city:
+                  type: string
       responses:
         '200':
           description: 登录成功
@@ -3036,5 +3048,4 @@ components:
           type: integer
         pageSize:
           type: integer
-
 

@@ -1,0 +1,7 @@
+{
+  "navigationStyle": "custom",
+  "disableScroll": false,
+  "usingComponents": {
+    "tuge-overlay": "/components/tuge-overlay/index"
+  }
+}

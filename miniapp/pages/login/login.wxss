@@ -1,0 +1,6 @@
+.login-btn {
+  margin-top: 48rpx;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-full);
+}

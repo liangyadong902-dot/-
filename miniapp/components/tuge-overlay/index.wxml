@@ -1,0 +1,212 @@
+<view wx:if="{{anyModal || toastShow}}" class="overlay-host {{anyModal ? 'on' : ''}}">
+<view class="modal-overlay {{unboxOpen ? 'active' : ''}}" catchtouchmove="noop">
+  <view class="modal-sheet">
+    <view class="sheet-handle"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">{{mBoxName}}</view>
+      <view class="sheet-x" bindtap="closeModal">×</view>
+    </view>
+    <view wx:if="{{unboxStep === 'confirm'}}">
+      <view class="sheet-img">
+        <image src="{{mBoxImg}}" mode="aspectFill" style="width:100%;height:100%;" />
+      </view>
+      <view class="soft-panel mb16">
+        <view class="row-between"><text>开盒售价</text><text class="strong">{{mBoxPrice}}</text></view>
+        <view class="row-between"><text>承诺保底</text><text class="strong" style="color:var(--sage-deep);">{{mBoxGuarantee}}</text></view>
+      </view>
+      <view class="btn-block btn-sage" bindtap="goCheckout">确认下单，去支付宝付款</view>
+      <view class="muted-center mt">开启即代表同意价值保底与退换规则</view>
+    </view>
+    <view wx:elif="{{unboxStep === 'pay'}}">
+      <view class="soft-panel mb12">
+        <view class="row-between"><text>订单号</text><text class="strong">{{payOrderNo}}</text></view>
+        <view class="row-between"><text>应付金额</text><text class="strong">{{payAmount}}</text></view>
+      </view>
+      <view class="muted-center">待支付剩余</view>
+      <view class="pay-clock">{{payClock}}</view>
+      <view class="pay-alipay">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="3" fill="#1677FF"/><path d="M7 13.5c1.8 1.6 4.2 2.2 6.2 1.4 1.4-.6 2-1.8 1.6-3-.4-1.2-1.7-1.5-3.1-.8" stroke="#fff" stroke-width="1.6" fill="none"/></svg>
+        <view>
+          <text class="b">支付宝沙箱收银台</text>
+          <text class="small">演示不跳转真沙箱，点下方即视为支付成功</text>
+        </view>
+      </view>
+      <view class="btn-block btn-sage" bindtap="confirmSandboxPay">模拟支付宝已付款</view>
+      <view class="btn-block btn-line" bindtap="cancelCurrentOrder">取消订单</view>
+      <view class="btn-block btn-line" bindtap="closeModal">稍后再付</view>
+    </view>
+    <view wx:elif="{{unboxStep === 'drawing'}}" class="draw-wrap">
+      <view class="pulse-box pulse-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6C7E58" stroke-width="1.6"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13"/></svg>
+      </view>
+      <view class="h4 serif">小途正在拆开纸盒…</view>
+      <view class="muted-center draw">保底线路匹配中</view>
+    </view>
+    <view wx:else>
+      <view class="sheet-img sm">
+        <image src="{{mResImg}}" mode="aspectFill" style="width:100%;height:100%;" />
+      </view>
+      <view class="center-copy">
+        <view class="h4">{{mResName}}</view>
+        <view class="mood">{{mResMood}}</view>
+      </view>
+      <view class="soft-panel mb16">
+        <view class="row-between"><text>目的地</text><text class="strong">{{mResDest}}</text></view>
+        <view class="row-between mt"><text>票面价值</text><text class="strong">{{mResVal}}</text></view>
+      </view>
+      <view class="btn-block btn-ink" bindtap="acceptRouteResult">收下并去行程查看</view>
+    </view>
+  </view>
+</view>
+
+<view class="modal-overlay {{testOpen ? 'active' : ''}}" catchtouchmove="noop">
+  <view class="modal-sheet tall">
+    <view class="sheet-handle"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">旅行人格测试</view>
+      <view class="sheet-x" bindtap="closeTestModal">×</view>
+    </view>
+    <view wx:if="{{!testShowResult}}">
+      <view class="test-meta">
+        <text>{{testQNum}}</text>
+        <text>点选项即进入下一题</text>
+      </view>
+      <view class="progress-track"><view class="progress-fill" style="width: {{testProgress}}%;"></view></view>
+      <view class="test-q">{{testQText}}</view>
+      <view
+        wx:for="{{testOptions}}"
+        wx:key="i"
+        class="test-option"
+        data-i="{{item.i}}"
+        bindtap="selectTestOption"
+      >{{item.text}}</view>
+    </view>
+    <view wx:else class="test-result">
+      <view class="result-mark">{{testResultMark}}</view>
+      <view class="sheet-title" style="font-size: 38.46rpx;">{{testResultName}}</view>
+      <view class="muted-13" style="margin: 15.38rpx 0 19.23rpx;">{{testResultDesc}}</view>
+      <view class="muted-13" style="color: var(--sage-deep); font-weight: 700; margin-bottom: 30.77rpx;">{{testResultRec}}</view>
+      <view class="btn-block btn-sage" bindtap="finishPersonalityToHome">去解锁适合我的盲盒</view>
+    </view>
+  </view>
+</view>
+
+<view class="modal-overlay {{tripOpen ? 'active' : ''}}" catchtouchmove="noop">
+  <view class="modal-sheet tall">
+    <view class="sheet-handle"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">{{tdName}}</view>
+      <view class="sheet-x" bindtap="closeTripDetail">×</view>
+    </view>
+    <view class="td-dest">{{tdDest}}</view>
+    <view class="soft-panel" style="margin-bottom: 26.92rpx;">
+      <view class="row-between"><text>票面价值</text><text class="strong">{{tdVal}}</text></view>
+      <view class="row-between"><text>购入价</text><text class="strong">{{tdPrice}}</text></view>
+    </view>
+    <view class="sheet-sec">
+      <view class="block-h">线路亮点</view>
+      <view class="muted-13">{{tdHighlight}}</view>
+    </view>
+    <view class="sheet-sec">
+      <view class="block-h">服务包含</view>
+      <view class="include-list">{{tdInclude}}</view>
+    </view>
+    <view>
+      <view class="block-h8">AI 旅行日记</view>
+      <view wx:if="{{!hasDiary}}" class="btn-block btn-sage" bindtap="generateDiary">{{diaryLoading ? 'AI 生成中...' : '一键生成旅行日记'}}</view>
+      <view wx:if="{{hasDiary}}" class="diary-box">
+        <view>{{diaryText}}</view>
+        <view class="by">—— AI生成</view>
+      </view>
+    </view>
+    <view class="btn-block btn-ink mt14" bindtap="closeTripDetail">我知道了</view>
+  </view>
+</view>
+
+<view class="modal-overlay {{orderOpen ? 'active' : ''}}" catchtouchmove="noop">
+  <view class="modal-sheet tall">
+    <view class="sheet-handle"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">我的订单</view>
+      <view class="sheet-x" bindtap="closeOrderSheet">×</view>
+    </view>
+    <scroll-view class="order-tabs" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="order-tabs-inner">
+      <view
+        wx:for="{{orderTabs}}"
+        wx:key="key"
+        class="mood-chip {{orderFilter === item.key ? 'active' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="setOrderFilter"
+      >{{item.label}}</view>
+      </view>
+    </scroll-view>
+    <view wx:if="{{!orderList.length}}" class="empty-hint">这一栏还没有订单</view>
+    <view wx:else>
+      <view class="order-row" wx:for="{{orderList}}" wx:key="no">
+        <view class="top">
+          <text>{{item.time}} · {{item.no}}</text>
+          <text class="{{item.stCls}}">{{item.stText}}</text>
+        </view>
+        <view class="order-time">{{item.box}}</view>
+        <view class="order-sub">{{item.routeText}} · 支付宝沙箱</view>
+        <view class="order-pay">实付 ¥{{item.pay}}{{item.val ? ' · 票面 ¥' + item.val : ''}}</view>
+        <view wx:if="{{item.showPay}}" class="order-act">
+          <view class="go" data-no="{{item.no}}" bindtap="continuePay">继续支付</view>
+          <view class="ghost" data-no="{{item.no}}" bindtap="cancelOrderByNo">取消</view>
+        </view>
+        <view wx:elif="{{item.showTrip}}" class="order-act">
+          <view class="go" data-no="{{item.no}}" bindtap="viewOrderTrip">查看行程</view>
+          <view class="ghost" data-no="{{item.no}}" bindtap="openRefundModal">申请退换</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<view class="modal-overlay {{loginOpen ? 'active' : ''}}" catchtouchmove="noop">
+  <view class="modal-sheet login-sheet">
+    <view class="sheet-handle"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">登录途个惊喜</view>
+      <view class="sheet-x" bindtap="closeLogin">×</view>
+    </view>
+    <view class="login-lead">游客可逛首页、和小途聊天。开盒支付、行程、订单与退换需要登录。</view>
+    <view class="mb10">
+      <input class="pill-input" type="number" maxlength="11" placeholder="手机号" placeholder-class="ph" value="{{loginPhone}}" bindinput="onLoginPhone" />
+    </view>
+    <view class="sms-row mb8">
+      <input class="pill-input" type="number" maxlength="6" placeholder="短信验证码" placeholder-class="ph" value="{{loginSms}}" bindinput="onLoginSms" />
+      <view class="sms-send" bindtap="sendDemoSms">{{smsBtn}}</view>
+    </view>
+    <view class="login-err">{{loginErr}}</view>
+    <view class="btn-block btn-sage" bindtap="submitPhoneLogin">登录 / 注册</view>
+    <button class="wx-login" open-type="chooseAvatar" bindchooseavatar="onWxChooseAvatar" hover-class="none">微信快捷登录</button>
+    <view class="login-demo">演示验证码固定 123456 · 微信登录请选「用微信头像」</view>
+  </view>
+</view>
+
+<view class="modal-overlay {{refundOpen ? 'active' : ''}}" catchtouchmove="noop">
+  <view class="modal-sheet">
+    <view class="sheet-handle"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">申请退换</view>
+      <view class="sheet-x" bindtap="closeRefundModal">×</view>
+    </view>
+    <view class="hint-12">{{refundHint}}</view>
+    <view class="order-tabs wrap">
+      <view
+        wx:for="{{refundReasons}}"
+        wx:key="key"
+        class="mood-chip {{refundReason === item.key ? 'active' : ''}}"
+        data-reason="{{item.key}}"
+        bindtap="pickRefundReason"
+      >{{item.label}}</view>
+    </view>
+    <view class="hint-11">已开盒但未使用线路，提交后由客服审核，原路退回支付宝。</view>
+    <view class="btn-block btn-sage" bindtap="submitRefund">提交申请</view>
+  </view>
+</view>
+
+<view class="demo-toast {{toastShow ? 'show' : ''}}">{{toast}}</view>
+</view>

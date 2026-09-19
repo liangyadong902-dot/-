@@ -1,0 +1,19 @@
+<view class="tab-bar-root {{hidden ? 'is-hidden' : ''}}">
+  <view class="bottom-tabbar">
+    <view
+      wx:for="{{list}}"
+      wx:key="key"
+      class="tab-item {{selected === index ? 'active' : ''}}"
+      data-path="{{item.path}}"
+      data-index="{{index}}"
+      bindtap="onChange"
+    >
+      <image
+        class="tab-icon"
+        src="{{selected === index ? item.activeIcon : item.icon}}"
+        mode="aspectFit"
+      />
+      <text>{{item.text}}</text>
+    </view>
+  </view>
+</view>

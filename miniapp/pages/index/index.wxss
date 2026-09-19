@@ -1,0 +1,162 @@
+/* 首页：对照 docs/页面原型.html #tab-home，390px → 750rpx */
+/* 底部留白由 .tab-safe 预留自定义 tabBar 高度 */
+
+.page-home .brand-row {
+  flex-wrap: nowrap;
+}
+
+.page-home .brand-copy {
+  flex: 1;
+  min-width: 0;
+  overflow: visible;
+  padding-top: 11.54rpx;
+}
+
+.page-home .shop-title {
+  white-space: normal;
+  writing-mode: horizontal-tb;
+  word-break: keep-all;
+}
+
+.page-home .mascot-col {
+  overflow: visible;
+}
+
+.page-home .special-block {
+  display: grid;
+  grid-template-columns: 1.18fr 0.92fr;
+  gap: 19.23rpx;
+  align-items: center;
+  padding: 19.23rpx 34.62rpx 11.54rpx;
+}
+
+.page-home .special-photo {
+  width: auto;
+  min-width: 0;
+  height: 269.23rpx;
+}
+
+.page-home .special-img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.page-home .special-copy {
+  min-width: 0;
+  flex: none;
+}
+
+.page-home .special-copy .h2,
+.page-home .special-copy .p {
+  white-space: pre-line;
+}
+
+.page-home .cta-arrow {
+  width: 26.92rpx;
+  height: 26.92rpx;
+  display: block;
+}
+
+.page-home .doodle-arrow {
+  width: 100rpx;
+  height: 53.85rpx;
+  left: -30.77rpx;
+  bottom: 53.85rpx;
+  display: block;
+}
+
+.page-home .search-ico {
+  width: 28.85rpx;
+  height: 28.85rpx;
+  flex-shrink: 0;
+  display: block;
+}
+
+.page-home .gift-ico {
+  width: 30.77rpx;
+  height: 30.77rpx;
+  display: block;
+}
+
+.page-home .mood-row {
+  width: 100%;
+  white-space: nowrap;
+  padding: 0 0 11.54rpx;
+  display: block;
+}
+
+.page-home .mood-inner {
+  display: inline-flex;
+  flex-direction: row;
+  gap: 11.54rpx;
+  padding: 0 34.62rpx;
+}
+
+.page-home .category-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  padding: 0 15.38rpx 15.38rpx;
+}
+
+.page-home .category-item {
+  width: auto;
+  flex: none;
+}
+
+.page-home .cat-icon image {
+  width: 84.62rpx;
+  height: 84.62rpx;
+  display: block;
+}
+
+.page-home .member-banner {
+  align-items: stretch;
+}
+
+.page-home .member-banner .photo,
+.page-home .member-banner-inner .photo {
+  width: 238.46rpx;
+  height: 100%;
+  display: block;
+}
+
+.page-home .sec-leaf {
+  width: 34.62rpx;
+  height: 34.62rpx;
+  display: block;
+}
+
+.page-home .sec-heart {
+  width: 23.08rpx;
+  height: 23.08rpx;
+  display: block;
+}
+
+.page-home .product-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 15.38rpx;
+}
+
+.page-home .product-card {
+  width: auto;
+  flex: none;
+}
+
+.page-home .prod-img-wrap image {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.page-home .empty-hint {
+  grid-column: 1 / span 3;
+  text-align: center;
+  padding: 53.85rpx 0;
+  color: var(--muted);
+  font-size: 23.08rpx;
+}

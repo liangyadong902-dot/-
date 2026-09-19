@@ -1,0 +1,63 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/ai/index",
+    "pages/community/index",
+    "pages/badges/index",
+    "pages/trips/index",
+    "pages/mine/index",
+    "pages/login/login"
+  ],
+  "window": {
+    "navigationStyle": "custom",
+    "navigationBarBackgroundColor": "#E3EDD6",
+    "navigationBarTitleText": "途个惊喜",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F6F1E6",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#C0B3A5",
+    "selectedColor": "#6C7E58",
+    "backgroundColor": "#FFFDF8",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "assets/tabs/home.png",
+        "selectedIconPath": "assets/tabs/home-active.png"
+      },
+      {
+        "pagePath": "pages/ai/index",
+        "text": "AI搭子",
+        "iconPath": "assets/tabs/ai.png",
+        "selectedIconPath": "assets/tabs/ai-active.png"
+      },
+      {
+        "pagePath": "pages/community/index",
+        "text": "社区",
+        "iconPath": "assets/tabs/community.png",
+        "selectedIconPath": "assets/tabs/community-active.png"
+      },
+      {
+        "pagePath": "pages/trips/index",
+        "text": "行程",
+        "iconPath": "assets/tabs/trips.png",
+        "selectedIconPath": "assets/tabs/trips-active.png"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的",
+        "iconPath": "assets/tabs/mine.png",
+        "selectedIconPath": "assets/tabs/mine-active.png"
+      }
+    ]
+  },
+  "usingComponents": {
+    "tuge-overlay": "/components/tuge-overlay/index"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

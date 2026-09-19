@@ -1,0 +1,42 @@
+<view class="page-trips tab-view active">
+  <view class="cloud-head sub-cloud">
+    <view class="scallop-row">
+      <view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view>
+    </view>
+    <view class="sub-cloud-copy">
+      <view class="sub-kicker">On the road</view>
+      <view class="sub-title">我的行程</view>
+      <view class="sub-desc">{{tripCountDisplay}}</view>
+    </view>
+  </view>
+  <view class="page-pad">
+    <view wx:if="{{!loggedIn}}" class="empty-box">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#8EA47C" stroke-width="1.5"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      <view class="p">登录后查看行程</view>
+      <text class="span">开盒记录会跟账号走</text>
+      <view class="ghost-cta" bindtap="goLogin">去登录</view>
+    </view>
+    <view wx:elif="{{tripsEmpty}}" class="empty-box">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#8EA47C" stroke-width="1.5"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      <view class="p">还没有开启旅程</view>
+      <text class="span">去首页开一个盲盒吧</text>
+      <view class="ghost-cta" bindtap="goHome">去首页看看</view>
+    </view>
+    <view wx:else>
+      <view class="ticket-card" wx:for="{{trips}}" wx:key="id" data-id="{{item.id}}" bindtap="openTrip">
+        <image src="{{item.img}}" mode="aspectFill" style="width:176.92rpx;height:176.92rpx;" />
+        <view class="ticket-body">
+          <view class="ticket-meta">{{item.boxName}} · {{item.date}}</view>
+          <view class="ticket-name">{{item.name}}</view>
+          <view class="ticket-dest">{{item.dest}}</view>
+          <view class="ticket-foot">
+            <view class="ticket-price">购入 ¥{{item.price}} · 票面 ¥{{item.val}}</view>
+            <text class="ticket-tag">已解锁</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="tab-safe"></view>
+  <tuge-overlay />
+</view>

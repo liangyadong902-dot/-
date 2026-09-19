@@ -1,0 +1,9 @@
+{
+  "desc": "途个惊喜小程序 sitemap",
+  "rules": [
+    {
+      "action": "allow",
+      "page": "*"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: tuge-server
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://123.57.181.126:3306/tuge?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: ${MYSQL_PASSWORD:1234}
+  redis:
+    host: 123.57.181.126
+    port: 6379
+    password: ${REDIS_PASSWORD:123456}
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+jwt:
+  # 生产环境必须用环境变量覆盖
+  secret: ${JWT_SECRET:tuge-dev-secret-key-change-in-production-0123456789abcdef}
+  expiration: 604800000  # 7 天（毫秒）
+
+pay:
+  mock-enabled: ${PAY_MOCK_ENABLED:false}
+
+wechat:
+  app-id: ${WECHAT_APP_ID:wxfc5f96ba8dfc7bca}
+  app-secret: ${WECHAT_APP_SECRET:}
+  demo-enabled: ${WECHAT_DEMO_ENABLED:false}
+
+logging:
+  level:
+    com.tuge: info

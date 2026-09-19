@@ -1,0 +1,179 @@
+<view class="page-home tab-view active">
+  <view class="cloud-head">
+    <view class="scallop-row">
+      <view class="scallop"></view>
+      <view class="scallop"></view>
+      <view class="scallop"></view>
+      <view class="scallop"></view>
+      <view class="scallop"></view>
+      <view class="scallop"></view>
+      <view class="scallop"></view>
+    </view>
+    <view class="brand-row">
+      <view class="menu-btn">
+        <view class="bar"></view>
+        <view class="bar"></view>
+        <view class="bar"></view>
+      </view>
+      <view class="brand-copy">
+        <view class="cursive-wrap">
+          <view class="cursive">Good Journey!</view>
+          <image class="leaf-mark" src="/assets/mascot/leaf.png" mode="aspectFit" />
+        </view>
+        <view class="shop-title">
+          <view>途个</view>
+          <view>惊喜</view>
+        </view>
+        <view class="slogan">
+          <text>随盒出发，途个好心情</text>
+          <image class="slogan-heart" src="/assets/mascot/heart.png" mode="aspectFit" />
+        </view>
+      </view>
+      <view class="mascot-col">
+        <view class="speech">今天也要好好出发呀！</view>
+        <image class="mascot-svg" src="/assets/mascot/home-dog.png" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
+
+  <view class="special-block">
+    <view class="special-photo" bindtap="openCurrentSpecial">
+      <image class="special-img" src="{{special.img}}" mode="aspectFill" />
+      <view class="v-label">FRESH JOURNEY</view>
+      <view class="photo-tag">途个
+惊喜</view>
+      <view class="fresh-orb">今日
+新鲜出发</view>
+    </view>
+    <view class="special-copy">
+      <view class="eyebrow">TODAY'S SPECIAL</view>
+      <view class="h2">{{specialName}}</view>
+      <view class="p">{{specialDesc}}</view>
+      <view class="link-cta" bindtap="openCurrentSpecial">
+        <text>立即开启</text>
+        <image class="cta-arrow" src="/assets/icons/arrow.png" mode="aspectFit" />
+      </view>
+      <image class="doodle-arrow" src="/assets/icons/doodle-arrow.png" mode="aspectFit" />
+      <view class="pager">
+        <block wx:for="{{specialPager}}" wx:key="n">
+          <view class="pg {{item.on ? 'on' : ''}}" data-n="{{item.n}}" bindtap="setSpecial">{{item.lab}}</view>
+          <text wx:if="{{item.n < 2}}">—</text>
+        </block>
+      </view>
+    </view>
+  </view>
+
+  <view class="search-row">
+    <view class="search-box">
+      <image class="search-ico" src="/assets/icons/search.png" mode="aspectFit" />
+      <input placeholder="今天想去哪里放空呢？" placeholder-class="ph" />
+      <view class="btn-search">搜索</view>
+    </view>
+    <view class="gift-btn" bindtap="goBadges">
+      <image class="gift-ico" src="/assets/icons/gift.png" mode="aspectFit" />
+      <text class="small">图鉴</text>
+    </view>
+  </view>
+
+  <scroll-view class="mood-row" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="mood-inner">
+      <view
+        wx:for="{{moods}}"
+        wx:key="key"
+        class="mood-chip {{mood === item.key ? 'active' : ''}}"
+        data-mood="{{item.key}}"
+        bindtap="filterMood"
+      >{{item.label}}</view>
+    </view>
+  </scroll-view>
+
+  <view class="category-row">
+    <view class="category-item {{category === 'nearby' ? 'active' : ''}}" data-cat="nearby" bindtap="filterCategory">
+      <view class="cat-icon">
+        <image src="/assets/icons/cat-nearby.png" mode="aspectFit" />
+      </view>
+      <view class="cat-name">周边游</view>
+      <view class="cat-en">NEARBY</view>
+    </view>
+    <view class="category-item {{category === 'province' ? 'active' : ''}}" data-cat="province" bindtap="filterCategory">
+      <view class="cat-icon">
+        <image src="/assets/icons/cat-province.png" mode="aspectFit" />
+      </view>
+      <view class="cat-name">省内游</view>
+      <view class="cat-en">PROVINCE</view>
+    </view>
+    <view class="category-item {{category === 'cross' ? 'active' : ''}}" data-cat="cross" bindtap="filterCategory">
+      <view class="cat-icon">
+        <image src="/assets/icons/cat-cross.png" mode="aspectFit" />
+      </view>
+      <view class="cat-name">跨省游</view>
+      <view class="cat-en">CROSS</view>
+    </view>
+    <view class="category-item {{category === 'theme' ? 'active' : ''}}" data-cat="theme" bindtap="filterCategory">
+      <view class="cat-icon">
+        <image src="/assets/icons/cat-theme.png" mode="aspectFit" />
+      </view>
+      <view class="cat-name">主题盒</view>
+      <view class="cat-en">THEME</view>
+    </view>
+  </view>
+
+  <swiper
+    wx:if="{{banners.length}}"
+    class="member-banner-swiper"
+    indicator-dots="{{banners.length > 1}}"
+    autoplay="{{banners.length > 1}}"
+    circular="{{banners.length > 1}}"
+    interval="4500"
+    indicator-color="rgba(60,52,44,0.18)"
+    indicator-active-color="#6C7E58"
+  >
+    <swiper-item wx:for="{{banners}}" wx:key="id">
+      <view class="member-banner-inner" data-id="{{item.id}}" bindtap="onBanner">
+        <view class="copy">
+          <view class="kicker">{{item.tag || 'MEMBER BENEFITS'}}</view>
+          <view class="h3">{{item.title}}</view>
+          <view class="ink-pill">立即开启</view>
+        </view>
+        <image class="photo" src="{{item.imageUrl}}" mode="aspectFill" />
+      </view>
+    </swiper-item>
+  </swiper>
+  <view wx:else class="member-banner">
+    <view class="copy">
+      <view class="kicker">MEMBER BENEFITS</view>
+      <view class="h3">开盒保底 120% 票面</view>
+      <view class="ink-pill" data-id="box_1" bindtap="openUnbox">立即开启</view>
+    </view>
+    <image class="photo" src="/assets/covers/box3.jpg" mode="aspectFill" />
+  </view>
+
+  <view class="section-pad">
+    <view class="section-header">
+      <view class="section-title">
+        <image class="sec-leaf" src="/assets/icons/leaf.png" mode="aspectFit" />
+        <text>人气推荐</text>
+        <image class="sec-heart" src="/assets/icons/heart.png" mode="aspectFit" />
+      </view>
+      <text class="view-more" bindtap="filterCategoryAll">查看更多 ›</text>
+    </view>
+    <view wx:if="{{productsEmpty}}" class="empty-hint">暂无匹配盲盒，换个心情看看</view>
+    <view wx:else class="product-grid">
+      <view class="product-card" wx:for="{{products}}" wx:key="id">
+        <view class="prod-img-wrap">
+          <image src="{{item.img}}" mode="aspectFill" />
+          <view class="top-badge">{{item.rank}}</view>
+        </view>
+        <view class="prod-info">
+          <view class="prod-name">{{item.name}}</view>
+          <view class="prod-bottom">
+            <view class="prod-price"><text class="yen">¥</text>{{item.price}}</view>
+            <view class="btn-add" data-id="{{item.id}}" bindtap="openUnbox">+</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="tab-safe"></view>
+  <tuge-overlay />
+</view>
