@@ -478,14 +478,13 @@ INSERT INTO `community_post` (`id`, `user_id`, `content`, `images`, `topic`, `lo
    NULL, '江西·多地', NULL, 456, 34, 78, 'on', '2026-09-11 20:00:00.000');
 
 -- ── C7. 打卡记录演示数据 ──
-DELETE FROM `checkin_like`;
 DELETE FROM `checkin`;
-INSERT INTO `checkin` (`id`, `user_id`, `route_id`, `location`, `photo_url`, `note`, `like_count`, `created_at`) VALUES
-  (1, 10021, 1, '渼陂古村', 'https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=400&q=80', '第一次带孩子来古村，超开心！', 45, '2026-09-10 11:30:00.000'),
-  (2, 10021, 2, '武夷山茶园', 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=400&q=80', '云雾缭绕，像仙境一样', 67, '2026-09-08 15:20:00.000'),
-  (3, 10044, 4, '三清山', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80', '日出云海，值了！', 123, '2026-09-06 06:00:00.000'),
-  (4, 10007, 3, '仙女湖', 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80', '星空露营太浪漫了', 89, '2026-09-04 21:30:00.000'),
-  (5, 10058, 5, '大理洱海', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=400&q=80', '面朝大海，春暖花开', 234, '2026-09-02 18:00:00.000');
+INSERT INTO `checkin` (`id`, `user_id`, `trip_id`, `route_id`, `location`, `photo_url`, `note`, `like_count`, `created_at`) VALUES
+  (1, 10021, 1, 1, '渼陂古村', '["https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=400&q=80"]', '第一次带孩子来古村，超开心！', 45, '2026-09-10 11:30:00.000'),
+  (2, 10021, 1, 2, '武夷山茶园', '["https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=400&q=80"]', '云雾缭绕，像仙境一样', 67, '2026-09-08 15:20:00.000'),
+  (3, 10044, 2, 4, '三清山', '["https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80"]', '日出云海，值了！', 123, '2026-09-06 06:00:00.000'),
+  (4, 10007, 2, 3, '仙女湖', '["https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80"]', '星空露营太浪漫了', 89, '2026-09-04 21:30:00.000'),
+  (5, 10058, 3, 5, '大理洱海', '["https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=400&q=80"]', '面朝大海，春暖花开', 234, '2026-09-02 18:00:00.000');
 
 -- ── C8. 用户积分演示 ──
 DELETE FROM `point_log`;
