@@ -189,6 +189,7 @@ public class CommunityService {
 
     @Transactional
     public CommunityPostVO share(Long userId, Long postId) {
+        requireUser(userId);
         CommunityPost post = findPublicPost(postId);
         postMapper.update(null, new LambdaUpdateWrapper<CommunityPost>().eq(CommunityPost::getId, postId).setSql("share_count = share_count + 1"));
         post.setShareCount((post.getShareCount() == null ? 0 : post.getShareCount()) + 1); return toPost(post, userId, false);

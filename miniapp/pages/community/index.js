@@ -43,13 +43,16 @@ Page(makePage(2, {
       if (view === 'creators') {
         const creators = await api.listCreators({ metric: 'influence', period: 'all', page: 1, pageSize: 50 })
         this.setData({
-          creators: (creators || []).map((item, index) => ({
-            userId: item.userId,
-            nickname: item.nickname || '途友',
-            mark: (item.nickname || '途').slice(0, 1),
-            bio: (item.postCount || 0) + ' 篇笔记 · ' + (item.checkinCount || 0) + ' 次打卡',
-            followed: !!item.followed,
-          })),
+          creators: (creators || []).map((item) => {
+            const user = item.user || item
+            return {
+              userId: user.userId,
+              nickname: user.nickname || '途友',
+              mark: (user.nickname || '途').slice(0, 1),
+              bio: (item.postCount || 0) + ' 篇笔记 · ' + (item.checkinCount || 0) + ' 次打卡',
+              followed: !!user.followed,
+            }
+          }),
           loading: false,
         })
         return

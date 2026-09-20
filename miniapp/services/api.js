@@ -41,6 +41,7 @@ module.exports = {
   likeCommunityPost: (id, active) => active ? request.put('/community/posts/' + id + '/like', {}) : request.delete('/community/posts/' + id + '/like'),
   collectCommunityPost: (id, active) => active ? request.put('/community/posts/' + id + '/collection', {}) : request.delete('/community/posts/' + id + '/collection'),
   shareCommunityPost: (id, channel) => request.post('/community/posts/' + id + '/share', { channel }),
+  deletePostComment: (id) => request.delete('/community/comments/' + id),
   listPostComments: (id, params) => request.get('/community/posts/' + id + '/comments', params, { silent: true }),
   createPostComment: (id, data) => request.post('/community/posts/' + id + '/comments', data),
   listTopics: (params) => request.get('/community/topics', params, { silent: true }),

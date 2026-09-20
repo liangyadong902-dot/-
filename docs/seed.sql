@@ -473,12 +473,12 @@ INSERT INTO `coupon` (`id`, `code`, `name`, `type`, `partner_id`, `discount_amou
 DELETE FROM `user_topic_follow`;
 DELETE FROM `topic`;
 INSERT INTO `topic` (`id`, `name`, `cover_url`, `description`, `post_count`, `follow_count`, `heat_weight`, `sort_weight`, `status`) VALUES
-  (1,  '周末去哪儿',    'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=400&q=80', '周末就要出去玩！分享你的周末目的地', 328, 1256, 100, 100, 'on'),
-  (2,  '美食探店',      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80', '吃货必看！发现各地特色美食', 256, 892, 90, 90, 'on'),
-  (3,  '情侣出游',      'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=400&q=80', '和TA一起走过的地方', 189, 654, 80, 80, 'on'),
-  (4,  '带娃旅行',      'https://images.unsplash.com/photo-1476703993599-0035a21b17a9?auto=format&fit=crop&w=400&q=80', '亲子游攻略，让带娃旅行更轻松', 145, 423, 70, 70, 'on'),
-  (5,  '小众秘境',      'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80', '发现那些不为人知的美景', 98, 367, 60, 60, 'on'),
-  (6,  '盲盒开箱',      'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=400&q=80', '分享你的盲盒开箱体验', 412, 1589, 110, 95, 'on');
+  (1,  '周末去哪儿',    'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=400&q=80', '周末就要出去玩！分享你的周末目的地', 2, 0, 100, 100, 'on'),
+  (2,  '美食探店',      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80', '吃货必看！发现各地特色美食', 1, 0, 90, 90, 'on'),
+  (3,  '情侣出游',      'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=400&q=80', '和TA一起走过的地方', 0, 0, 80, 80, 'on'),
+  (4,  '带娃旅行',      'https://images.unsplash.com/photo-1476703993599-0035a21b17a9?auto=format&fit=crop&w=400&q=80', '亲子游攻略，让带娃旅行更轻松', 1, 0, 70, 70, 'on'),
+  (5,  '小众秘境',      'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80', '发现那些不为人知的美景', 1, 0, 60, 60, 'on'),
+  (6,  '盲盒开箱',      'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=400&q=80', '分享你的盲盒开箱体验', 1, 0, 110, 95, 'on');
 
 -- ── C5. 盲盒奖品配置 ──
 DELETE FROM `blind_box_prize`;
@@ -504,12 +504,12 @@ DELETE FROM `post_collect`;
 DELETE FROM `post_image`;
 DELETE FROM `community_post`;
 INSERT INTO `community_post` (`id`, `user_id`, `title`, `content`, `topic_id`, `location_name`, `public_location`, `linked_blind_box_id`, `linked_trip_id`, `like_count`, `comment_count`, `share_count`, `collect_count`, `status`, `created_at`) VALUES
-  (1, 10021, '古村亲子游超出预期', '孩子玩得超开心，还学会了打糍粑。这份盲盒也很划算，适合周末慢慢逛。', 4, '吉安·渼陂古村', 1, 1, 1, 328, 2, 89, 126, 'featured', '2026-09-16 14:30:00.000'),
-  (2, 10044, '仙女湖的日落太美了', '盲盒开出意外惊喜，湖边的光线非常温柔，下次还想再来。', 6, '新余·仙女湖', 1, 1, NULL, 892, 1, 234, 310, 'published', '2026-09-15 18:45:00.000'),
-  (3, 10007, '周末逃离城市去看星空', '湖畔徒步和露营都很舒服，晚上抬头就是整片星空。', 5, '新余·仙女湖', 1, 3, 2, 567, 1, 156, 198, 'published', '2026-09-14 09:20:00.000'),
-  (4, 10058, '三清山云海日出攻略', '建议提前看天气，早上四点出发，山顶风大记得带外套。', 1, '上饶·三清山', 1, 4, NULL, 1234, 0, 456, 502, 'featured', '2026-09-13 07:15:00.000'),
-  (5, 10063, '西关三天两夜寻味记', '早茶、骑楼和糖水都值得慢慢体验，巷子里的烟火气最治愈。', 2, '广州·西关', 1, 6, 3, 2156, 0, 678, 830, 'published', '2026-09-12 16:40:00.000'),
-  (6, 10021, '第一次打卡完成', '从行程页完成打卡后，成就进度也同步更新了。', 1, '吉安·青原区', 1, NULL, 1, 456, 0, 78, 144, 'review', '2026-09-11 20:00:00.000');
+  (1, 10021, '古村亲子游超出预期', '孩子玩得超开心，还学会了打糍粑。这份盲盒也很划算，适合周末慢慢逛。', 4, '吉安·渼陂古村', 1, 1, 1, 0, 2, 0, 0, 'featured', '2026-09-16 14:30:00.000'),
+  (2, 10044, '仙女湖的日落太美了', '盲盒开出意外惊喜，湖边的光线非常温柔，下次还想再来。', 6, '新余·仙女湖', 1, 1, NULL, 0, 1, 0, 0, 'published', '2026-09-15 18:45:00.000'),
+  (3, 10007, '周末逃离城市去看星空', '湖畔徒步和露营都很舒服，晚上抬头就是整片星空。', 5, '新余·仙女湖', 1, 3, 2, 0, 1, 0, 0, 'published', '2026-09-14 09:20:00.000'),
+  (4, 10058, '三清山云海日出攻略', '建议提前看天气，早上四点出发，山顶风大记得带外套。', 1, '上饶·三清山', 1, 4, NULL, 0, 0, 0, 0, 'featured', '2026-09-13 07:15:00.000'),
+  (5, 10063, '西关三天两夜寻味记', '早茶、骑楼和糖水都值得慢慢体验，巷子里的烟火气最治愈。', 2, '广州·西关', 1, 6, 3, 0, 0, 0, 0, 'published', '2026-09-12 16:40:00.000'),
+  (6, 10021, '第一次打卡完成', '从行程页完成打卡后，成就进度也同步更新了。', 1, '吉安·青原区', 1, NULL, 1, 0, 0, 0, 0, 'review', '2026-09-11 20:00:00.000');
 
 INSERT INTO `post_image` (`post_id`, `url`, `sort_order`) VALUES
   (1, 'https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=900&q=80', 0),
@@ -531,9 +531,9 @@ DELETE FROM `checkin_like`;
 DELETE FROM `checkin_image`;
 DELETE FROM `checkin`;
 INSERT INTO `checkin` (`id`, `user_id`, `trip_id`, `route_id`, `location_name`, `public_location`, `note`, `like_count`, `status`, `created_at`) VALUES
-  (1, 10021, 1, 1, '渼陂古村', 1, '第一次带孩子来古村，超开心！', 45, 'published', '2026-09-10 11:30:00.000'),
-  (2, 10007, 2, 3, '仙女湖畔', 1, '星空露营太浪漫了', 89, 'published', '2026-09-04 21:30:00.000'),
-  (3, 10063, 3, 6, '广州西关', 1, '跟着行程一路吃到老街深处。', 64, 'published', '2026-09-18 12:00:00.000');
+  (1, 10021, 1, 1, '渼陂古村', 1, '第一次带孩子来古村，超开心！', 0, 'published', '2026-09-10 11:30:00.000'),
+  (2, 10007, 2, 3, '仙女湖畔', 1, '星空露营太浪漫了', 0, 'published', '2026-09-04 21:30:00.000'),
+  (3, 10063, 3, 6, '广州西关', 1, '跟着行程一路吃到老街深处。', 0, 'published', '2026-09-18 12:00:00.000');
 
 INSERT INTO `checkin_image` (`checkin_id`, `url`, `sort_order`) VALUES
   (1, 'https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=900&q=80', 0),

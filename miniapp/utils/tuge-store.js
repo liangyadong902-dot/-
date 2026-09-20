@@ -507,8 +507,6 @@ function mineMenu() {
     rows.push({ key: 'checkins', action: 'checkins', b: '我的打卡', small: '照片 / 海报 / 点赞 ›' })
     rows.push({ key: 'collections', action: 'collections', b: '收藏帖子', small: '保存的社区灵感 ›' })
     rows.push({ key: 'achievements', action: 'achievements', b: '行为成就', small: '查看解锁进度 ›' })
-    rows.push({ key: 'payments', action: 'payments', b: '支付记录', small: '订单流水与退款 ›' })
-    rows.push({ key: 'cart', action: 'cart', b: '购物车', small: '待结算的盲盒 ›' })
   } else {
     rows.push({ key: 'login', action: 'login', b: '登录 / 注册', small: '手机验证码或微信 ›' })
   }
@@ -1487,8 +1485,6 @@ function onMineMenu(action) {
   else if (action === 'checkins') wx.navigateTo({ url: '/pages/checkin/index' })
   else if (action === 'collections') wx.navigateTo({ url: '/pages/community/collections' })
   else if (action === 'achievements') wx.navigateTo({ url: '/pages/achievements/index' })
-  else if (action === 'payments') wx.navigateTo({ url: '/pages/payment-records/index' })
-  else if (action === 'cart') wx.navigateTo({ url: '/pages/cart/index' })
   else if (action === 'logout') logoutUser()
 }
 

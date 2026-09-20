@@ -35,7 +35,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/api/v1/admin/login");
 
         registry.addInterceptor(optionalAuthInterceptor)
-                .addPathPatterns("/api/v1/personality/submit", "/api/v1/ai/chat", "/api/v1/ai/chat/stream");
+                .addPathPatterns("/api/v1/personality/submit", "/api/v1/ai/chat", "/api/v1/ai/chat/stream",
+                        "/api/v1/community/posts", "/api/v1/community/posts/{id}",
+                        "/api/v1/community/posts/{id}/comments", "/api/v1/community/topics",
+                        "/api/v1/community/creators", "/api/v1/checkins/rankings",
+                        "/api/v1/achievements", "/api/v1/achievements/{code}");
 
         // 用户端：仅拦截需要登录的子路径（按需补充）
         registry.addInterceptor(authInterceptor)
@@ -52,18 +56,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/v1/personality/submit",
                         "/api/v1/ai/config",
                         "/api/v1/ai/chat",
-                "/api/v1/ai/chat/stream",
-                "/api/v1/pay/notify/alipay",
-                        "/api/v1/pay/**",
-                        "/api/v1/community/**",
-                        "/api/v1/checkins/**",
-                        "/api/v1/achievements",
-                        "/api/v1/achievements/**"
+                        "/api/v1/ai/chat/stream",
+                        "/api/v1/pay/notify/alipay",
+                        "/api/v1/pay/**"
                 );
-        registry.addInterceptor(optionalAuthInterceptor)
-                .addPathPatterns("/api/v1/community/**", "/api/v1/checkins/**", "/api/v1/achievements", "/api/v1/achievements/**");
     }
-
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping("/**")
