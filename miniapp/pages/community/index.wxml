@@ -1,1 +1,92 @@
-<view class="placeholder">社区 - 功能开发中</view>
+<view class="community-page tab-view active">
+  <view class="community-head">
+    <view class="community-tabs">
+      <view class="community-tab {{view === 'discover' ? 'active' : ''}}" data-view="discover" bindtap="switchView">发现</view>
+      <view class="community-tab {{view === 'following' ? 'active' : ''}}" data-view="following" bindtap="switchView">关注</view>
+      <view class="community-tab {{view === 'topics' ? 'active' : ''}}" data-view="topics" bindtap="switchView">话题</view>
+      <view class="community-tab {{view === 'creators' ? 'active' : ''}}" data-view="creators" bindtap="switchView">达人</view>
+    </view>
+    <view class="community-collection" bindtap="showCollections">★</view>
+  </view>
+
+  <scroll-view wx:if="{{view !== 'topics' && view !== 'creators'}}" class="community-chips" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="community-chips-inner">
+      <view wx:for="{{categories}}" wx:key="key" class="community-chip {{category === item.key ? 'active' : ''}}" data-key="{{item.key}}" data-topic="{{item.topicId}}" bindtap="setCategory">{{item.label}}</view>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{view === 'topics'}}" class="community-board">
+    <view wx:if="{{loading}}" class="community-state"><view class="state-mark">· · ·</view><text>正在翻开话题榜</text></view>
+    <view wx:elif="{{error}}" class="community-state"><view class="state-mark">!</view><text>{{error}}</text><view class="state-button" bindtap="loadAll">重新加载</view></view>
+    <view wx:else class="community-list">
+      <view wx:for="{{topics}}" wx:key="topicId" class="community-row" data-id="{{item.topicId}}" data-name="{{item.name}}" bindtap="enterTopic">
+        <view class="community-row-rank">{{item.rankText}}</view>
+        <view class="community-row-copy"><view class="row-title">#{{item.name}}</view><view class="row-sub">{{item.desc}}</view></view>
+        <view class="row-views">{{item.views}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:elif="{{view === 'creators'}}" class="community-board">
+    <view wx:if="{{loading}}" class="community-state"><view class="state-mark">· · ·</view><text>正在翻开达人榜</text></view>
+    <view wx:elif="{{error}}" class="community-state"><view class="state-mark">!</view><text>{{error}}</text><view class="state-button" bindtap="loadAll">重新加载</view></view>
+    <view wx:elif="{{!creators.length}}" class="community-empty"><view class="empty-title">达人榜还在酝酿</view><view class="empty-text">第一位旅途达人马上就位。</view></view>
+    <view wx:else class="community-list">
+      <view wx:for="{{creators}}" wx:key="userId" class="community-row">
+        <view class="community-row-rank">{{index + 1}}</view>
+        <view class="community-avatar lg">{{item.mark}}</view>
+        <view class="community-row-copy"><view class="row-title">{{item.nickname}}</view><view class="row-sub">{{item.bio}}</view></view>
+        <view class="community-follow {{item.followed ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleFollow">{{item.followed ? '已关注' : '关注'}}</view>
+      </view>
+    </view>
+  </view>
+
+  <block wx:else>
+    <view wx:if="{{loading}}" class="community-state"><view class="state-mark">· · ·</view><text>正在翻开旅途笔记</text></view>
+    <view wx:elif="{{error}}" class="community-state"><view class="state-mark">!</view><text>{{error}}</text><view class="state-button" bindtap="loadAll">重新加载</view></view>
+    <view wx:elif="{{!posts.length}}" class="community-feed">
+      <view class="community-empty">
+        <block wx:if="{{view === 'following'}}">
+          <view class="empty-title">还没有关注的旅途达人</view>
+          <view class="empty-text">去达人榜关注几位同行者，动态会出现在这里。</view>
+          <view class="state-button" bindtap="goCreators">去看达人</view>
+        </block>
+        <block wx:elif="{{view === 'collections'}}">
+          <view class="empty-title">收藏夹还是空的</view>
+          <view class="empty-text">在喜欢的旅途笔记里点收藏，下次找路线更方便。</view>
+          <view class="state-button" bindtap="goDiscover">去发现</view>
+        </block>
+        <block wx:else>
+          <view class="empty-title">这里还没有笔记</view>
+          <view class="empty-text">第一篇旅途笔记，可以从这里开始。</view>
+          <view class="state-button" bindtap="openPublish">写下第一篇</view>
+        </block>
+      </view>
+    </view>
+    <view wx:else class="community-feed">
+      <view wx:for="{{posts}}" wx:key="postId" class="community-card" data-id="{{item.postId}}" bindtap="openPost">
+        <view class="community-card-cover">
+          <image wx:if="{{item.cover}}" class="card-img" src="{{item.cover}}" mode="aspectFill" style="aspect-ratio: 1/{{item.ratio}};" />
+          <view wx:else class="card-img card-img-empty" style="aspect-ratio: 1/{{item.ratio}};">途个好心情</view>
+          <view class="community-card-tag">{{item.tagText}}</view>
+        </view>
+        <view class="community-card-copy">
+          <view class="community-card-title">{{item.title}}</view>
+          <view class="community-card-foot">
+            <view class="community-author">
+              <view class="community-avatar">{{item.authorMark}}</view>
+              <view class="author-name">{{item.author.nickname || '途友'}}</view>
+            </view>
+            <view class="community-like {{item.liked ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleLike">
+              <text class="like-icon">{{item.liked ? '♥' : '♡'}}</text>
+              <text>{{item.likeCount}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <view class="community-compose" bindtap="openPublish">＋ 发布</view>
+  <view class="tab-safe"></view>
+</view>

@@ -1,7 +1,12 @@
 package com.tuge.domain.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tuge.common.exception.BusinessException;
+import com.tuge.common.result.PageResult;
 import com.tuge.common.util.Money;
 import com.tuge.domain.entity.BlindBox;
 import com.tuge.domain.entity.BlindBoxMood;
@@ -29,22 +34,54 @@ public class BlindBoxService {
     private final BlindBoxMapper blindBoxMapper;
     private final BlindBoxMoodMapper moodMapper;
     private final BlindBoxSceneMapper sceneMapper;
+    private final ObjectMapper objectMapper;
 
     public BlindBoxService(BlindBoxMapper blindBoxMapper, BlindBoxMoodMapper moodMapper,
-                           BlindBoxSceneMapper sceneMapper) {
+                           BlindBoxSceneMapper sceneMapper, ObjectMapper objectMapper) {
         this.blindBoxMapper = blindBoxMapper;
         this.moodMapper = moodMapper;
         this.sceneMapper = sceneMapper;
+        this.objectMapper = objectMapper;
     }
 
     /**
      * 上架盲盒列表，可选按分类与心情过滤
      */
     public List<BlindBoxVO> listBoxes(String category, String mood) {
+        LambdaQueryWrapper<BlindBox> wrapper = listQuery(category, mood, null);
+        wrapper.orderByDesc(BlindBox::getSortWeight).orderByAsc(BlindBox::getId);
+        List<BlindBox> rows = blindBoxMapper.selectList(wrapper);
+        return toVOList(rows);
+    }
+
+    public PageResult<BlindBoxVO> listBoxesPage(String category, String mood, String keyword,
+                                                 String sort, long page, long pageSize) {
+        LambdaQueryWrapper<BlindBox> wrapper = listQuery(category, mood, keyword);
+        String order = sort == null || sort.isBlank() ? "default" : sort;
+        switch (order) {
+            case "default" -> wrapper.orderByDesc(BlindBox::getSortWeight).orderByAsc(BlindBox::getId);
+            case "price_asc" -> wrapper.orderByAsc(BlindBox::getPriceCent).orderByAsc(BlindBox::getId);
+            case "price_desc" -> wrapper.orderByDesc(BlindBox::getPriceCent).orderByAsc(BlindBox::getId);
+            case "popular" -> wrapper.orderByDesc(BlindBox::getOpenCount).orderByAsc(BlindBox::getId);
+            default -> throw new BusinessException(400, "排序参数不合法: " + order);
+        }
+        long current = Math.max(1, page);
+        long size = Math.min(100, Math.max(1, pageSize));
+        Page<BlindBox> rows = blindBoxMapper.selectPage(new Page<>(current, size), wrapper);
+        return PageResult.of(toVOList(rows.getRecords()), rows.getTotal(), rows.getCurrent(), rows.getSize());
+    }
+
+    private LambdaQueryWrapper<BlindBox> listQuery(String category, String mood, String keyword) {
         LambdaQueryWrapper<BlindBox> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(BlindBox::getStatus, "on");
         if (category != null && !category.isBlank() && !"all".equalsIgnoreCase(category)) {
             wrapper.eq(BlindBox::getCategory, category);
+        }
+        if (keyword != null && !keyword.isBlank()) {
+            String value = keyword.trim();
+            wrapper.and(query -> query.like(BlindBox::getName, value)
+                    .or().like(BlindBox::getIntro, value)
+                    .or().like(BlindBox::getDescription, value));
         }
         if (mood != null && !mood.isBlank() && !"all".equalsIgnoreCase(mood)) {
             validateMood(mood);
@@ -54,13 +91,13 @@ public class BlindBoxService {
                     .map(BlindBoxMood::getBoxId)
                     .distinct()
                     .toList();
-            if (ids.isEmpty()) {
-                return List.of();
-            }
-            wrapper.in(BlindBox::getId, ids);
+            if (ids.isEmpty()) wrapper.apply("1 = 0");
+            else wrapper.in(BlindBox::getId, ids);
         }
-        wrapper.orderByDesc(BlindBox::getSortWeight).orderByAsc(BlindBox::getId);
-        List<BlindBox> rows = blindBoxMapper.selectList(wrapper);
+        return wrapper;
+    }
+
+    private List<BlindBoxVO> toVOList(List<BlindBox> rows) {
         List<Long> ids = rows.stream().map(BlindBox::getId).toList();
         Map<Long, List<String>> moodMap = loadMoods(ids);
         Map<Long, List<String>> sceneMap = loadScenes(ids);
@@ -70,12 +107,12 @@ public class BlindBoxService {
     }
 
     /**
-     * 上架盲盒详情
+     * 盲盒详情保留历史可见性；下架状态由客户端禁用购买，订单接口再次兜底。
      */
     public BlindBoxVO getBox(Long id) {
         BlindBox box = blindBoxMapper.selectById(id);
-        if (box == null || !"on".equals(box.getStatus())) {
-            throw new BusinessException(404, "盲盒不存在或已下架");
+        if (box == null) {
+            throw new BusinessException(404, "盲盒不存在");
         }
         Map<Long, List<String>> moodMap = loadMoods(List.of(id));
         Map<Long, List<String>> sceneMap = loadScenes(List.of(id));
@@ -116,12 +153,37 @@ public class BlindBoxService {
         vo.setTag(box.getTag());
         vo.setRankTag(box.getRankTag());
         vo.setIntro(box.getIntro());
+        vo.setDescription(box.getDescription());
         vo.setPrice(Money.yuan(box.getPriceCent()));
         vo.setMinValue(Money.yuan(box.getMinValueCent()));
         vo.setCoverUrl(box.getCoverUrl());
+        List<String> imageUrls = readList(box.getImagesJson());
+        vo.setImageUrls(imageUrls.isEmpty() && box.getCoverUrl() != null ? List.of(box.getCoverUrl()) : imageUrls);
         vo.setMoods(moods);
         vo.setScenes(scenes);
+        vo.setIncludes(readList(box.getIncludesJson()));
+        vo.setGuidePreview(readMap(box.getGuidePreviewJson()));
         vo.setStatus(box.getStatus());
+        vo.setOpenCount(box.getOpenCount());
+        vo.setVersion(box.getVersion());
         return vo;
+    }
+
+    private List<String> readList(String json) {
+        if (json == null || json.isBlank()) return List.of();
+        try {
+            return objectMapper.readValue(json, new TypeReference<>() { });
+        } catch (JsonProcessingException e) {
+            return List.of();
+        }
+    }
+
+    private Map<String, Object> readMap(String json) {
+        if (json == null || json.isBlank()) return Map.of();
+        try {
+            return objectMapper.readValue(json, new TypeReference<>() { });
+        } catch (JsonProcessingException e) {
+            return Map.of();
+        }
     }
 }

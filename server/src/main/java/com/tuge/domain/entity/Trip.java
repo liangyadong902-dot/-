@@ -26,6 +26,8 @@ public class Trip {
     private Integer valueCent;
     private String highlight;
     private String includeJson;
+    private String guideSnapshotJson;
+    private Integer guideVersion;
     private String moodText;
     private String badgeName;
     private String validity;

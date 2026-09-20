@@ -17,6 +17,11 @@ const [usersTitle, usersSub] = TITLES.users
 const [statsTitle, statsSub] = TITLES.stats
 const [settingsTitle, settingsSub] = TITLES.settings
 const [tokensTitle, tokensSub] = TITLES.tokens
+const [communityTitle, communitySub] = TITLES.community
+const [commentsTitle, commentsSub] = TITLES.comments
+const [topicsTitle, topicsSub] = TITLES.topics
+const [checkinsTitle, checkinsSub] = TITLES.checkins
+const [achievementsTitle, achievementsSub] = TITLES.achievements
 
 const routes: RouteRecordRaw[] = [
   {
@@ -44,6 +49,11 @@ const routes: RouteRecordRaw[] = [
       { path: '/stats', name: 'Stats', component: () => import('@/views/stats/index.vue'), meta: { title: statsTitle, sub: statsSub } },
       { path: '/tokens', name: 'Tokens', component: () => import('@/views/tokens/index.vue'), meta: { title: tokensTitle, sub: tokensSub } },
       { path: '/settings', name: 'Settings', component: () => import('@/views/settings/index.vue'), meta: { title: settingsTitle, sub: settingsSub } },
+      { path: '/community/posts', name: 'CommunityPosts', component: () => import('@/views/community/posts.vue'), meta: { title: communityTitle, sub: communitySub } },
+      { path: '/community/comments', name: 'CommunityComments', component: () => import('@/views/community/comments.vue'), meta: { title: commentsTitle, sub: commentsSub } },
+      { path: '/community/topics', name: 'CommunityTopics', component: () => import('@/views/community/topics.vue'), meta: { title: topicsTitle, sub: topicsSub } },
+      { path: '/checkins', name: 'Checkins', component: () => import('@/views/checkins/index.vue'), meta: { title: checkinsTitle, sub: checkinsSub } },
+      { path: '/achievements', name: 'Achievements', component: () => import('@/views/achievements/index.vue'), meta: { title: achievementsTitle, sub: achievementsSub } },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: '/dashboard' },

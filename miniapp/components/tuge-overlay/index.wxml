@@ -4,7 +4,7 @@
     <view class="sheet-handle"></view>
     <view class="sheet-head">
       <view class="sheet-title">{{mBoxName}}</view>
-      <view class="sheet-x" bindtap="closeModal">×</view>
+      <view wx:if="{{unboxStep !== 'drawing'}}" class="sheet-x" bindtap="closeModal">×</view>
     </view>
     <view wx:if="{{unboxStep === 'confirm'}}">
       <view class="sheet-img">
@@ -38,14 +38,24 @@
       <view class="btn-block btn-line" bindtap="cancelCurrentOrder">取消订单</view>
       <view class="btn-block btn-line" bindtap="closeModal">稍后再付</view>
     </view>
-    <view wx:elif="{{unboxStep === 'drawing'}}" class="draw-wrap">
-      <view class="pulse-box pulse-icon">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6C7E58" stroke-width="1.6"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13"/></svg>
+    <view wx:elif="{{unboxStep === 'drawing'}}" class="unbox-drawing {{drawAnimating ? 'animating' : ''}}">
+      <view class="unbox-scene">
+        <view class="unbox-rays"><view></view><view></view><view></view><view></view><view></view><view></view></view>
+        <view class="unbox-confetti"><view></view><view></view><view></view><view></view><view></view><view></view></view>
+        <view class="unbox-shadow"></view>
+        <view class="unbox-ticket">
+          <view class="ticket-sm">DESTINATION CARD</view>
+          <view class="ticket-b">路线卡</view>
+          <view class="ticket-sm">途个惊喜</view>
+        </view>
+        <view class="unbox-lid"></view>
+        <view class="unbox-base"><view class="base-brand">途个惊喜</view></view>
       </view>
-      <view class="h4 serif">小途正在拆开纸盒…</view>
-      <view class="muted-center draw">保底线路匹配中</view>
+      <view class="draw-title">正在开启你的旅行盲盒</view>
+      <view class="draw-status">{{drawStatusText}}</view>
+      <view class="draw-progress"><view class="draw-progress-bar"></view></view>
     </view>
-    <view wx:else>
+    <view wx:else class="reveal-in">
       <view class="sheet-img sm">
         <image src="{{mResImg}}" mode="aspectFill" style="width:100%;height:100%;" />
       </view>

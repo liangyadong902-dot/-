@@ -21,6 +21,10 @@ public class PageResult<T> implements Serializable {
     private long page;
     private long pageSize;
 
+    public boolean isHasMore() {
+        return page * pageSize < total;
+    }
+
     public static <T> PageResult<T> of(List<T> list, long total, long page, long pageSize) {
         PageResult<T> r = new PageResult<>();
         r.setList(list == null ? Collections.emptyList() : list);

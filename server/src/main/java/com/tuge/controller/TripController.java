@@ -5,6 +5,7 @@ import com.tuge.common.result.PageResult;
 import com.tuge.common.result.Result;
 import com.tuge.domain.service.TripService;
 import com.tuge.domain.service.AiDiaryService;
+import com.tuge.domain.service.CheckinService;
 import com.tuge.domain.vo.DiaryResultVO;
 import com.tuge.domain.vo.TripVO;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,15 +15,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1/trips")
 public class TripController {
     private final TripService tripService;
     private final AiDiaryService aiDiaryService;
+    private final CheckinService checkinService;
 
-    public TripController(TripService tripService, AiDiaryService aiDiaryService) {
+    public TripController(TripService tripService, AiDiaryService aiDiaryService, CheckinService checkinService) {
         this.tripService = tripService;
         this.aiDiaryService = aiDiaryService;
+        this.checkinService = checkinService;
     }
 
     @GetMapping
@@ -37,8 +42,18 @@ public class TripController {
         return Result.success(tripService.detail(JwtContext.getUserId(), id));
     }
 
+    @GetMapping("/{id}/guide")
+    public Result<Map<String, Object>> guide(@PathVariable Long id) {
+        return Result.success(tripService.guide(JwtContext.getUserId(), id));
+    }
+
     @PostMapping("/{id}/diary")
     public Result<DiaryResultVO> diary(@PathVariable Long id) {
         return Result.success(aiDiaryService.generate(JwtContext.getUserId(), id));
+    }
+
+    @GetMapping("/{id}/checkin-eligibility")
+    public Result<CheckinService.CheckinEligibility> checkinEligibility(@PathVariable Long id) {
+        return Result.success(checkinService.eligibility(JwtContext.getUserId(), id));
     }
 }

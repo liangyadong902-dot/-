@@ -1,0 +1,2 @@
+const api = require('../../services/api')
+Page({ data:{ list:[],loading:true,error:'' }, onShow(){this.load()}, async load(){this.setData({loading:true});try{const list=await api.listMyAchievements();this.setData({list:list||[],loading:false})}catch(e){this.setData({loading:false,error:'成就加载失败'})}}, openDetail(e){wx.navigateTo({url:'/pages/achievements/detail?code='+e.currentTarget.dataset.code})}, check(){api.checkAchievements().then((list)=>{if(list&&list.length) wx.showToast({title:'有新的成就解锁',icon:'none'});this.load()}).catch(()=>{})} })

@@ -1275,6 +1275,67 @@
       50% { transform: scale(0.96); opacity: 0.75; }
     }
     .pulse-box { animation: pulseBox 1s ease-in-out infinite; }
+
+    /* 开盒：纸盒摇动、盒盖弹开、路线卡揭晓（原型 390px → 750rpx） */
+    .unbox-drawing { padding: 26.92rpx 0 15.38rpx; text-align: center; overflow: hidden; }
+    .unbox-scene { position: relative; height: 423.08rpx; max-width: 596.15rpx; margin: 0 auto; perspective: 1346.15rpx; }
+    .unbox-shadow { position: absolute; left: 50%; bottom: 46.15rpx; width: 288.46rpx; height: 28.85rpx; transform: translateX(-50%); border-radius: 50%; background: rgba(60,52,44,.13); filter: blur(9.62rpx); }
+    .unbox-base {
+      position: absolute; left: 50%; bottom: 67.31rpx; width: 242.31rpx; height: 176.92rpx; transform: translateX(-50%);
+      background: var(--sage); border: 3.85rpx solid var(--ink); border-radius: 15.38rpx 15.38rpx 26.92rpx 26.92rpx;
+      box-shadow: inset 0 -17.31rpx 0 rgba(60,52,44,.08), 0 19.23rpx 34.62rpx rgba(60,52,44,.13);
+    }
+    .unbox-base::before { content: ''; position: absolute; left: 105.77rpx; top: 0; bottom: 0; width: 26.92rpx; background: var(--cream-2); border-left: 2.88rpx solid var(--ink); border-right: 2.88rpx solid var(--ink); }
+    .unbox-base .base-brand { position: absolute; left: 0; right: 0; bottom: 19.23rpx; font-family: "Noto Serif SC", "Songti SC", serif; font-size: 19.23rpx; font-weight: 900; color: #fff; letter-spacing: .08em; }
+    .unbox-lid {
+      position: absolute; left: 50%; bottom: 228.85rpx; width: 273.08rpx; height: 57.69rpx; transform: translateX(-50%); transform-origin: 34.62rpx 50rpx;
+      background: var(--sage-soft); border: 3.85rpx solid var(--ink); border-radius: 15.38rpx 15.38rpx 9.62rpx 9.62rpx; z-index: 5;
+    }
+    .unbox-lid::before { content: ''; position: absolute; left: 119.23rpx; top: -3.85rpx; width: 26.92rpx; height: 57.69rpx; background: var(--cream-2); border-left: 2.88rpx solid var(--ink); border-right: 2.88rpx solid var(--ink); }
+    .unbox-ticket {
+      position: absolute; left: 50%; bottom: 128.85rpx; z-index: 3; width: 180.77rpx; height: 226.92rpx; padding: 23.08rpx 15.38rpx; box-sizing: border-box;
+      transform: translateX(-50%) translateY(111.54rpx) rotate(-2deg); opacity: 0;
+      background: var(--paper); border: 2.88rpx solid var(--ink); border-radius: 15.38rpx; box-shadow: 7.69rpx 11.54rpx 0 rgba(60,52,44,.1);
+    }
+    .unbox-ticket::after { content: ''; position: absolute; left: 19.23rpx; right: 19.23rpx; top: 71.15rpx; height: 0; border-top: 1.92rpx dashed var(--sage); }
+    .unbox-ticket .ticket-b { display: block; margin-top: 51.92rpx; font-family: "Noto Serif SC", "Songti SC", serif; font-size: 26.92rpx; font-weight: 700; color: var(--sage-deep); }
+    .unbox-ticket .ticket-sm { display: block; margin-top: 11.54rpx; color: var(--muted); font-size: 15.38rpx; letter-spacing: .08em; }
+    .unbox-rays view { position: absolute; left: 50%; bottom: 234.62rpx; width: 3.85rpx; height: 88.46rpx; background: var(--sage); transform-origin: 50% 134.62rpx; opacity: 0; }
+    .unbox-rays view:nth-child(1) { transform: rotate(-68deg); }
+    .unbox-rays view:nth-child(2) { transform: rotate(-43deg); }
+    .unbox-rays view:nth-child(3) { transform: rotate(-20deg); }
+    .unbox-rays view:nth-child(4) { transform: rotate(20deg); }
+    .unbox-rays view:nth-child(5) { transform: rotate(43deg); }
+    .unbox-rays view:nth-child(6) { transform: rotate(68deg); }
+    .unbox-confetti view { position: absolute; left: 50%; top: 138.46rpx; width: 13.46rpx; height: 25rpx; border-radius: 3.85rpx; opacity: 0; }
+    .unbox-confetti view:nth-child(1) { margin-left: -176.92rpx; background: var(--blush); }
+    .unbox-confetti view:nth-child(2) { margin-left: -105.77rpx; background: var(--sage); }
+    .unbox-confetti view:nth-child(3) { margin-left: -34.62rpx; background: #D7B86B; }
+    .unbox-confetti view:nth-child(4) { margin-left: 51.92rpx; background: var(--sage-soft); }
+    .unbox-confetti view:nth-child(5) { margin-left: 123.08rpx; background: var(--blush); }
+    .unbox-confetti view:nth-child(6) { margin-left: 180.77rpx; background: #D7B86B; }
+    .unbox-drawing.animating .unbox-base { animation: unboxShake .7s ease .12s both, unboxSettle .45s ease 1.95s both; }
+    .unbox-drawing.animating .unbox-lid { animation: lidOpen 1s cubic-bezier(.2,.8,.2,1) .65s both; }
+    .unbox-drawing.animating .unbox-ticket { animation: ticketReveal 1.25s cubic-bezier(.16,1,.3,1) 1.02s both; }
+    .unbox-drawing.animating .unbox-rays view { animation: rayFlash .9s ease 1s both; }
+    .unbox-drawing.animating .unbox-confetti view:nth-child(odd) { animation: confettiLeft 1.45s ease-out .82s both; }
+    .unbox-drawing.animating .unbox-confetti view:nth-child(even) { animation: confettiRight 1.45s ease-out .9s both; }
+    .draw-title { margin-top: 0; font-family: "Noto Serif SC", "Songti SC", serif; font-size: 32.69rpx; font-weight: 700; color: var(--ink); }
+    .draw-status { min-height: 34.62rpx; margin-top: 9.62rpx; color: var(--muted); font-size: 20.19rpx; transition: opacity .18s ease; }
+    .draw-progress { width: 346.15rpx; height: 7.69rpx; margin: 21.15rpx auto 0; border-radius: 99rpx; overflow: hidden; background: var(--line); }
+    .draw-progress-bar { display: block; width: 0; height: 100%; border-radius: 99rpx; background: var(--sage-deep); }
+    .unbox-drawing.animating .draw-progress-bar { animation: drawProgress 2.65s linear both; }
+    .reveal-in { animation: resultReveal .5s cubic-bezier(.16,1,.3,1) both; }
+    @keyframes unboxShake { 0%,100% { transform: translateX(-50%) rotate(0); } 20% { transform: translateX(-50%) rotate(-4deg); } 40% { transform: translateX(-50%) rotate(4deg); } 60% { transform: translateX(-50%) rotate(-3deg); } 80% { transform: translateX(-50%) rotate(3deg); } }
+    @keyframes unboxSettle { 50% { transform: translateX(-50%) translateY(-11.54rpx); } 100% { transform: translateX(-50%) translateY(0); } }
+    @keyframes lidOpen { 0% { transform: translateX(-50%) rotate(0); } 55% { transform: translateX(-50%) translateY(-92.31rpx) rotate(-13deg); } 100% { transform: translateX(-50%) translate(-123.08rpx,-105.77rpx) rotate(-28deg); } }
+    @keyframes ticketReveal { 0% { transform: translateX(-50%) translateY(111.54rpx) rotate(-2deg); opacity: 0; } 35% { opacity: 1; } 75% { transform: translateX(-50%) translateY(-51.92rpx) rotate(2deg); opacity: 1; } 100% { transform: translateX(-50%) translateY(-38.46rpx) rotate(0); opacity: 1; } }
+    @keyframes rayFlash { 0% { opacity: 0; height: 15.38rpx; } 45% { opacity: .8; height: 88.46rpx; } 100% { opacity: 0; height: 111.54rpx; } }
+    @keyframes confettiLeft { 0% { opacity: 0; transform: translate(0,38.46rpx) rotate(0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(-65.38rpx,226.92rpx) rotate(230deg); } }
+    @keyframes confettiRight { 0% { opacity: 0; transform: translate(0,38.46rpx) rotate(0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(57.69rpx,234.62rpx) rotate(-250deg); } }
+    @keyframes drawProgress { to { width: 100%; } }
+    @keyframes resultReveal { from { opacity: 0; transform: translateY(26.92rpx) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
   
     .status-bar, .home-indicator { display: none; }
 

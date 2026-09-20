@@ -55,6 +55,11 @@ export const PAGE_PATH: Record<string, string> = {
   users: '/users',
   settings: '/settings',
   tokens: '/tokens',
+  community: '/community/posts',
+  comments: '/community/comments',
+  topics: '/community/topics',
+  checkins: '/checkins',
+  achievements: '/achievements',
 }
 
 export const PATH_PAGE: Record<string, string> = Object.fromEntries(
@@ -76,6 +81,11 @@ export const TITLES: Record<string, [string, string]> = {
   stats: ['数据统计', '支付成功且未退款才计入成交'],
   settings: ['系统设置', '规则文案、等级、公益与账号'],
   tokens: ['视觉规范', '完全复刻烘焙店参考图的奶油与鼠尾草'],
+  community: ['社区帖子', '审核、精选与下架'],
+  comments: ['社区评论', '上下文处理与隐藏恢复'],
+  topics: ['社区话题', '话题运营与引用检查'],
+  checkins: ['打卡审核', '公开内容与异常记录'],
+  achievements: ['行为成就', '服务端计算与规则配置'],
 }
 
 export interface NavItem {
@@ -125,6 +135,16 @@ export const NAV: NavGroup[] = [
   {
     g: '客人',
     items: [{ id: 'users', name: '用户管理', path: '/users', icon: 'user' }],
+  },
+  {
+    g: '社区',
+    items: [
+      { id: 'community', name: '帖子审核', path: '/community/posts', icon: 'user' },
+      { id: 'comments', name: '评论处理', path: '/community/comments', icon: 'ai' },
+      { id: 'topics', name: '话题管理', path: '/community/topics', icon: 'banner' },
+      { id: 'checkins', name: '打卡审核', path: '/checkins', icon: 'trip' },
+      { id: 'achievements', name: '行为成就', path: '/achievements', icon: 'badge' },
+    ],
   },
   {
     g: '后场',

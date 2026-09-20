@@ -20,6 +20,21 @@ USE `tuge`;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS `achievement_event`;
+DROP TABLE IF EXISTS `checkin_like`;
+DROP TABLE IF EXISTS `checkin_image`;
+DROP TABLE IF EXISTS `post_collect`;
+DROP TABLE IF EXISTS `post_like`;
+DROP TABLE IF EXISTS `post_comment`;
+DROP TABLE IF EXISTS `post_image`;
+DROP TABLE IF EXISTS `user_follow`;
+DROP TABLE IF EXISTS `user_topic_follow`;
+DROP TABLE IF EXISTS `community_post`;
+DROP TABLE IF EXISTS `topic`;
+DROP TABLE IF EXISTS `user_achievement`;
+DROP TABLE IF EXISTS `achievement`;
+DROP TABLE IF EXISTS `checkin`;
+DROP TABLE IF EXISTS `blind_box_prize`;
 DROP TABLE IF EXISTS `admin_audit_log`;
 DROP TABLE IF EXISTS `admin_user`;
 DROP TABLE IF EXISTS `sys_config`;
@@ -44,9 +59,15 @@ DROP TABLE IF EXISTS `user_badge`;
 DROP TABLE IF EXISTS `badge`;
 DROP TABLE IF EXISTS `travel_route`;
 DROP TABLE IF EXISTS `blind_box_scene`;
+DROP TABLE IF EXISTS `cart_item`;
 DROP TABLE IF EXISTS `blind_box_mood`;
 DROP TABLE IF EXISTS `blind_box`;
 DROP TABLE IF EXISTS `app_user`;
+DROP TABLE IF EXISTS `user_coupon`;
+DROP TABLE IF EXISTS `coupon`;
+DROP TABLE IF EXISTS `partner`;
+DROP TABLE IF EXISTS `point_log`;
+DROP TABLE IF EXISTS `user_point`;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -72,6 +93,7 @@ CREATE TABLE `app_user` (
   `last_login_at`    DATETIME(3)      DEFAULT NULL COMMENT '最近一次鉴权成功',
   `last_active_at`   DATETIME(3)      DEFAULT NULL COMMENT '最近一次关键行为，用于 DAU',
   `cs_note`          VARCHAR(500)     DEFAULT NULL COMMENT '客服备注，用户不可见',
+  `version`          INT UNSIGNED     NOT NULL DEFAULT 0 COMMENT '资料乐观锁版本',
   `created_at`       DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   `updated_at`       DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
@@ -81,6 +103,20 @@ CREATE TABLE `app_user` (
   KEY `idx_last_active`    (`last_active_at`),
   KEY `idx_channel`        (`register_channel`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户';
+
+CREATE TABLE `cart_item` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT UNSIGNED NOT NULL,
+  `box_id` BIGINT UNSIGNED NOT NULL,
+  `quantity` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  `selected` TINYINT(1) NOT NULL DEFAULT 1,
+  `version` INT UNSIGNED NOT NULL DEFAULT 0,
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_cart_user_box` (`user_id`, `box_id`),
+  KEY `idx_cart_user` (`user_id`, `selected`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='购物车';
 
 
 -- ═══════════════════════════════════════════════════════
@@ -93,12 +129,17 @@ CREATE TABLE `blind_box` (
   `tag`             VARCHAR(32)     NOT NULL COMMENT '展示标签，如「周边游」',
   `rank_tag`        VARCHAR(8)      DEFAULT NULL COMMENT '角标 TOP1 / HOT / NEW，空则不显示',
   `intro`           VARCHAR(255)    NOT NULL COMMENT '一句话卖点',
+  `description`     TEXT            DEFAULT NULL COMMENT '商品详情完整描述',
   `price_cent`      INT UNSIGNED    NOT NULL COMMENT '售价（分）',
   `min_value_cent`  INT UNSIGNED    NOT NULL COMMENT '保底票面价值（分）',
   `cover_url`       VARCHAR(512)    DEFAULT NULL COMMENT '封面图',
+  `images_json`     JSON            DEFAULT NULL COMMENT '详情轮播图 URL 数组',
+  `includes_json`   JSON            DEFAULT NULL COMMENT '商品承诺服务内容快照模板',
+  `guide_preview_json` JSON         DEFAULT NULL COMMENT '开盒前攻略预览',
   `sort_weight`     INT             NOT NULL DEFAULT 0 COMMENT '越大越靠前',
   `status`          VARCHAR(8)      NOT NULL DEFAULT 'on' COMMENT 'on / off',
   `open_count`      INT UNSIGNED    NOT NULL DEFAULT 0 COMMENT '开盒次数冗余计数，可重建（见数据库设计 §7）',
+  `version`         INT UNSIGNED    NOT NULL DEFAULT 0 COMMENT '乐观锁版本',
   `created_at`      DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   `updated_at`      DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
@@ -135,6 +176,8 @@ CREATE TABLE `travel_route` (
   `badge_id`    BIGINT UNSIGNED NOT NULL COMMENT '开盒解锁徽章',
   `highlight`   TEXT            NOT NULL COMMENT '线路亮点',
   `include_json` JSON           NOT NULL COMMENT '服务包含字符串数组',
+  `guide_json`   JSON           DEFAULT NULL COMMENT '完整攻略模板，开盒时复制到 trip',
+  `guide_version` INT UNSIGNED  NOT NULL DEFAULT 1 COMMENT '攻略模板版本',
   `mood_text`   VARCHAR(255)    NOT NULL COMMENT '开盒结果页情绪文案',
   `status`      VARCHAR(8)      NOT NULL DEFAULT 'on' COMMENT 'on / off',
   `draw_count`  INT UNSIGNED    NOT NULL DEFAULT 0 COMMENT '被抽中次数冗余计数，可重建',
@@ -301,6 +344,8 @@ CREATE TABLE `trip` (
   `value_cent`   INT UNSIGNED    NOT NULL COMMENT '票面快照（分）',
   `highlight`    TEXT            NOT NULL COMMENT '亮点快照',
   `include_json` JSON            NOT NULL COMMENT '服务包含快照',
+  `guide_snapshot_json` JSON     DEFAULT NULL COMMENT '开盒时完整攻略快照',
+  `guide_version` INT UNSIGNED   NOT NULL DEFAULT 1 COMMENT '攻略快照版本',
   `mood_text`    VARCHAR(255)    NOT NULL COMMENT '情绪文案快照',
   `badge_name`   VARCHAR(32)     NOT NULL COMMENT '解锁徽章名快照',
   `validity`     VARCHAR(16)     NOT NULL DEFAULT 'valid' COMMENT 'valid / invalid（退款后）',
@@ -602,21 +647,39 @@ CREATE TABLE `blind_box_prize` (
 -- ═══════════════════════════════════════════════════════
 CREATE TABLE `checkin` (
   `id`               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `user_id`         BIGINT UNSIGNED NOT NULL COMMENT '打卡用户',
-  `route_id`        BIGINT UNSIGNED DEFAULT NULL COMMENT '关联线路/景点',
-  `location`        VARCHAR(200)     DEFAULT NULL COMMENT '打卡地点描述',
-  `latitude`        DECIMAL(10,7)    DEFAULT NULL COMMENT '纬度',
-  `longitude`       DECIMAL(11,7)    DEFAULT NULL COMMENT '经度',
-  `photo_url`       VARCHAR(500)     DEFAULT NULL COMMENT '打卡照片URL',
-  `note`            VARCHAR(500)     DEFAULT NULL COMMENT '打卡备注',
-  `share_poster_url` VARCHAR(500)    DEFAULT NULL COMMENT '生成的分享海报URL',
-  `like_count`      INT UNSIGNED     NOT NULL DEFAULT 0 COMMENT '点赞数',
-  `created_at`      DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `user_id`          BIGINT UNSIGNED NOT NULL COMMENT '打卡用户',
+  `trip_id`          BIGINT UNSIGNED NOT NULL COMMENT '本人有效行程',
+  `route_id`         BIGINT UNSIGNED NOT NULL COMMENT '行程对应线路',
+  `location_name`    VARCHAR(100)     NOT NULL COMMENT '公开的模糊地点描述',
+  `public_location`  TINYINT          NOT NULL DEFAULT 0 COMMENT '是否公开地点',
+  `latitude`         DECIMAL(10,7)    DEFAULT NULL COMMENT '纬度，仅管理端可见',
+  `longitude`        DECIMAL(11,7)    DEFAULT NULL COMMENT '经度，仅管理端可见',
+  `note`             VARCHAR(500)     DEFAULT NULL COMMENT '打卡备注',
+  `poster_url`       VARCHAR(500)     DEFAULT NULL COMMENT '分享海报 URL',
+  `status`           VARCHAR(16)      NOT NULL DEFAULT 'published' COMMENT 'published / hidden / deleted',
+  `like_count`       INT UNSIGNED     NOT NULL DEFAULT 0 COMMENT '点赞数',
+  `version`          INT UNSIGNED     NOT NULL DEFAULT 0 COMMENT '乐观锁',
+  `created_at`       DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at`       DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_trip` (`user_id`, `trip_id`),
   KEY `idx_user`   (`user_id`, `created_at`),
   KEY `idx_route`  (`route_id`),
-  KEY `idx_location` (`location`)
+  KEY `idx_location` (`location_name`),
+  KEY `idx_status_created` (`status`, `created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='景点打卡记录';
+
+CREATE TABLE `checkin_image` (
+  `id`         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `checkin_id` BIGINT UNSIGNED NOT NULL,
+  `url`        VARCHAR(500)     NOT NULL,
+  `width`      INT UNSIGNED     DEFAULT NULL,
+  `height`     INT UNSIGNED     DEFAULT NULL,
+  `sort_order` INT              NOT NULL DEFAULT 0,
+  `created_at` DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `idx_checkin_sort` (`checkin_id`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='打卡图片';
 
 
 -- ═══════════════════════════════════════════════════════
@@ -635,6 +698,7 @@ CREATE TABLE `achievement` (
   `level`             INT              NOT NULL DEFAULT 1 COMMENT '成就等级：1-青铜 2-白银 3-黄金 4-钻石 5-王者',
   `sort_weight`       INT              NOT NULL DEFAULT 0 COMMENT '排序权重',
   `status`            VARCHAR(8)       NOT NULL DEFAULT 'on' COMMENT 'on / off',
+  `version`           INT UNSIGNED     NOT NULL DEFAULT 0 COMMENT '乐观锁',
   `created_at`        DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   `updated_at`        DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
@@ -655,6 +719,7 @@ CREATE TABLE `user_achievement` (
   `unlocked`      TINYINT         NOT NULL DEFAULT 0 COMMENT '是否已解锁：0-进行中 1-已解锁',
   `unlocked_at`   DATETIME(3)      DEFAULT NULL COMMENT '解锁时间',
   `reward_sent`   TINYINT          NOT NULL DEFAULT 0 COMMENT '奖励是否已发放',
+  `version`       INT UNSIGNED     NOT NULL DEFAULT 0 COMMENT '乐观锁',
   `created_at`    DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   `updated_at`    DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
@@ -668,11 +733,14 @@ CREATE TABLE `user_achievement` (
 -- ═══════════════════════════════════════════════════════
 CREATE TABLE `community_post` (
   `id`                  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `user_id`            BIGINT UNSIGNED NOT NULL COMMENT '发帖用户',
-  `content`            TEXT            NOT NULL COMMENT '帖子内容',
-  `images`             VARCHAR(2000)   DEFAULT NULL COMMENT '多图URL，逗号分隔',
-  `topic`              VARCHAR(50)     DEFAULT NULL COMMENT '话题标签，如：周末去哪儿',
-  `location_tag`       VARCHAR(100)    DEFAULT NULL COMMENT '地点标签',
+  `user_id`             BIGINT UNSIGNED NOT NULL COMMENT '发帖用户',
+  `title`               VARCHAR(30)     NOT NULL COMMENT '帖子标题',
+  `content`             VARCHAR(500)    NOT NULL COMMENT '帖子内容',
+  `topic_id`            BIGINT UNSIGNED DEFAULT NULL COMMENT '启用话题 ID',
+  `location_name`       VARCHAR(100)    DEFAULT NULL COMMENT '公开的模糊地点',
+  `public_location`     TINYINT          NOT NULL DEFAULT 0,
+  `latitude`            DECIMAL(10,7)    DEFAULT NULL COMMENT '仅管理端可见',
+  `longitude`           DECIMAL(11,7)    DEFAULT NULL COMMENT '仅管理端可见',
   `linked_blind_box_id` BIGINT UNSIGNED DEFAULT NULL COMMENT '关联盲盒ID',
   `linked_checkin_id`  BIGINT UNSIGNED  DEFAULT NULL COMMENT '关联打卡ID',
   `linked_trip_id`     BIGINT UNSIGNED  DEFAULT NULL COMMENT '关联行程ID',
@@ -680,35 +748,71 @@ CREATE TABLE `community_post` (
   `comment_count`      INT UNSIGNED     NOT NULL DEFAULT 0 COMMENT '评论数',
   `share_count`        INT UNSIGNED     NOT NULL DEFAULT 0 COMMENT '分享数',
   `collect_count`      INT UNSIGNED     NOT NULL DEFAULT 0 COMMENT '收藏数',
-  `status`             VARCHAR(8)       NOT NULL DEFAULT 'on' COMMENT 'on-正常 / off-下架 / deleted-已删除',
+  `status`             VARCHAR(16)      NOT NULL DEFAULT 'review' COMMENT 'review / published / featured / down / deleted',
+  `featured_at`        DATETIME(3)      DEFAULT NULL,
+  `reviewed_by`        BIGINT UNSIGNED  DEFAULT NULL,
+  `review_reason`      VARCHAR(255)     DEFAULT NULL,
+  `version`            INT UNSIGNED     NOT NULL DEFAULT 0 COMMENT '乐观锁',
   `created_at`         DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   `updated_at`         DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
   KEY `idx_user`      (`user_id`, `status`, `created_at`),
-  KEY `idx_topic`     (`topic`, `created_at`),
+  KEY `idx_topic`     (`topic_id`, `status`, `created_at`),
   KEY `idx_like`      (`like_count`, `created_at`),
-  KEY `idx_location`  (`location_tag`),
+  KEY `idx_location`  (`location_name`),
   KEY `idx_box`       (`linked_blind_box_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='社区帖子';
 
+CREATE TABLE `post_image` (
+  `id`         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `post_id`    BIGINT UNSIGNED NOT NULL,
+  `url`        VARCHAR(500)     NOT NULL,
+  `width`      INT UNSIGNED     DEFAULT NULL,
+  `height`     INT UNSIGNED     DEFAULT NULL,
+  `sort_order` INT              NOT NULL DEFAULT 0,
+  `created_at` DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `idx_post_sort` (`post_id`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='帖子图片';
+
 
 -- ═══════════════════════════════════════════════════════
--- N+6 帖子互动（点赞/评论/收藏）
+-- N+6 帖子评论、点赞和收藏
 -- ═══════════════════════════════════════════════════════
-CREATE TABLE `post_interaction` (
-  `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `post_id`         BIGINT UNSIGNED NOT NULL COMMENT '关联帖子',
-  `user_id`         BIGINT UNSIGNED NOT NULL COMMENT '互动用户',
-  `type`            VARCHAR(16)      NOT NULL COMMENT 'like-点赞 / comment-评论 / collect-收藏 / share-分享',
-  `comment_content` VARCHAR(500)     DEFAULT NULL COMMENT '评论内容',
-  `parent_id`       BIGINT UNSIGNED  DEFAULT NULL COMMENT '回复目标互动ID',
-  `created_at`      DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+CREATE TABLE `post_comment` (
+  `id`               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `post_id`          BIGINT UNSIGNED NOT NULL,
+  `user_id`          BIGINT UNSIGNED NOT NULL,
+  `parent_id`        BIGINT UNSIGNED DEFAULT NULL,
+  `reply_to_user_id` BIGINT UNSIGNED DEFAULT NULL,
+  `content`          VARCHAR(500)    NOT NULL,
+  `status`           VARCHAR(16)     NOT NULL DEFAULT 'published' COMMENT 'published / hidden / deleted',
+  `reviewed_by`      BIGINT UNSIGNED DEFAULT NULL,
+  `review_reason`    VARCHAR(255)    DEFAULT NULL,
+  `version`          INT UNSIGNED    NOT NULL DEFAULT 0,
+  `created_at`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at`       DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
-  -- 同一用户对同一帖子只能点赞/收藏一次
-  UNIQUE KEY `uk_post_user_collect` (`post_id`, `user_id`, `type`),
-  KEY `idx_post`    (`post_id`, `type`),
-  KEY `idx_user`    (`user_id`, `created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='帖子互动（点赞/评论/收藏/分享）';
+  KEY `idx_post_status` (`post_id`, `status`, `created_at`),
+  KEY `idx_parent` (`parent_id`, `created_at`),
+  KEY `idx_user` (`user_id`, `created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='帖子评论与回复';
+
+CREATE TABLE `post_like` (
+  `post_id` BIGINT UNSIGNED NOT NULL,
+  `user_id` BIGINT UNSIGNED NOT NULL,
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`post_id`, `user_id`),
+  KEY `idx_user_created` (`user_id`, `created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='帖子点赞';
+
+CREATE TABLE `post_collect` (
+  `post_id` BIGINT UNSIGNED NOT NULL,
+  `user_id` BIGINT UNSIGNED NOT NULL,
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`post_id`, `user_id`),
+  KEY `idx_user_created` (`user_id`, `created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='帖子收藏';
 
 
 -- ═══════════════════════════════════════════════════════
@@ -799,9 +903,10 @@ CREATE TABLE `topic` (
   `description`   VARCHAR(255)     DEFAULT NULL COMMENT '话题描述',
   `post_count`    INT UNSIGNED     NOT NULL DEFAULT 0 COMMENT '帖子数量',
   `follow_count`  INT UNSIGNED     NOT NULL DEFAULT 0 COMMENT '关注人数',
-  `热度权重`      INT              NOT NULL DEFAULT 0 COMMENT '热度计算权重',
+  `heat_weight`   INT              NOT NULL DEFAULT 0 COMMENT '热度计算权重',
   `status`        VARCHAR(8)       NOT NULL DEFAULT 'on' COMMENT 'on / off',
   `sort_weight`   INT              NOT NULL DEFAULT 0 COMMENT '排序',
+  `version`       INT UNSIGNED     NOT NULL DEFAULT 0 COMMENT '乐观锁',
   `created_at`    DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   `updated_at`    DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
@@ -823,6 +928,16 @@ CREATE TABLE `user_topic_follow` (
   KEY `idx_topic` (`topic_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户话题关注';
 
+CREATE TABLE `user_follow` (
+  `id`               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `follower_user_id` BIGINT UNSIGNED NOT NULL,
+  `followed_user_id` BIGINT UNSIGNED NOT NULL,
+  `created_at`       DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_follower_followed` (`follower_user_id`, `followed_user_id`),
+  KEY `idx_followed_created` (`followed_user_id`, `created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户单向关注';
+
 
 -- ═══════════════════════════════════════════════════════
 -- N+12 打卡点赞（独立表，便于统计）
@@ -835,6 +950,17 @@ CREATE TABLE `checkin_like` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_checkin_user` (`checkin_id`, `user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='打卡点赞';
+
+CREATE TABLE `achievement_event` (
+  `id`           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id`      BIGINT UNSIGNED NOT NULL,
+  `event_type`   VARCHAR(32)     NOT NULL,
+  `biz_type`     VARCHAR(32)     NOT NULL,
+  `biz_id`       BIGINT UNSIGNED NOT NULL,
+  `processed_at` DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_event` (`user_id`, `event_type`, `biz_type`, `biz_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='成就幂等事件';
 
 
 -- ═══════════════════════════════════════════════════════

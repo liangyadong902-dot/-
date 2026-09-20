@@ -8,6 +8,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 
 /**
  * Web MVC 配置：拦截器注册 + 跨域。
@@ -51,10 +52,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/v1/personality/submit",
                         "/api/v1/ai/config",
                         "/api/v1/ai/chat",
-                        "/api/v1/ai/chat/stream",
-                        "/api/v1/pay/notify/alipay",
-                        "/api/v1/pay/**"
+                "/api/v1/ai/chat/stream",
+                "/api/v1/pay/notify/alipay",
+                        "/api/v1/pay/**",
+                        "/api/v1/community/**",
+                        "/api/v1/checkins/**",
+                        "/api/v1/achievements",
+                        "/api/v1/achievements/**"
                 );
+        registry.addInterceptor(optionalAuthInterceptor)
+                .addPathPatterns("/api/v1/community/**", "/api/v1/checkins/**", "/api/v1/achievements", "/api/v1/achievements/**");
     }
 
     @Override
@@ -65,5 +72,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(3600);
+    }
+
+    @Override
+    public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
+        String uploadRoot = "file:" + System.getProperty("java.io.tmpdir") + "/tuge-uploads/";
+        registry.addResourceHandler("/uploads/**").addResourceLocations(uploadRoot);
     }
 }

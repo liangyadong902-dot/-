@@ -1,6 +1,7 @@
 package com.tuge.domain.dto;
 
 import java.util.List;
+import java.util.Map;
 
 public record RouteUpsertRequest(
         String name,
@@ -12,6 +13,8 @@ public record RouteUpsertRequest(
         Long badgeId,
         String highlight,
         List<String> includes,
+        Map<String, Object> guide,
+        Integer guideVersion,
         String moodText,
         String status) {
 }

@@ -32,10 +32,14 @@ tags:
   - name: 用户端-订单与支付
   - name: 用户端-行程与我的
   - name: 用户端-AI
+  - name: 用户端-社区
+  - name: 用户端-打卡
+  - name: 用户端-成就
   - name: 管理端-鉴权
   - name: 管理端-配置
   - name: 管理端-订单支付用户
   - name: 管理端-工作台与统计
+  - name: 管理端-社区
   - name: 支付回调
     description: 第三方异步通知，不走统一响应体
 
@@ -235,6 +239,8 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/UserProfile'
+    patch:
+      $ref: '#/paths/~1api~1v1~1me/put'
 
   /api/v1/me/bind-phone:
     post:
@@ -866,8 +872,340 @@ paths:
                         $ref: '#/components/schemas/UserStats'
 
   # ═══════════════════════════════════════════════════════
+  # 用户端 · 社区 / 打卡 / 成就
+  # ═══════════════════════════════════════════════════════
+  /api/v1/community/posts:
+    get:
+      tags: [用户端-社区]
+      security: []
+      parameters:
+        - { name: view, in: query, schema: { type: string, enum: [discover, following] } }
+        - { name: topicId, in: query, schema: { type: integer, format: int64 } }
+        - { name: locationTag, in: query, schema: { type: string, maxLength: 100 } }
+        - { name: sort, in: query, schema: { type: string, enum: [recent, popular], default: recent } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200': { description: 帖子分页, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Result' }, { type: object, properties: { data: { $ref: '#/components/schemas/PagedCommunityPostResult' } } } ] } } } }
+    post:
+      tags: [用户端-社区]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PostCreateRequest' }
+      responses:
+        '200': { description: 帖子已创建, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Result' }, { type: object, properties: { data: { $ref: '#/components/schemas/CommunityPost' } } } ] } } } }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/v1/community/posts/{id}:
+    get:
+      tags: [用户端-社区]
+      security: []
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses:
+        '200': { description: 帖子详情, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Result' }, { type: object, properties: { data: { $ref: '#/components/schemas/CommunityPost' } } } ] } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [用户端-社区]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses: { '200': { description: 已删除 }, '403': { $ref: '#/components/responses/Forbidden' } }
+
+  /api/v1/community/posts/{id}/like:
+    put:
+      tags: [用户端-社区]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses: { '200': { description: 点赞结果 }, '409': { $ref: '#/components/responses/Conflict' } }
+    delete:
+      tags: [用户端-社区]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses: { '200': { description: 取消点赞结果 } }
+
+  /api/v1/community/posts/{id}/collection:
+    put:
+      tags: [用户端-社区]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses: { '200': { description: 收藏结果 } }
+    delete:
+      tags: [用户端-社区]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses: { '200': { description: 取消收藏结果 } }
+
+  /api/v1/community/posts/{id}/share:
+    post:
+      tags: [用户端-社区]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      requestBody:
+        content:
+          application/json: { schema: { type: object, properties: { channel: { type: string, enum: [wechat, poster, link] } } } }
+      responses: { '200': { description: 分享计数 } }
+
+  /api/v1/community/posts/{id}/comments:
+    get:
+      tags: [用户端-社区]
+      security: []
+      parameters: [ { $ref: '#/components/parameters/PathId' }, { $ref: '#/components/parameters/Page' }, { $ref: '#/components/parameters/PageSize' } ]
+      responses: { '200': { description: 评论分页 } }
+    post:
+      tags: [用户端-社区]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CommentCreateRequest' } } } }
+      responses: { '200': { description: 评论已创建 }, '409': { $ref: '#/components/responses/Conflict' } }
+
+  /api/v1/community/topics:
+    get:
+      tags: [用户端-社区]
+      security: []
+      parameters: [ { name: keyword, in: query, schema: { type: string } }, { name: followed, in: query, schema: { type: boolean } }, { $ref: '#/components/parameters/Page' }, { $ref: '#/components/parameters/PageSize' } ]
+      responses: { '200': { description: 话题分页 } }
+
+  /api/v1/community/creators:
+    get:
+      tags: [用户端-社区]
+      security: []
+      parameters: [ { name: metric, in: query, schema: { type: string, enum: [post, checkin, influence] } }, { name: period, in: query, schema: { type: string, enum: [week, month, all] } } ]
+      responses: { '200': { description: 达人榜 } }
+
+  /api/v1/community/users/{id}/follow:
+    put:
+      tags: [用户端-社区]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses: { '200': { description: 关注结果 } }
+    delete:
+      tags: [用户端-社区]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses: { '200': { description: 取消关注结果 } }
+
+  /api/v1/checkins:
+    get:
+      tags: [用户端-打卡]
+      parameters: [ { $ref: '#/components/parameters/Page' }, { $ref: '#/components/parameters/PageSize' } ]
+      responses: { '200': { description: 我的打卡分页 } }
+    post:
+      tags: [用户端-打卡]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CheckinCreateRequest' } } } }
+      responses: { '200': { description: 打卡结果及 newlyUnlocked }, '409': { $ref: '#/components/responses/Conflict' } }
+
+  /api/v1/checkins/{id}:
+    get:
+      tags: [用户端-打卡]
+      security: []
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses: { '200': { description: 打卡详情 }, '404': { $ref: '#/components/responses/NotFound' } }
+
+  /api/v1/checkins/{id}/like:
+    put:
+      tags: [用户端-打卡]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses: { '200': { description: 点赞结果 } }
+    delete:
+      tags: [用户端-打卡]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses: { '200': { description: 取消点赞结果 } }
+
+  /api/v1/checkins/rankings:
+    get:
+      tags: [用户端-打卡]
+      security: []
+      parameters: [ { name: period, in: query, schema: { type: string, enum: [week, month, all] } } ]
+      responses: { '200': { description: 打卡排行榜 } }
+
+  /api/v1/checkins/{id}/poster:
+    post:
+      tags: [用户端-打卡]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses: { '200': { description: 海报地址 } }
+
+  /api/v1/achievements:
+    get:
+      tags: [用户端-成就]
+      security: []
+      parameters: [ { name: state, in: query, schema: { type: string, enum: [locked, in_progress, unlocked] } } ]
+      responses: { '200': { description: 成就列表 } }
+
+  /api/v1/achievements/{code}:
+    get:
+      tags: [用户端-成就]
+      security: []
+      parameters: [ { name: code, in: path, required: true, schema: { type: string } } ]
+      responses: { '200': { description: 成就详情 }, '404': { $ref: '#/components/responses/NotFound' } }
+
+  /api/v1/me/achievements:
+    get:
+      tags: [用户端-成就]
+      parameters: [ { name: state, in: query, schema: { type: string } } ]
+      responses: { '200': { description: 我的成就 } }
+
+  /api/v1/me/achievements/check:
+    post:
+      tags: [用户端-成就]
+      responses: { '200': { description: 幂等检查结果 } }
+
+  # ═══════════════════════════════════════════════════════
   # 管理端 · 鉴权  （接口设计.md §6）
   # ═══════════════════════════════════════════════════════
+  /api/v1/me/payment-records:
+    get:
+      tags: [用户端-订单与支付]
+      summary: 我的支付记录
+      parameters: [ { $ref: '#/components/parameters/Page' }, { $ref: '#/components/parameters/PageSize' } ]
+      responses: { '200': { description: 支付流水分页 } }
+
+  /api/v1/refunds:
+    get:
+      tags: [用户端-订单与支付]
+      summary: 我的退款单
+      parameters: [ { name: status, in: query, schema: { type: string } }, { $ref: '#/components/parameters/Page' }, { $ref: '#/components/parameters/PageSize' } ]
+      responses: { '200': { description: 退款单分页 } }
+
+  /api/v1/refunds/{refundNo}:
+    get:
+      tags: [用户端-订单与支付]
+      parameters: [ { name: refundNo, in: path, required: true, schema: { type: string } } ]
+      responses: { '200': { description: 退款详情 }, '404': { $ref: '#/components/responses/NotFound' } }
+
+  /api/v1/orders/{orderNo}/refund-eligibility:
+    get:
+      tags: [用户端-订单与支付]
+      parameters: [ { name: orderNo, in: path, required: true, schema: { type: string } } ]
+      responses: { '200': { description: 退款资格，返回 eligible、allowedKinds、maxAmount、reasonCode、reasonMessage } }
+
+  /api/v1/trips/{id}/guide:
+    get:
+      tags: [用户端-行程与我的]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses: { '200': { description: 行程完整攻略快照 } }
+
+  /api/v1/upload/image:
+    post:
+      tags: [用户端-社区]
+      summary: 上传社区图片
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { type: object, required: [file], properties: { file: { type: string, format: binary } } }
+      responses: { '200': { description: 上传地址与尺寸 } }
+
+  /api/v1/upload/images:
+    post:
+      tags: [用户端-社区]
+      summary: 批量上传社区图片
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [files]
+              properties:
+                files:
+                  type: array
+                  maxItems: 9
+                  items: { type: string, format: binary }
+      responses: { '200': { description: 上传地址与尺寸列表 } }
+
+  /api/v1/cart/items:
+    get:
+      tags: [用户端-订单与支付]
+      responses: { '200': { description: 购物车分页 } }
+    post:
+      tags: [用户端-订单与支付]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [boxId], properties: { boxId: { type: integer, format: int64 }, quantity: { type: integer, minimum: 1, maximum: 10 } } } } } }
+      responses: { '200': { description: 加购结果 } }
+    delete:
+      tags: [用户端-订单与支付]
+      parameters: [ { name: selectedOnly, in: query, schema: { type: boolean, default: false } } ]
+      responses: { '200': { description: 清空结果 } }
+
+  /api/v1/cart/items/{id}:
+    patch:
+      tags: [用户端-订单与支付]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { quantity: { type: integer, minimum: 1, maximum: 10 }, selected: { type: boolean }, version: { type: integer } } } } } }
+      responses: { '200': { description: 购物车项已更新 }, '409': { $ref: '#/components/responses/Conflict' } }
+    delete:
+      tags: [用户端-订单与支付]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses: { '200': { description: 已删除 } }
+
+  /api/v1/cart/checkout:
+    post:
+      tags: [用户端-订单与支付]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [itemIds], properties: { itemIds: { type: array, items: { type: integer, format: int64 } } } } } } }
+      responses: { '200': { description: 逐单结算结果，包含 orders 与 failedItems } }
+
+  /api/v1/admin/community/posts:
+    get:
+      tags: [管理端-社区]
+      parameters: [ { name: keyword, in: query, schema: { type: string } }, { name: userId, in: query, schema: { type: integer, format: int64 } }, { name: topicId, in: query, schema: { type: integer, format: int64 } }, { name: status, in: query, schema: { type: string } }, { $ref: '#/components/parameters/Page' }, { $ref: '#/components/parameters/PageSize' } ]
+      responses: { '200': { description: 管理帖子分页 } }
+
+  /api/v1/admin/community/posts/{id}/status:
+    patch:
+      tags: [管理端-社区]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [toStatus], properties: { toStatus: { type: string, enum: [published, featured, down] }, reason: { type: string, maxLength: 255 }, version: { type: integer } } } } } }
+      responses: { '200': { description: 状态已更新 }, '409': { $ref: '#/components/responses/Conflict' } }
+
+  /api/v1/admin/community/comments:
+    get:
+      tags: [管理端-社区]
+      parameters: [ { name: postId, in: query, schema: { type: integer, format: int64 } }, { name: userId, in: query, schema: { type: integer, format: int64 } }, { name: status, in: query, schema: { type: string } }, { $ref: '#/components/parameters/Page' }, { $ref: '#/components/parameters/PageSize' } ]
+      responses: { '200': { description: 管理评论分页 } }
+
+  /api/v1/admin/community/comments/{id}/status:
+    patch:
+      tags: [管理端-社区]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [toStatus], properties: { toStatus: { type: string, enum: [published, hidden] }, reason: { type: string }, version: { type: integer } } } } } }
+      responses: { '200': { description: 状态已更新 } }
+
+  /api/v1/admin/community/topics:
+    get:
+      tags: [管理端-社区]
+      parameters: [ { name: keyword, in: query, schema: { type: string } }, { name: status, in: query, schema: { type: string } }, { $ref: '#/components/parameters/Page' }, { $ref: '#/components/parameters/PageSize' } ]
+      responses: { '200': { description: 话题分页 } }
+    post:
+      tags: [管理端-社区]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/TopicUpsertRequest' } } } }
+      responses: { '200': { description: 话题已创建 } }
+
+  /api/v1/admin/checkins:
+    get:
+      tags: [管理端-社区]
+      parameters: [ { name: userId, in: query, schema: { type: integer, format: int64 } }, { name: status, in: query, schema: { type: string } }, { $ref: '#/components/parameters/Page' }, { $ref: '#/components/parameters/PageSize' } ]
+      responses: { '200': { description: 打卡分页 } }
+
+  /api/v1/admin/checkins/statistics:
+    get:
+      tags: [管理端-社区]
+      summary: 打卡统计
+      responses: { '200': { description: total、newUsers、activeUsers、topLocations、dailyTrend } }
+
+  /api/v1/admin/checkins/{id}/status:
+    patch:
+      tags: [管理端-社区]
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AdminContentStatusRequest' } } } }
+      responses: { '200': { description: 打卡状态已更新 } }
+
+  /api/v1/admin/achievements:
+    get:
+      tags: [管理端-社区]
+      parameters: [ { name: status, in: query, schema: { type: string } }, { $ref: '#/components/parameters/Page' }, { $ref: '#/components/parameters/PageSize' } ]
+      responses: { '200': { description: 成就分页 } }
+    post:
+      tags: [管理端-社区]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AchievementUpsertRequest' } } } }
+      responses: { '200': { description: 成就已创建 } }
+
+  /api/v1/admin/achievements/statistics:
+    get:
+      tags: [管理端-社区]
+      summary: 成就达成率统计
+      responses: { '200': { description: unlockTotal、userTotal、unlockRate、byAchievement、dailyTrend } }
+
   /api/v1/admin/login:
     post:
       tags: [管理端-鉴权]
@@ -2089,6 +2427,9 @@ components:
           example: 0
         message:
           type: string
+        requestId:
+          type: string
+          description: 请求追踪 ID
           example: ok
     ResultVoid:
       type: object
@@ -2164,6 +2505,8 @@ components:
           type: string
           nullable: true
           enum: [nature, city, adventure, culture, null]
+        version:
+          type: integer
 
     Banner:
       type: object
@@ -2203,6 +2546,9 @@ components:
           description: 角标，如 TOP1 / HOT / NEW
         intro:
           type: string
+        description:
+          type: string
+          nullable: true
         price:
           type: number
           description: 售价（元）
@@ -2213,13 +2559,26 @@ components:
           example: 120
         coverUrl:
           type: string
+        imageUrls:
+          type: array
+          items: { type: string }
         moods:
           type: array
           items:
             $ref: '#/components/schemas/Mood'
+        includes:
+          type: array
+          items: { type: string }
+        guidePreview:
+          type: object
+          additionalProperties: true
         status:
           type: string
           enum: [on, off]
+        openCount:
+          type: integer
+        version:
+          type: integer
 
     Badge:
       type: object
@@ -2652,6 +3011,112 @@ components:
         diaryCount:
           type: integer
 
+    # ── Phase 5 社交域 ──
+    PostCreateRequest:
+      type: object
+      required: [title, content]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 30 }
+        content: { type: string, minLength: 1, maxLength: 500 }
+        imageUrls: { type: array, maxItems: 9, items: { type: string, maxLength: 500 } }
+        topicId: { type: integer, format: int64, nullable: true }
+        locationName: { type: string, maxLength: 100, nullable: true }
+        publicLocation: { type: boolean, default: false }
+        latitude: { type: number, format: double, nullable: true }
+        longitude: { type: number, format: double, nullable: true }
+        linkedBlindBoxId: { type: integer, format: int64, nullable: true }
+        linkedTripId: { type: integer, format: int64, nullable: true }
+        linkedCheckinId: { type: integer, format: int64, nullable: true }
+    CommentCreateRequest:
+      type: object
+      required: [content]
+      properties:
+        content: { type: string, minLength: 1, maxLength: 500 }
+        parentCommentId: { type: integer, format: int64, nullable: true }
+        replyToUserId: { type: integer, format: int64, nullable: true }
+    CheckinCreateRequest:
+      type: object
+      required: [tripId, locationName, imageUrls]
+      properties:
+        tripId: { type: integer, format: int64 }
+        locationName: { type: string, minLength: 1, maxLength: 100 }
+        publicLocation: { type: boolean, default: false }
+        latitude: { type: number, format: double, nullable: true }
+        longitude: { type: number, format: double, nullable: true }
+        imageUrls: { type: array, minItems: 1, maxItems: 9, items: { type: string, maxLength: 500 } }
+        note: { type: string, maxLength: 500, nullable: true }
+    SocialUser:
+      type: object
+      properties:
+        userId: { type: integer, format: int64 }
+        nickname: { type: string }
+        avatarUrl: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+        followed: { type: boolean }
+        followerCount: { type: integer, format: int64 }
+    CommunityPost:
+      type: object
+      properties:
+        postId: { type: integer, format: int64 }
+        title: { type: string }
+        content: { type: string }
+        imageUrls: { type: array, items: { type: string } }
+        author: { $ref: '#/components/schemas/SocialUser' }
+        topic: { type: object, nullable: true }
+        locationName: { type: string, nullable: true }
+        publicLocation: { type: boolean }
+        linkedBox: { type: object, nullable: true }
+        linkedTrip: { type: object, nullable: true }
+        linkedCheckin: { type: object, nullable: true }
+        likeCount: { type: integer }
+        collectCount: { type: integer }
+        commentCount: { type: integer }
+        shareCount: { type: integer }
+        liked: { type: boolean }
+        collected: { type: boolean }
+        status: { type: string, enum: [review, published, featured, down, deleted] }
+        createdAt: { type: string }
+        updatedAt: { type: string, nullable: true }
+    PagedCommunityPostResult:
+      type: object
+      properties:
+        list: { type: array, items: { $ref: '#/components/schemas/CommunityPost' } }
+        total: { type: integer, format: int64 }
+        page: { type: integer }
+        pageSize: { type: integer }
+        hasMore: { type: boolean }
+    AdminContentStatusRequest:
+      type: object
+      required: [toStatus]
+      properties:
+        toStatus: { type: string }
+        reason: { type: string, maxLength: 255 }
+        version: { type: integer }
+    TopicUpsertRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 64 }
+        coverUrl: { type: string, nullable: true }
+        description: { type: string, maxLength: 255 }
+        heatWeight: { type: integer }
+        sortWeight: { type: integer }
+        status: { type: string, enum: [on, off] }
+        version: { type: integer }
+    AchievementUpsertRequest:
+      type: object
+      required: [code, name, requirementType, requirementValue]
+      properties:
+        code: { type: string, maxLength: 64 }
+        name: { type: string, maxLength: 64 }
+        description: { type: string, maxLength: 255 }
+        iconUrl: { type: string, nullable: true }
+        requirementType: { type: string, enum: [checkin_count, trip_count, badge_count, post_count, expense_sum] }
+        requirementValue: { type: integer, minimum: 1 }
+        level: { type: integer, minimum: 1 }
+        sortWeight: { type: integer }
+        status: { type: string, enum: [on, off] }
+        version: { type: integer }
     # ── 管理端 ──
     AdminRole:
       type: string
@@ -3367,3 +3832,5 @@ components:
           type: integer
         pageSize:
           type: integer
+        hasMore:
+          type: boolean

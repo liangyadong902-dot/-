@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 
 class UserServiceTest {
 
@@ -29,15 +30,16 @@ class UserServiceTest {
     void updatesProfileAndKeepsHttpsAvatar() {
         AppUser user = user("normal");
         when(userMapper.selectById(1L)).thenReturn(user);
+        when(userMapper.update(any(), any())).thenReturn(1);
 
         UserVO result = service.update(1L, new UserUpdateRequest(
-                "新昵称", "https://cdn.example.com/avatar.jpg", 1, "成都"));
+                "新昵称", "https://cdn.example.com/avatar.jpg", 1, "成都", 0));
 
         assertThat(result.getNickname()).isEqualTo("新昵称");
         assertThat(result.getAvatarUrl()).isEqualTo("https://cdn.example.com/avatar.jpg");
         assertThat(result.getGender()).isEqualTo(1);
         assertThat(result.getCity()).isEqualTo("成都");
-        verify(userMapper).updateById(user);
+        verify(userMapper).update(any(), any());
     }
 
     @Test
@@ -64,6 +66,7 @@ class UserServiceTest {
         user.setNickname("原昵称");
         user.setRegisterChannel("wechat");
         user.setStatus(status);
+        user.setVersion(0);
         return user;
     }
 }

@@ -3,6 +3,7 @@ package com.tuge.domain.vo;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class AdminRouteVO {
@@ -19,6 +20,8 @@ public class AdminRouteVO {
     private String badgeMark;
     private String highlight;
     private List<String> includes;
+    private Map<String, Object> guide;
+    private Integer guideVersion;
     private String moodText;
     private String status;
     private Integer drawCount;

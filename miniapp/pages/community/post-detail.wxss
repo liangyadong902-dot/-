@@ -1,0 +1,136 @@
+/* 帖子详情：对照 index-app-latest.html .community-detail，390px → 750rpx */
+.post-detail-page { height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
+.detail-state { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--muted); gap: 20rpx; font-size: 24rpx; }
+.state-button { padding: 12rpx 24rpx; color: #fff; background: var(--sage); border: 0; border-radius: 999rpx; font-size: 21rpx; }
+
+.cd-head {
+  flex-shrink: 0;
+  min-height: 188.46rpx;
+  padding: 100rpx 26.92rpx 19.23rpx;
+  display: flex;
+  align-items: center;
+  gap: 17.31rpx;
+  background: var(--cream);
+}
+.cd-avatar {
+  width: 69.23rpx;
+  height: 69.23rpx;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sage-mist);
+  color: var(--sage-deep);
+  font-size: 25rpx;
+  font-weight: 800;
+}
+.cd-avatar.sm { width: 50rpx; height: 50rpx; font-size: 19.23rpx; }
+.cd-author { min-width: 0; flex: 1; }
+.cd-name { font-size: 25rpx; font-weight: 700; }
+.cd-place { margin-top: 3.85rpx; color: var(--muted); font-size: 19.23rpx; }
+.cd-follow {
+  min-width: 123.08rpx;
+  height: 69.23rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 25rpx;
+  border: 1.92rpx solid var(--sage-deep);
+  border-radius: 999rpx;
+  background: transparent;
+  color: var(--sage-deep);
+  font-size: 21.15rpx;
+  font-weight: 700;
+}
+.cd-follow.active { border-color: transparent; background: var(--sage-mist); color: var(--muted); }
+.cd-close {
+  width: 84.62rpx;
+  height: 84.62rpx;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cd-media { width: 100%; height: 646.55rpx; flex-shrink: 0; background: var(--cream-2); }
+.cd-media-img { width: 100%; height: 100%; display: block; }
+
+.cd-body { flex: 1; min-height: 0; padding: 30.77rpx 30.77rpx 0; }
+.cd-body-pad { height: 46.15rpx; }
+.cd-title { font-family: "Noto Serif SC", "Songti SC", serif; font-size: 36.54rpx; font-weight: 900; line-height: 1.45; }
+.cd-text { margin-top: 19.23rpx; font-size: 25rpx; line-height: 1.85; white-space: pre-wrap; }
+.cd-tags { display: flex; flex-wrap: wrap; gap: 13.46rpx; margin: 23.08rpx 0 9.62rpx; }
+.cd-tags text { color: var(--sage-deep); font-size: 21.15rpx; font-weight: 700; }
+.cd-meta { color: var(--muted); font-size: 19.23rpx; }
+
+.cd-samebox {
+  width: 100%;
+  min-height: 130.77rpx;
+  margin: 30.77rpx 0;
+  padding: 19.23rpx 23.08rpx;
+  display: flex;
+  align-items: center;
+  gap: 19.23rpx;
+  border-radius: 15.38rpx;
+  background: var(--sage-mist);
+  color: var(--ink);
+  box-sizing: border-box;
+}
+.samebox-img { width: 92.31rpx; height: 92.31rpx; border-radius: 11.54rpx; flex-shrink: 0; background: var(--cream-2); }
+.samebox-copy { flex: 1; min-width: 0; }
+.samebox-name { font-size: 23.08rpx; font-weight: 700; }
+.samebox-sub { margin-top: 5.77rpx; color: var(--muted); font-size: 19.23rpx; }
+.samebox-go { color: var(--sage-deep); font-size: 21.15rpx; font-weight: 800; white-space: nowrap; }
+
+.cd-divider { height: 1.92rpx; margin: 26.92rpx 0; background: var(--line); }
+.cd-comment-title { font-size: 23.08rpx; font-weight: 800; }
+.cd-comment-empty { color: var(--muted); padding: 40rpx 0; font-size: 21rpx; }
+.cd-comment { display: flex; gap: 17.31rpx; padding: 21.15rpx 0; }
+.cd-comment-copy { flex: 1; min-width: 0; }
+.cd-comment-name { font-size: 21.15rpx; font-weight: 700; }
+.cd-comment-text { margin-top: 5.77rpx; font-size: 23.08rpx; line-height: 1.6; }
+.cd-comment-meta { margin-top: 7.69rpx; color: var(--muted); font-size: 17.31rpx; }
+.cd-reply { color: var(--sage-deep); }
+
+.cd-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 15.38rpx;
+  padding: 17.31rpx 23.08rpx calc(21.15rpx + env(safe-area-inset-bottom));
+  background: var(--paper);
+  border-top: 1.92rpx solid var(--line);
+}
+.cd-input {
+  min-width: 0;
+  flex: 1;
+  height: 84.62rpx;
+  border-radius: 999rpx;
+  padding: 0 25rpx;
+  background: var(--cream-2);
+  color: var(--ink);
+  font-size: 23.08rpx;
+}
+.cd-ph { color: #B3A698; }
+.cd-action {
+  width: 84.62rpx;
+  height: 84.62rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  line-height: 1;
+}
+.cd-action-icon { font-size: 38.46rpx; line-height: 1; }
+.cd-action.active { color: #C86657; }
+.cd-action.collect.active { color: #B5813B; }

@@ -1,0 +1,171 @@
+/* 社区：对照 index-app-latest.html #tab-community，390px → 750rpx */
+.community-page { min-height: 100vh; background: var(--cream); }
+
+.community-head {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 19.23rpx;
+  padding: 100rpx 26.92rpx 23.08rpx;
+  background:
+    radial-gradient(107.69rpx 57.69rpx at 12% 0%, #f7faf3 0 62%, transparent 63%),
+    radial-gradient(123.08rpx 61.54rpx at 62% -4%, #eef5e5 0 64%, transparent 65%),
+    linear-gradient(180deg, #E3EDD6 0%, #EAF1E0 100%);
+  border-bottom: 1.92rpx solid rgba(231, 220, 206, 0.7);
+}
+.community-tabs { flex: 1; display: flex; justify-content: center; gap: 38.46rpx; }
+.community-tab { position: relative; min-height: 84.62rpx; padding: 7.69rpx 0; color: var(--muted); font-size: 25rpx; font-weight: 600; }
+.community-tab.active { color: var(--ink); font-weight: 800; }
+.community-tab.active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 34.62rpx;
+  height: 5.77rpx;
+  border-radius: 5.77rpx;
+  transform: translateX(-50%);
+  background: var(--sage-deep);
+}
+.community-collection {
+  width: 84.62rpx;
+  height: 84.62rpx;
+  border-radius: 50%;
+  background: rgba(255, 253, 248, 0.88);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32.69rpx;
+  flex-shrink: 0;
+}
+
+.community-chips { white-space: nowrap; }
+.community-chips-inner { display: flex; gap: 13.46rpx; padding: 23.08rpx 26.92rpx 19.23rpx; }
+.community-chip {
+  flex-shrink: 0;
+  padding: 11.54rpx 25rpx;
+  border-radius: 999rpx;
+  background: var(--paper);
+  color: var(--muted);
+  font-size: 21.15rpx;
+  font-weight: 600;
+  box-shadow: 0 3.85rpx 15.38rpx rgba(60, 52, 44, 0.04);
+}
+.community-chip.active { background: var(--sage); color: #fff; }
+
+.community-feed { columns: 2; column-gap: 19.23rpx; padding: 0 26.92rpx 192.31rpx; }
+.community-card {
+  break-inside: avoid;
+  margin-bottom: 19.23rpx;
+  background: var(--paper);
+  border-radius: 15.38rpx;
+  overflow: hidden;
+  box-shadow: 0 5.77rpx 23.08rpx rgba(60, 52, 44, 0.05);
+}
+.community-card-cover { position: relative; background: var(--cream-2); }
+.card-img { width: 100%; display: block; }
+.card-img-empty { display: flex; align-items: center; justify-content: center; color: var(--sage-deep); font-family: "Noto Serif SC", "Songti SC", serif; font-size: 25rpx; line-height: 1.5; text-align: center; }
+.community-card-tag {
+  position: absolute;
+  left: 15.38rpx;
+  top: 15.38rpx;
+  padding: 5.77rpx 13.46rpx;
+  border-radius: 999rpx;
+  color: #fff;
+  background: rgba(60, 52, 44, 0.55);
+  font-size: 17.31rpx;
+  font-weight: 700;
+}
+.community-card-copy { padding: 17.31rpx 19.23rpx 19.23rpx; }
+.community-card-title {
+  min-height: 69.23rpx;
+  font-size: 25rpx;
+  font-weight: 700;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.community-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 15.38rpx; margin-top: 17.31rpx; }
+.community-author { display: flex; align-items: center; gap: 11.54rpx; min-width: 0; }
+.community-avatar {
+  width: 42.31rpx;
+  height: 42.31rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sage-mist);
+  color: var(--sage-deep);
+  font-size: 19.23rpx;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.community-avatar.lg { width: 76.92rpx; height: 76.92rpx; font-size: 26.92rpx; }
+.author-name { color: var(--muted); font-size: 19.23rpx; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.community-like { display: flex; align-items: center; gap: 7.69rpx; color: var(--muted); font-size: 19.23rpx; font-weight: 600; }
+.community-like .like-icon { font-size: 23.08rpx; line-height: 1; }
+.community-like.active { color: #C86657; }
+
+.community-empty { column-span: all; padding: 107.69rpx 34.62rpx; text-align: center; }
+.empty-title { font-family: "Noto Serif SC", "Songti SC", serif; font-size: 34.62rpx; font-weight: 900; margin-bottom: 15.38rpx; }
+.empty-text { color: var(--muted); font-size: 23.08rpx; line-height: 1.7; margin-bottom: 30.77rpx; }
+
+.community-board { padding: 0 26.92rpx 192.31rpx; }
+.community-list { display: grid; gap: 19.23rpx; }
+.community-row {
+  width: 100%;
+  min-height: 123.08rpx;
+  display: flex;
+  align-items: center;
+  gap: 23.08rpx;
+  padding: 21.15rpx 23.08rpx;
+  border-radius: 15.38rpx;
+  background: var(--paper);
+  box-shadow: 0 5.77rpx 23.08rpx rgba(60, 52, 44, 0.05);
+}
+.community-row-rank { width: 42.31rpx; color: var(--sage-deep); font-family: "Noto Serif SC", "Songti SC", serif; font-weight: 900; text-align: center; }
+.community-row-copy { flex: 1; min-width: 0; }
+.row-title { font-size: 25rpx; font-weight: 700; }
+.row-sub { color: var(--muted); font-size: 19.23rpx; margin-top: 5.77rpx; }
+.row-views { font-size: 21.15rpx; color: var(--muted); }
+.community-follow {
+  min-width: 119.23rpx;
+  height: 84.62rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.92rpx solid var(--sage-deep);
+  border-radius: 999rpx;
+  background: transparent;
+  color: var(--sage-deep);
+  font-size: 21.15rpx;
+  font-weight: 700;
+}
+.community-follow.active { border-color: transparent; background: var(--sage-mist); color: var(--muted); }
+
+.community-compose {
+  position: fixed;
+  right: 34.62rpx;
+  bottom: 169.23rpx;
+  z-index: 32;
+  display: flex;
+  align-items: center;
+  gap: 9.62rpx;
+  height: 84.62rpx;
+  padding: 0 32.69rpx;
+  border-radius: 999rpx;
+  background: var(--sage);
+  color: #fff;
+  font-size: 25rpx;
+  font-weight: 700;
+  box-shadow: 0 11.54rpx 34.62rpx rgba(108, 126, 88, 0.34);
+}
+
+.community-state { min-height: 430rpx; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); gap: 16rpx; font-size: 23rpx; }
+.state-mark { width: 82rpx; height: 82rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--sage-mist); color: var(--sage-deep); font-size: 34rpx; }
+.state-button { padding: 12rpx 24rpx; color: #fff; background: var(--sage); border-radius: 999rpx; font-size: 21rpx; }

@@ -3,6 +3,7 @@ package com.tuge.common.result;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 /**
  * 统一响应体
@@ -24,12 +25,14 @@ public class Result<T> implements Serializable {
     private String message;
     /** 业务数据 */
     private T data;
+    private String requestId;
 
     public static <T> Result<T> success(T data) {
         Result<T> r = new Result<>();
         r.setCode(0);
         r.setMessage("success");
         r.setData(data);
+        r.setRequestId(UUID.randomUUID().toString());
         return r;
     }
 
@@ -41,6 +44,7 @@ public class Result<T> implements Serializable {
         Result<T> r = new Result<>();
         r.setCode(code);
         r.setMessage(message);
+        r.setRequestId(UUID.randomUUID().toString());
         return r;
     }
 }

@@ -2,7 +2,7 @@ package com.tuge.controller;
 
 import com.tuge.common.result.Result;
 import com.tuge.domain.dto.PhoneLoginRequest;
-import com.tuge.domain.dto.PhoneRequest;
+import com.tuge.domain.dto.SmsSendRequest;
 import com.tuge.domain.dto.WechatLoginRequest;
 import com.tuge.domain.service.AuthService;
 import com.tuge.domain.vo.LoginVO;
@@ -23,9 +23,8 @@ public class AuthController {
     }
 
     @PostMapping("/sms/send")
-    public Result<Void> sendSms(@Valid @RequestBody PhoneRequest request) {
-        authService.sendSms(request.phone());
-        return Result.success();
+    public Result<AuthService.SmsTicket> sendSms(@Valid @RequestBody SmsSendRequest request) {
+        return Result.success(authService.sendSms(request.phone(), request.scene()));
     }
 
     @PostMapping("/login/phone")

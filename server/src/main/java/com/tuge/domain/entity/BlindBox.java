@@ -23,12 +23,17 @@ public class BlindBox {
     private String tag;
     private String rankTag;
     private String intro;
+    private String description;
     private Integer priceCent;
     private Integer minValueCent;
     private String coverUrl;
+    private String imagesJson;
+    private String includesJson;
+    private String guidePreviewJson;
     private Integer sortWeight;
     private String status;
     private Integer openCount;
+    private Integer version;
 
     @JsonIgnore
     private LocalDateTime createdAt;

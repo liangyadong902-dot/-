@@ -1,0 +1,2 @@
+const api = require('../../services/api')
+Page({ data:{ list:[], loading:true, period:'all' }, onLoad(){ this.load() }, async load(){ this.setData({loading:true}); try{ const list=await api.listCheckinRankings({period:this.data.period}); this.setData({list:list||[],loading:false}) }catch(e){this.setData({loading:false})} }, switchPeriod(e){this.setData({period:e.currentTarget.dataset.period},()=>this.load())} })

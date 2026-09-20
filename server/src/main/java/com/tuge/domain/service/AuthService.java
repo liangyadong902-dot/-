@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -23,6 +24,7 @@ public class AuthService {
     private static final String DEMO_CODE = "123456";
     private static final Pattern PHONE = Pattern.compile("^1\\d{10}$");
     private static final Map<String, Long> SMS_SENT_AT = new ConcurrentHashMap<>();
+    private static final Map<String, String> SMS_TOKENS = new ConcurrentHashMap<>();
 
     private final AppUserMapper appUserMapper;
     private final JwtTokenUtil jwtTokenUtil;
@@ -35,9 +37,12 @@ public class AuthService {
         this.wechatClient = wechatClient;
     }
 
-    public void sendSms(String phone) {
+    public SmsTicket sendSms(String phone, String scene) {
         validatePhone(phone);
         SMS_SENT_AT.put(phone, System.currentTimeMillis());
+        String token = UUID.randomUUID().toString();
+        SMS_TOKENS.put(phone, token);
+        return new SmsTicket(token, 300);
     }
 
     @Transactional
@@ -49,6 +54,10 @@ public class AuthService {
         Long sentAt = SMS_SENT_AT.get(request.phone());
         if (sentAt == null || System.currentTimeMillis() - sentAt > 5 * 60 * 1000L) {
             throw new BusinessException(401, "请先获取验证码");
+        }
+        if (request.smsToken() != null && !request.smsToken().isBlank()
+                && !request.smsToken().equals(SMS_TOKENS.get(request.phone()))) {
+            throw new BusinessException(401, "短信凭证无效或已过期");
         }
         AppUser user = appUserMapper.selectOne(new LambdaQueryWrapper<AppUser>()
                 .eq(AppUser::getPhone, request.phone()));
@@ -120,6 +129,8 @@ public class AuthService {
         user.setPhone(phone);
         appUserMapper.updateById(user);
     }
+
+    public record SmsTicket(String smsToken, int expireSeconds) {}
 
     public AppUser current(Long userId) {
         AppUser user = appUserMapper.selectById(userId);

@@ -19,6 +19,7 @@ public class TripVO {
     private Integer valueCent;
     private String highlight;
     private List<String> includeList;
+    private Integer guideVersion;
     private String moodText;
     private String badgeName;
     private String validity;

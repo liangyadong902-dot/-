@@ -41,6 +41,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -104,6 +105,7 @@ public class ContentAdminService {
         validateBox(request);
         BlindBox box = new BlindBox();
         applyBox(box, request);
+        box.setVersion(0);
         blindBoxMapper.insert(box);
         replaceMoods(box.getId(), request.moods());
         return toAdminBox(box);
@@ -114,7 +116,11 @@ public class ContentAdminService {
         AdminRoles.requireContentWrite();
         validateBox(request);
         BlindBox box = findBox(id);
+        if (request.version() != null && !request.version().equals(box.getVersion())) {
+            throw new BusinessException(409, "盲盒已被其他管理员更新");
+        }
         applyBox(box, request);
+        box.setVersion(box.getVersion() == null ? 1 : box.getVersion() + 1);
         blindBoxMapper.updateById(box);
         replaceMoods(id, request.moods());
         return toAdminBox(box);
@@ -361,9 +367,13 @@ public class ContentAdminService {
         box.setTag(request.tag() == null ? "" : request.tag().trim());
         box.setRankTag(request.rankTag());
         box.setIntro(request.intro() == null ? "" : request.intro().trim());
+        box.setDescription(request.description() == null ? "" : request.description().trim());
         box.setPriceCent(Money.cent(request.price()));
         box.setMinValueCent(Money.cent(request.minValue()));
         box.setCoverUrl(request.coverUrl());
+        box.setImagesJson(writeJson(request.imageUrls() == null ? List.of() : request.imageUrls()));
+        box.setIncludesJson(writeJson(request.includes() == null ? List.of() : request.includes()));
+        box.setGuidePreviewJson(writeJson(request.guidePreview() == null ? Map.of() : request.guidePreview()));
         box.setSortWeight(request.sortWeight() == null ? 0 : request.sortWeight());
         box.setStatus(request.status() == null ? "on" : request.status());
     }
@@ -378,6 +388,8 @@ public class ContentAdminService {
         route.setBadgeId(request.badgeId());
         route.setHighlight(request.highlight() == null ? "" : request.highlight());
         route.setIncludeJson(writeJson(request.includes() == null ? List.of() : request.includes()));
+        route.setGuideJson(writeJson(request.guide() == null ? Map.of() : request.guide()));
+        route.setGuideVersion(request.guideVersion() == null ? 1 : request.guideVersion());
         route.setMoodText(request.moodText() == null ? "" : request.moodText());
         route.setStatus(request.status() == null ? "on" : request.status());
     }
@@ -421,12 +433,18 @@ public class ContentAdminService {
         vo.setTag(box.getTag());
         vo.setRankTag(box.getRankTag());
         vo.setIntro(box.getIntro());
+        vo.setDescription(box.getDescription());
         vo.setPrice(Money.yuan(box.getPriceCent()));
         vo.setMinValue(Money.yuan(box.getMinValueCent()));
         vo.setCoverUrl(box.getCoverUrl());
+        List<String> images = readJson(box.getImagesJson());
+        vo.setImageUrls(images.isEmpty() && box.getCoverUrl() != null ? List.of(box.getCoverUrl()) : images);
         vo.setMoods(loadMoods(box.getId()));
         vo.setScenes(List.of());
+        vo.setIncludes(readJson(box.getIncludesJson()));
+        vo.setGuidePreview(readMap(box.getGuidePreviewJson()));
         vo.setStatus(box.getStatus());
+        vo.setVersion(box.getVersion());
         vo.setSortWeight(box.getSortWeight());
         vo.setOpenCount(box.getOpenCount());
         vo.setCreatedAt(box.getCreatedAt());
@@ -454,6 +472,8 @@ public class ContentAdminService {
         vo.setBadgeMark(badge == null ? "" : badge.getMark());
         vo.setHighlight(route.getHighlight());
         vo.setIncludes(readJson(route.getIncludeJson()));
+        vo.setGuide(readMap(route.getGuideJson()));
+        vo.setGuideVersion(route.getGuideVersion());
         vo.setMoodText(route.getMoodText());
         vo.setStatus(route.getStatus());
         vo.setDrawCount(route.getDrawCount());
@@ -529,7 +549,7 @@ public class ContentAdminService {
         if (BigDecimal.valueOf(amount).scale() > 2) throw new BusinessException(400, label + "最多保留两位小数");
     }
 
-    private String writeJson(List<String> value) {
+    private String writeJson(Object value) {
         try {
             return objectMapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {
@@ -545,6 +565,15 @@ public class ContentAdminService {
         } catch (JsonProcessingException e) {
             return Arrays.stream(value.replace("[", "").replace("]", "").replace("\"", "").split(","))
                     .filter(item -> !item.isBlank()).map(String::trim).toList();
+        }
+    }
+
+    private Map<String, Object> readMap(String value) {
+        if (value == null || value.isBlank()) return Map.of();
+        try {
+            return objectMapper.readValue(value, new TypeReference<>() { });
+        } catch (JsonProcessingException e) {
+            return Map.of();
         }
     }
 

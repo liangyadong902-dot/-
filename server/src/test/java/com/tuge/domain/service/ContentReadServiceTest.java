@@ -3,6 +3,7 @@ package com.tuge.domain.service;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tuge.domain.entity.Badge;
 import com.tuge.domain.entity.Banner;
 import com.tuge.domain.entity.BlindBox;
@@ -48,7 +49,7 @@ class ContentReadServiceTest {
         BlindBoxMapper boxMapper = mock(BlindBoxMapper.class);
         BlindBoxMoodMapper moodMapper = mock(BlindBoxMoodMapper.class);
         BlindBoxSceneMapper sceneMapper = mock(BlindBoxSceneMapper.class);
-        BlindBoxService service = new BlindBoxService(boxMapper, moodMapper, sceneMapper);
+        BlindBoxService service = new BlindBoxService(boxMapper, moodMapper, sceneMapper, new ObjectMapper());
 
         BlindBoxMood mood = new BlindBoxMood();
         mood.setBoxId(8L);

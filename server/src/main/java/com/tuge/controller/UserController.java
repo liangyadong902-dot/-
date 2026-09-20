@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * 用户端 · 我的
@@ -55,6 +56,7 @@ public class UserController {
         vo.setWechatOpenidBound(user.getWechatOpenid() != null && !user.getWechatOpenid().isBlank());
         vo.setPersonalityType(user.getPersonalityType());
         vo.setTitle(userStatsService.get(user.getId()).getTitle());
+        vo.setVersion(user.getVersion());
         return Result.success(vo);
     }
 
@@ -68,7 +70,7 @@ public class UserController {
         return Result.success(userStatsService.get(JwtContext.getUserId()));
     }
 
-    @PutMapping("/me")
+    @RequestMapping(value = "/me", method = {RequestMethod.PUT, RequestMethod.PATCH})
     public Result<UserVO> update(@Valid @RequestBody UserUpdateRequest request) {
         UserVO vo = userService.update(JwtContext.getUserId(), request);
         vo.setTitle(userStatsService.get(JwtContext.getUserId()).getTitle());

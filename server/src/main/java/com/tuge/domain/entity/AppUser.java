@@ -33,6 +33,7 @@ public class AppUser {
     private LocalDateTime lastLoginAt;
     private LocalDateTime lastActiveAt;
     private String csNote;
+    private Integer version;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

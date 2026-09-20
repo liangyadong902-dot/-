@@ -16,4 +16,5 @@ public class UserVO {
     private boolean wechatOpenidBound;
     private String title;
     private String personalityType;
+    private Integer version;
 }

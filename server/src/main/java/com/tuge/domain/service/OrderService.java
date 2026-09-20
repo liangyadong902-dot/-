@@ -354,6 +354,8 @@ public class OrderService {
         trip.setValueCent(route.getValueCent());
         trip.setHighlight(route.getHighlight());
         trip.setIncludeJson(route.getIncludeJson());
+        trip.setGuideSnapshotJson(route.getGuideJson());
+        trip.setGuideVersion(route.getGuideVersion() == null ? 1 : route.getGuideVersion());
         trip.setMoodText(route.getMoodText());
         trip.setBadgeName(badge == null ? "旅行足迹" : badge.getName());
         trip.setValidity("valid");

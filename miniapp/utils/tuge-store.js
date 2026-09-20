@@ -30,8 +30,10 @@ let contentError = ''
 const listeners = []
 let payTimer = null
 let smsTick = null
+let smsToken = ''
 let toastTimer = null
 let drawTimer = null
+let drawStatusTimer = null
 let chatTimer = null
 let wxLoginBusy = false
 let toastSeq = 0
@@ -44,6 +46,8 @@ const ui = {
   login: false,
   refund: false,
   unboxStep: 'confirm',
+  drawAnimating: false,
+  drawStatusText: '正在验证价值保底',
   toast: '',
   toastShow: false,
   loginErr: '',
@@ -499,6 +503,12 @@ function mineMenu() {
   if (logged) {
     rows.push({ key: 'stats', action: 'stats', b: '资产详情', small: '目的地 / 消费 / 日记 ›' })
     rows.push({ key: 'edit', action: 'edit', b: '编辑资料', small: '昵称 / 头像 ›' })
+    rows.push({ key: 'trips', action: 'trips', b: '我的行程', small: '已开盒线路与攻略 ›' })
+    rows.push({ key: 'checkins', action: 'checkins', b: '我的打卡', small: '照片 / 海报 / 点赞 ›' })
+    rows.push({ key: 'collections', action: 'collections', b: '收藏帖子', small: '保存的社区灵感 ›' })
+    rows.push({ key: 'achievements', action: 'achievements', b: '行为成就', small: '查看解锁进度 ›' })
+    rows.push({ key: 'payments', action: 'payments', b: '支付记录', small: '订单流水与退款 ›' })
+    rows.push({ key: 'cart', action: 'cart', b: '购物车', small: '待结算的盲盒 ›' })
   } else {
     rows.push({ key: 'login', action: 'login', b: '登录 / 注册', small: '手机验证码或微信 ›' })
   }
@@ -596,6 +606,8 @@ function snapshot() {
     loginOpen: ui.login,
     refundOpen: ui.refund,
     unboxStep: ui.unboxStep,
+    drawAnimating: ui.drawAnimating,
+    drawStatusText: ui.drawStatusText,
     mBoxName: (currentBox && currentBox.name) || (currentOrder && currentOrder.box) || '周边微度假盲盒',
     mBoxImg: (currentBox && currentBox.img) || '',
     mBoxPrice: currentBox ? ('¥' + currentBox.price) : '¥99',
@@ -769,7 +781,8 @@ async function sendDemoSms() {
   if (ui.smsLeft > 0) return
   try {
     const api = require('../services/api')
-    await api.sendSms(phone)
+    const ticket = await api.sendSms(phone)
+    smsToken = (ticket && ticket.smsToken) || ''
     showDemoToast('验证码 ' + DEMO_SMS)
     ui.loginErr = '演示验证码 ' + DEMO_SMS
     ui.smsLeft = 60
@@ -821,7 +834,7 @@ async function submitPhoneLogin() {
   }
   try {
     const api = require('../services/api')
-    const result = await api.loginPhone(phone, sms)
+    const result = await api.loginPhone(phone, sms, smsToken)
     wx.setStorageSync('token', result.token)
     wx.setStorageSync('user', result.user)
     finishLogin({
@@ -1074,13 +1087,25 @@ function startPaymentPolling() {
 
 function runRemoteUnboxResult() {
   ui.unboxStep = 'drawing'
+  ui.drawAnimating = true
+  ui.drawStatusText = '正在验证价值保底'
   ui.unbox = true
   afterUi()
+  const statuses = ['正在验证价值保底', '正在摇匀候选目的地', '正在匹配你的主题线路', '路线卡即将揭晓']
+  let statusIndex = 0
+  clearInterval(drawStatusTimer)
+  drawStatusTimer = setInterval(() => {
+    statusIndex = Math.min(statusIndex + 1, statuses.length - 1)
+    ui.drawStatusText = statuses[statusIndex]
+    afterUi()
+  }, 620)
   clearTimeout(drawTimer)
   drawTimer = setTimeout(() => {
+    clearInterval(drawStatusTimer)
+    ui.drawAnimating = false
     ui.unboxStep = 'result'
     afterUi()
-  }, 500)
+  }, 2300)
 }
 
 function openUnboxModal(boxId) {
@@ -1094,6 +1119,9 @@ function openUnboxModal(boxId) {
 function closeModal() {
   clearInterval(payTimer)
   payTimer = null
+  clearInterval(drawStatusTimer)
+  clearTimeout(drawTimer)
+  ui.drawAnimating = false
   ui.unbox = false
   afterUi()
 }
@@ -1455,6 +1483,12 @@ function onMineMenu(action) {
   else if (action === 'stats') wx.navigateTo({ url: '/pages/mine/stats-detail' })
   else if (action === 'edit') openProfileEditor()
   else if (action === 'badges') switchNav('badges')
+  else if (action === 'trips') wx.switchTab({ url: '/pages/trips/index' })
+  else if (action === 'checkins') wx.navigateTo({ url: '/pages/checkin/index' })
+  else if (action === 'collections') wx.navigateTo({ url: '/pages/community/collections' })
+  else if (action === 'achievements') wx.navigateTo({ url: '/pages/achievements/index' })
+  else if (action === 'payments') wx.navigateTo({ url: '/pages/payment-records/index' })
+  else if (action === 'cart') wx.navigateTo({ url: '/pages/cart/index' })
   else if (action === 'logout') logoutUser()
 }
 

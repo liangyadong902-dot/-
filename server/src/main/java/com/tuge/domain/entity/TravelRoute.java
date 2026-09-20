@@ -26,6 +26,8 @@ public class TravelRoute {
     private Long badgeId;
     private String highlight;
     private String includeJson;
+    private String guideJson;
+    private Integer guideVersion;
     private String moodText;
     private String status;
     private Integer drawCount;

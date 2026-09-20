@@ -1,0 +1,70 @@
+<view class="post-detail-page">
+  <view wx:if="{{loading}}" class="detail-state">正在打开这篇旅途笔记…</view>
+  <view wx:elif="{{error}}" class="detail-state"><text>{{error}}</text><view class="state-button" bindtap="load">重新加载</view></view>
+  <block wx:elif="{{post}}">
+    <view class="cd-head">
+      <view class="cd-avatar">{{authorMark}}</view>
+      <view class="cd-author">
+        <view class="cd-name">{{post.author.nickname || '途友'}}</view>
+        <view class="cd-place">{{post.locationName || '旅途中'}}</view>
+      </view>
+      <view class="cd-follow {{post.author.followed ? 'active' : ''}}" bindtap="followAuthor">{{post.author.followed ? '已关注' : '关注'}}</view>
+      <view class="cd-close" bindtap="goBack">←</view>
+    </view>
+    <swiper wx:if="{{post.imageUrls.length}}" class="cd-media" circular="{{post.imageUrls.length > 1}}">
+      <swiper-item wx:for="{{post.imageUrls}}" wx:key="*this"><image class="cd-media-img" src="{{item}}" mode="aspectFill" /></swiper-item>
+    </swiper>
+    <scroll-view class="cd-body" scroll-y enhanced show-scrollbar="{{false}}">
+      <view class="cd-title">{{post.title}}</view>
+      <view class="cd-text">{{post.content}}</view>
+      <view class="cd-tags">
+        <text>#{{post.topic ? post.topic.name : '旅途'}}</text>
+        <text>#盲盒开箱</text>
+        <text>#周末出发</text>
+      </view>
+      <view class="cd-meta">{{post.locationName || '旅途中'}} · 最近更新</view>
+      <view wx:if="{{post.linkedBox}}" class="cd-samebox" data-id="{{post.linkedBox.id}}" bindtap="openBox">
+        <image class="samebox-img" src="{{post.linkedBox.coverUrl}}" mode="aspectFill" />
+        <view class="samebox-copy">
+          <view class="samebox-name">{{post.linkedBox.name}}</view>
+          <view class="samebox-sub">{{post.linkedBox.subtitle}}</view>
+        </view>
+        <view class="samebox-go">查看同款 ›</view>
+      </view>
+      <view wx:if="{{post.linkedTrip}}" class="cd-samebox" data-id="{{post.linkedTrip.id}}" bindtap="openTrip">
+        <image class="samebox-img" src="{{post.linkedTrip.coverUrl}}" mode="aspectFill" />
+        <view class="samebox-copy">
+          <view class="samebox-name">{{post.linkedTrip.name}}</view>
+          <view class="samebox-sub">{{post.linkedTrip.subtitle}}</view>
+        </view>
+        <view class="samebox-go">查看行程 ›</view>
+      </view>
+      <view wx:if="{{post.linkedCheckin}}" class="cd-samebox" data-id="{{post.linkedCheckin.id}}" bindtap="openCheckin">
+        <image class="samebox-img" src="{{post.linkedCheckin.coverUrl}}" mode="aspectFill" />
+        <view class="samebox-copy">
+          <view class="samebox-name">{{post.linkedCheckin.name}}</view>
+          <view class="samebox-sub">{{post.linkedCheckin.subtitle}}</view>
+        </view>
+        <view class="samebox-go">查看打卡 ›</view>
+      </view>
+      <view class="cd-divider"></view>
+      <view class="cd-comment-title">共 {{post.commentCount}} 条评论</view>
+      <view wx:if="{{!comments.length}}" class="cd-comment-empty">还没有评论，留下第一句吧</view>
+      <view wx:for="{{comments}}" wx:key="commentId" class="cd-comment">
+        <view class="cd-avatar sm">{{item.mark}}</view>
+        <view class="cd-comment-copy">
+          <view class="cd-comment-name">{{item.author.nickname}}</view>
+          <view class="cd-comment-text">{{item.content}}</view>
+          <view class="cd-comment-meta">{{item.createdAt}} · <text class="cd-reply" data-name="{{item.author.nickname}}" catchtap="reply">回复</text></view>
+        </view>
+      </view>
+      <view class="cd-body-pad"></view>
+    </scroll-view>
+    <view class="cd-bar">
+      <input class="cd-input" value="{{input}}" placeholder="说点旅途见闻…" placeholder-class="cd-ph" maxlength="120" bindinput="inputChange" bindconfirm="sendComment" confirm-type="send" />
+      <view class="cd-action {{post.liked ? 'active' : ''}}" bindtap="toggleLike"><text class="cd-action-icon">{{post.liked ? '♥' : '♡'}}</text></view>
+      <view class="cd-action collect {{post.collected ? 'active' : ''}}" bindtap="toggleCollect"><text class="cd-action-icon">{{post.collected ? '★' : '☆'}}</text></view>
+      <button class="cd-action share" open-type="share" hover-class="none"><text class="cd-action-icon">↑</text></button>
+    </view>
+  </block>
+</view>

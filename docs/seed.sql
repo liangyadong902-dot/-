@@ -78,6 +78,27 @@ INSERT INTO `travel_route`
       CAST('["向导","三餐打卡"]' AS JSON),
       '烟火气是最好的良药', 'off');
 
+UPDATE `travel_route`
+SET `guide_version` = 1,
+    `guide_json` = JSON_OBJECT(
+      'overview', `highlight`,
+      'durationText', CASE WHEN `category` = 'cross' THEN '3天2夜' WHEN `category` = 'province' THEN '2天1夜' ELSE '一日轻旅行' END,
+      'schedules', JSON_ARRAY(
+        JSON_OBJECT('dayNo', 1, 'time', '08:30', 'title', '集合出发', 'description', '核验订单并确认返程安排。'),
+        JSON_OBJECT('dayNo', 1, 'time', '10:30', 'title', `name`, 'description', `highlight`),
+        JSON_OBJECT('dayNo', CASE WHEN `category` = 'cross' THEN 3 WHEN `category` = 'province' THEN 2 ELSE 1 END, 'time', '17:00', 'title', '集合返程', 'description', '清点随身物品并按约定地点返程。')
+      ),
+      'spots', JSON_ARRAY(JSON_OBJECT('spotId', CONCAT('route-', `id`), 'name', `location`, 'coverUrl', '', 'highlights', `highlight`, 'notice', '开放时间与现场安排以出发前通知为准。', 'durationMinutes', 240)),
+      'transport', JSON_ARRAY(JSON_OBJECT('title', '集合与接驳', 'description', '出发前一天在行程页确认集合点和车辆信息。')),
+      'dining', JSON_ARRAY(JSON_OBJECT('title', '餐饮安排', 'description', '以订单服务内容和出发前通知为准。')),
+      'lodging', CASE WHEN `category` IN ('province', 'cross') THEN JSON_ARRAY(JSON_OBJECT('title', '住宿安排', 'description', '入住信息在出发前通知中确认。')) ELSE JSON_ARRAY() END,
+      'budgetItems', JSON_ARRAY(JSON_OBJECT('name', '个人机动消费', 'amount', 100, 'required', false)),
+      'checklist', `include_json`,
+      'planB', '如遇天气或景区临时调整，以安全为先切换室内点位，并保留返程时间。',
+      'safetyTips', JSON_ARRAY('提前确认天气和集合时间', '不进入未开放区域', '保管好证件与订单信息'),
+      'faqs', JSON_ARRAY(JSON_OBJECT('question', '集合信息在哪里查看？', 'answer', '出发前一天在行程详情和订单通知中查看。'))
+    );
+
 -- ── A3. 盲盒 6 个 + 适配心情 + 适配景点类型（docs/页面原型.html TUGE_BOXES） ──
 -- box_6 默认下架，与原型一致（管理端提示「上架美食专线」）
 DELETE FROM `blind_box_scene`;
@@ -98,6 +119,23 @@ INSERT INTO `blind_box`
       59900, 75000, 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80', 50, 'on'),
   (6, '老城寻味美食专线', 'theme',    '主题专线', 'HOT',  '街角早茶，烟火气',
       11900, 15000, 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', 40, 'on');
+
+UPDATE `blind_box`
+SET `description` = CONCAT(`intro`, '。目的地在支付完成并开盒后揭晓，订单保留商品售价、保底价值与分类快照。'),
+    `images_json` = JSON_ARRAY(`cover_url`),
+    `includes_json` = CASE `category`
+      WHEN 'nearby' THEN JSON_ARRAY('往返交通', '向导陪同', '页面标明的主题体验')
+      WHEN 'province' THEN JSON_ARRAY('大巴往返', '住宿', '基础门票', '向导陪同')
+      WHEN 'cross' THEN JSON_ARRAY('当地接驳', '住宿', '主行程体验', '行程服务')
+      ELSE JSON_ARRAY('市内交通', '主题体验', '向导讲解') END,
+    `guide_preview_json` = JSON_OBJECT(
+      'title', CONCAT(`tag`, '主题出行攻略'),
+      'summary', `intro`,
+      'durationText', CASE WHEN `category` = 'cross' THEN '3天2夜' WHEN `category` = 'province' THEN '2天1夜' ELSE '1天' END,
+      'sceneTags', JSON_ARRAY(`tag`),
+      'notice', '具体集合点与最终线路以开盒后的行程快照为准。'
+    ),
+    `version` = 0;
 
 INSERT INTO `blind_box_mood` (`box_id`, `mood`) VALUES
   (1, 'happy'), (1, 'emo'),   (1, 'bored'),
@@ -337,6 +375,11 @@ INSERT INTO `trip`
       CAST('["向导","三餐打卡"]' AS JSON),
       '烟火气是最好的良药', '美食', 'valid', '2026-09-17', '2026-09-17 11:24:06.000');
 
+UPDATE `trip` t
+JOIN `travel_route` r ON r.`id` = t.`route_id`
+SET t.`guide_snapshot_json` = r.`guide_json`,
+    t.`guide_version` = r.`guide_version`;
+
 INSERT INTO `user_badge` (`user_id`, `badge_id`, `source_trip_id`, `unlocked_at`) VALUES
   (10021, 1,  1, '2026-09-17 08:14:05.000'),
   (10007, 10, 2, '2026-09-17 10:07:06.000'),
@@ -429,7 +472,7 @@ INSERT INTO `coupon` (`id`, `code`, `name`, `type`, `partner_id`, `discount_amou
 -- ── C4. 话题广场 ──
 DELETE FROM `user_topic_follow`;
 DELETE FROM `topic`;
-INSERT INTO `topic` (`id`, `name`, `cover_url`, `description`, `post_count`, `follow_count`, `热度权重`, `sort_weight`, `status`) VALUES
+INSERT INTO `topic` (`id`, `name`, `cover_url`, `description`, `post_count`, `follow_count`, `heat_weight`, `sort_weight`, `status`) VALUES
   (1,  '周末去哪儿',    'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=400&q=80', '周末就要出去玩！分享你的周末目的地', 328, 1256, 100, 100, 'on'),
   (2,  '美食探店',      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80', '吃货必看！发现各地特色美食', 256, 892, 90, 90, 'on'),
   (3,  '情侣出游',      'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=400&q=80', '和TA一起走过的地方', 189, 654, 80, 80, 'on'),
@@ -455,37 +498,47 @@ INSERT INTO `blind_box_prize` (`blind_box_id`, `prize_type`, `prize_name`, `priz
   (2, 'badge',       '古村徽章',            0,      0, 0.1000, NULL, '集齐可兑换盲盒', 'on');
 
 -- ── C6. 社区帖子演示数据 ──
-DELETE FROM `post_interaction`;
+DELETE FROM `post_comment`;
+DELETE FROM `post_like`;
+DELETE FROM `post_collect`;
+DELETE FROM `post_image`;
 DELETE FROM `community_post`;
-INSERT INTO `community_post` (`id`, `user_id`, `content`, `images`, `topic`, `location_tag`, `linked_blind_box_id`, `like_count`, `comment_count`, `share_count`, `status`, `created_at`) VALUES
-  (1, 10021, '带娃必去！渼陂古村超出预期，孩子玩得超开心，还学会了打糍粑！这份盲盒让我省了200块门票～',
-   'https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=400&q=80,https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?auto=format&fit=crop&w=400&q=80',
-   '带娃旅行', '吉安·渼陂古村', 1, 328, 45, 89, 'on', '2026-09-16 14:30:00.000'),
-  (2, 10044, '盲盒开出意外惊喜！抽到了仙女湖度假酒店，海景房太美了，日落绝绝子！下次还要抽',
-   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80',
-   '盲盒开箱', '新余·仙女湖', 1, 892, 67, 234, 'on', '2026-09-15 18:45:00.000'),
-  (3, 10007, '周末逃离城市！武夷山徒步真的绝了，云海日出美哭，强烈推荐大家去！抽这个盲盒太值了',
-   'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=400&q=80,https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?auto=format&fit=crop&w=400&q=80,https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=400&q=80',
-   '小众秘境', '南平·武夷山', 2, 567, 89, 156, 'on', '2026-09-14 09:20:00.000'),
-  (4, 10058, '三清山的云海日出，我这辈子一定要看一次！这次终于实现了😭 攻略附上：建议早上4点起床爬上去',
-   'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80,https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&w=400&q=80',
-   '周末去哪儿', '上饶·三清山', 4, 1234, 178, 456, 'on', '2026-09-13 07:15:00.000'),
-  (5, 10063, '大理三天两夜，洱海边发呆真的太治愈了！抽到这家民宿超满意，老板人超好，还送了我们自制酸奶🥛',
-   'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=400&q=80,https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=400&q=80',
-   '情侣出游', '大理·洱海', 5, 2156, 234, 678, 'on', '2026-09-12 16:40:00.000'),
-  (6, 10021, '打卡成就达成！已经打卡10个景点了，离集齐徽章还差2个，加油💪',
-   'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=400&q=80',
-   NULL, '江西·多地', NULL, 456, 34, 78, 'on', '2026-09-11 20:00:00.000');
+INSERT INTO `community_post` (`id`, `user_id`, `title`, `content`, `topic_id`, `location_name`, `public_location`, `linked_blind_box_id`, `linked_trip_id`, `like_count`, `comment_count`, `share_count`, `collect_count`, `status`, `created_at`) VALUES
+  (1, 10021, '古村亲子游超出预期', '孩子玩得超开心，还学会了打糍粑。这份盲盒也很划算，适合周末慢慢逛。', 4, '吉安·渼陂古村', 1, 1, 1, 328, 2, 89, 126, 'featured', '2026-09-16 14:30:00.000'),
+  (2, 10044, '仙女湖的日落太美了', '盲盒开出意外惊喜，湖边的光线非常温柔，下次还想再来。', 6, '新余·仙女湖', 1, 1, NULL, 892, 1, 234, 310, 'published', '2026-09-15 18:45:00.000'),
+  (3, 10007, '周末逃离城市去看星空', '湖畔徒步和露营都很舒服，晚上抬头就是整片星空。', 5, '新余·仙女湖', 1, 3, 2, 567, 1, 156, 198, 'published', '2026-09-14 09:20:00.000'),
+  (4, 10058, '三清山云海日出攻略', '建议提前看天气，早上四点出发，山顶风大记得带外套。', 1, '上饶·三清山', 1, 4, NULL, 1234, 0, 456, 502, 'featured', '2026-09-13 07:15:00.000'),
+  (5, 10063, '西关三天两夜寻味记', '早茶、骑楼和糖水都值得慢慢体验，巷子里的烟火气最治愈。', 2, '广州·西关', 1, 6, 3, 2156, 0, 678, 830, 'published', '2026-09-12 16:40:00.000'),
+  (6, 10021, '第一次打卡完成', '从行程页完成打卡后，成就进度也同步更新了。', 1, '吉安·青原区', 1, NULL, 1, 456, 0, 78, 144, 'review', '2026-09-11 20:00:00.000');
+
+INSERT INTO `post_image` (`post_id`, `url`, `sort_order`) VALUES
+  (1, 'https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=900&q=80', 0),
+  (1, 'https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?auto=format&fit=crop&w=900&q=80', 1),
+  (2, 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=900&q=80', 0),
+  (3, 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80', 0),
+  (4, 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=900&q=80', 0),
+  (5, 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80', 0),
+  (6, 'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=900&q=80', 0);
+
+INSERT INTO `post_comment` (`id`, `post_id`, `user_id`, `content`, `status`, `created_at`) VALUES
+  (1, 1, 10044, '路线看起来很适合周末，已经收藏了。', 'published', '2026-09-16 15:00:00.000'),
+  (2, 1, 10021, '带孩子的话建议上午早点到。', 'published', '2026-09-16 15:08:00.000'),
+  (3, 2, 10007, '日落时间大概几点？', 'published', '2026-09-15 19:00:00.000'),
+  (4, 3, 10063, '星空照片太有氛围了。', 'published', '2026-09-14 10:00:00.000');
 
 -- ── C7. 打卡记录演示数据 ──
 DELETE FROM `checkin_like`;
+DELETE FROM `checkin_image`;
 DELETE FROM `checkin`;
-INSERT INTO `checkin` (`id`, `user_id`, `route_id`, `location`, `photo_url`, `note`, `like_count`, `created_at`) VALUES
-  (1, 10021, 1, '渼陂古村', 'https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=400&q=80', '第一次带孩子来古村，超开心！', 45, '2026-09-10 11:30:00.000'),
-  (2, 10021, 2, '武夷山茶园', 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=400&q=80', '云雾缭绕，像仙境一样', 67, '2026-09-08 15:20:00.000'),
-  (3, 10044, 4, '三清山', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80', '日出云海，值了！', 123, '2026-09-06 06:00:00.000'),
-  (4, 10007, 3, '仙女湖', 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80', '星空露营太浪漫了', 89, '2026-09-04 21:30:00.000'),
-  (5, 10058, 5, '大理洱海', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=400&q=80', '面朝大海，春暖花开', 234, '2026-09-02 18:00:00.000');
+INSERT INTO `checkin` (`id`, `user_id`, `trip_id`, `route_id`, `location_name`, `public_location`, `note`, `like_count`, `status`, `created_at`) VALUES
+  (1, 10021, 1, 1, '渼陂古村', 1, '第一次带孩子来古村，超开心！', 45, 'published', '2026-09-10 11:30:00.000'),
+  (2, 10007, 2, 3, '仙女湖畔', 1, '星空露营太浪漫了', 89, 'published', '2026-09-04 21:30:00.000'),
+  (3, 10063, 3, 6, '广州西关', 1, '跟着行程一路吃到老街深处。', 64, 'published', '2026-09-18 12:00:00.000');
+
+INSERT INTO `checkin_image` (`checkin_id`, `url`, `sort_order`) VALUES
+  (1, 'https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=900&q=80', 0),
+  (2, 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=900&q=80', 0),
+  (3, 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80', 0);
 
 -- ── C8. 用户积分演示 ──
 DELETE FROM `point_log`;

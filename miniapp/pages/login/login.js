@@ -2,6 +2,7 @@ Page({
   data: {
     phone: '',
     code: '',
+    smsToken: '',
   },
   onShow() {
     try {
@@ -21,13 +22,14 @@ Page({
   },
   async sendSms() {
     const api = require('../../services/api')
-    await api.sendSms(this.data.phone)
+    const ticket = await api.sendSms(this.data.phone)
+    this.setData({ smsToken: (ticket && ticket.smsToken) || '' })
     wx.showToast({ title: '验证码 123456', icon: 'none' })
   },
   async onSubmit() {
     const api = require('../../services/api')
     try {
-      const result = await api.loginPhone(this.data.phone, this.data.code)
+      const result = await api.loginPhone(this.data.phone, this.data.code, this.data.smsToken)
       wx.setStorageSync('token', result.token)
       wx.setStorageSync('user', result.user)
     } catch (e) {
