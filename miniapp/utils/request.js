@@ -1,7 +1,9 @@
+const { BASE_URL } = require('./constants')
+
 function request(options) {
   return new Promise((resolve, reject) => {
     const app = getApp()
-    const baseUrl = (app && app.globalData && app.globalData.baseUrl) || 'http://localhost:8080/api/v1'
+    const baseUrl = (app && app.globalData && app.globalData.baseUrl) || BASE_URL
     const token = wx.getStorageSync('token')
     const header = {
       'Content-Type': 'application/json',
@@ -49,7 +51,7 @@ function request(options) {
       },
       fail: (err) => {
         if (!options.silent) wx.hideLoading()
-        wx.showToast({ title: '网络错误', icon: 'none' })
+        wx.showToast({ title: '后端连接失败', icon: 'none' })
         reject(err)
       },
     })

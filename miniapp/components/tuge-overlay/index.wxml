@@ -28,10 +28,13 @@
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="3" fill="#1677FF"/><path d="M7 13.5c1.8 1.6 4.2 2.2 6.2 1.4 1.4-.6 2-1.8 1.6-3-.4-1.2-1.7-1.5-3.1-.8" stroke="#fff" stroke-width="1.6" fill="none"/></svg>
         <view>
           <text class="b">支付宝沙箱收银台</text>
-          <text class="small">演示不跳转真沙箱，点下方即视为支付成功</text>
+          <text class="small">{{payMock ? '本地开发替身：不会产生真实支付' : '请在外部浏览器打开支付链接，或使用二维码完成沙箱付款'}}</text>
+        <image wx:if="{{payQrCode}}" src="{{payQrCode}}" mode="aspectFit" style="width:180px;height:180px;margin-top:12px;" />
+        <view wx:if="{{payUrl && !payMock}}" class="btn-block btn-line" bindtap="copyPayUrl">复制支付链接</view>
+        <text wx:if="{{payUrl && !payQrCode}}" class="small">支付链接已生成，请复制到外部浏览器打开</text>
         </view>
       </view>
-      <view class="btn-block btn-sage" bindtap="confirmSandboxPay">模拟支付宝已付款</view>
+      <view class="btn-block btn-sage" bindtap="confirmSandboxPay">{{payMock ? '模拟开发支付' : (payUrl ? '我已完成付款，查询结果' : '生成支付宝支付链接')}}</view>
       <view class="btn-block btn-line" bindtap="cancelCurrentOrder">取消订单</view>
       <view class="btn-block btn-line" bindtap="closeModal">稍后再付</view>
     </view>
@@ -141,7 +144,7 @@
       >{{item.label}}</view>
       </view>
     </scroll-view>
-    <view wx:if="{{!orderList.length}}" class="empty-hint">这一栏还没有订单</view>
+    <view wx:if="{{!orderList.length}}" class="empty-hint">{{orderError || '这一栏还没有订单'}}</view>
     <view wx:else>
       <view class="order-row" wx:for="{{orderList}}" wx:key="no">
         <view class="top">
@@ -161,6 +164,33 @@
         </view>
       </view>
     </view>
+  </view>
+</view>
+
+<view class="modal-overlay {{profileOpen ? 'active' : ''}}" catchtouchmove="noop">
+  <view class="modal-sheet login-sheet">
+    <view class="sheet-handle"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">编辑资料</view>
+      <view class="sheet-x" bindtap="closeProfileEditor">×</view>
+    </view>
+    <button class="profile-avatar-button" open-type="chooseAvatar" bindchooseavatar="onProfileChooseAvatar" hover-class="none">
+      <image wx:if="{{loginAvatar}}" src="{{loginAvatar}}" mode="aspectFill" class="profile-avatar-image" />
+      <view wx:else class="profile-avatar-placeholder">头像</view>
+    </button>
+    <view class="muted-center mb16">点击头像可更换本机微信头像</view>
+    <input class="pill-input profile-input" maxlength="30" placeholder="昵称" placeholder-class="ph" value="{{profileNickname}}" bindinput="onProfileNickname" />
+    <input class="pill-input profile-input" maxlength="30" placeholder="城市" placeholder-class="ph" value="{{profileCity}}" bindinput="onProfileCity" />
+    <view class="profile-genders">
+      <view
+        wx:for="{{profileGenderOptions}}"
+        wx:key="value"
+        class="mood-chip {{item.active ? 'active' : ''}}"
+        data-gender="{{item.value}}"
+        bindtap="pickProfileGender"
+      >{{item.label}}</view>
+    </view>
+    <view class="btn-block btn-sage" bindtap="submitProfile">保存资料</view>
   </view>
 </view>
 

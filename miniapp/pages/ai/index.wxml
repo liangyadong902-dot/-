@@ -65,7 +65,11 @@
                   <image class="bot-ava-img" src="/assets/mascot/ai-dog.png" mode="aspectFit" />
                 </view>
                 <view wx:if="{{item.role === 'bot'}}" class="chat-col">
-                  <view class="chat-bubble-box">{{item.text}}</view>
+                  <rich-text
+                    class="chat-bubble-box markdown-body"
+                    nodes="{{item.markdownNodes}}"
+                    user-select
+                  ></rich-text>
                 </view>
                 <view wx:else class="chat-bubble-box">{{item.text}}</view>
               </view>
@@ -105,9 +109,7 @@
 
         <view class="ai-dock">
           <view class="ai-quick">
-            <view class="mood-chip" data-text="推荐散心的地方" bindtap="sendQuick">推荐散心的地方</view>
-            <view class="mood-chip" data-text="周末一日游推荐" bindtap="sendQuick">周末一日游推荐</view>
-            <view class="mood-chip" data-text="一个人旅行安全吗" bindtap="sendQuick">一个人旅行安全吗</view>
+            <view wx:for="{{aiQuickQuestions}}" wx:key="*this" class="mood-chip" data-text="{{item}}" bindtap="sendQuick">{{item}}</view>
           </view>
           <view class="ai-compose">
             <view class="ai-input-wrap">

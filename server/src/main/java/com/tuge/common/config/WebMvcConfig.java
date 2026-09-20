@@ -2,6 +2,7 @@ package com.tuge.common.config;
 
 import com.tuge.common.auth.AdminAuthInterceptor;
 import com.tuge.common.auth.AuthInterceptor;
+import com.tuge.common.auth.OptionalAuthInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -16,10 +17,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private final AuthInterceptor authInterceptor;
     private final AdminAuthInterceptor adminAuthInterceptor;
+    private final OptionalAuthInterceptor optionalAuthInterceptor;
 
-    public WebMvcConfig(AuthInterceptor authInterceptor, AdminAuthInterceptor adminAuthInterceptor) {
+    public WebMvcConfig(AuthInterceptor authInterceptor, AdminAuthInterceptor adminAuthInterceptor,
+                        OptionalAuthInterceptor optionalAuthInterceptor) {
         this.authInterceptor = authInterceptor;
         this.adminAuthInterceptor = adminAuthInterceptor;
+        this.optionalAuthInterceptor = optionalAuthInterceptor;
     }
 
     @Override
@@ -28,6 +32,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(adminAuthInterceptor)
                 .addPathPatterns("/api/v1/admin/**")
                 .excludePathPatterns("/api/v1/admin/login");
+
+        registry.addInterceptor(optionalAuthInterceptor)
+                .addPathPatterns("/api/v1/personality/submit", "/api/v1/ai/chat", "/api/v1/ai/chat/stream");
 
         // 用户端：仅拦截需要登录的子路径（按需补充）
         registry.addInterceptor(authInterceptor)
@@ -39,7 +46,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/v1/boxes/**",
                         "/api/v1/banners",
                         "/api/v1/badges",
-                        "/api/v1/mood-logs"
+                        "/api/v1/mood-logs",
+                        "/api/v1/personality/questions",
+                        "/api/v1/personality/submit",
+                        "/api/v1/ai/config",
+                        "/api/v1/ai/chat",
+                        "/api/v1/ai/chat/stream",
+                        "/api/v1/pay/notify/alipay",
+                        "/api/v1/pay/**"
                 );
     }
 

@@ -1,0 +1,26 @@
+.asset-page { min-height: 100vh; background: var(--cream); color: var(--ink); }
+.asset-head { padding: 104rpx 34rpx 48rpx; background: var(--sage-mist); display: flex; align-items: center; gap: 24rpx; }
+.back { width: 62rpx; height: 62rpx; border: 2rpx solid var(--ink); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 50rpx; line-height: 1; background: var(--paper); }
+.title { font-family: "Noto Serif SC", serif; font-size: 42rpx; font-weight: 900; }
+.sub { margin-top: 8rpx; color: var(--muted); font-size: 22rpx; }
+.state { padding: 160rpx 36rpx; text-align: center; color: var(--muted); }
+.state.error { color: #A14E43; }
+.asset-body { padding: 34rpx; }
+.hero-line { display: flex; align-items: flex-end; justify-content: space-between; padding-bottom: 28rpx; border-bottom: 2rpx dashed var(--line); }
+.hero-num { font-family: "Noto Serif SC", serif; font-size: 72rpx; font-weight: 900; }
+.unit { font-size: 24rpx; color: var(--muted); }
+.rank { padding: 10rpx 18rpx; background: var(--sage-mist); border: 2rpx solid var(--ink); border-radius: 999rpx; font-size: 22rpx; font-weight: 700; }
+.asset-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rpx; margin: 30rpx 0; border: 2rpx solid var(--line); background: var(--line); }
+.asset-item { min-height: 128rpx; padding: 24rpx; background: var(--paper); display: flex; flex-direction: column; justify-content: center; }
+.value { font-size: 32rpx; font-weight: 900; }
+.label { margin-top: 8rpx; color: var(--muted); font-size: 21rpx; }
+.detail-list { border-top: 2rpx solid var(--ink); border-bottom: 2rpx solid var(--ink); }
+.detail-row { display: flex; justify-content: space-between; gap: 28rpx; padding: 25rpx 4rpx; border-bottom: 2rpx dashed var(--line); font-size: 24rpx; }
+.detail-row:last-child { border-bottom: 0; }
+.detail-row text:last-child { text-align: right; color: var(--sage-deep); font-weight: 700; }
+.personality { display: flex; gap: 24rpx; margin-top: 32rpx; padding: 28rpx 0; border-top: 2rpx dashed var(--line); }
+.mark { width: 88rpx; height: 88rpx; flex: 0 0 88rpx; border: 3rpx solid var(--ink); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40rpx; font-weight: 900; background: var(--sage-mist); }
+.personality-copy { min-width: 0; }
+.personality-name { font-size: 30rpx; font-weight: 900; }
+.personality-desc { margin-top: 8rpx; color: var(--muted); font-size: 22rpx; line-height: 1.6; }
+.personality-rec { margin-top: 10rpx; color: var(--sage-deep); font-size: 22rpx; font-weight: 700; line-height: 1.5; }

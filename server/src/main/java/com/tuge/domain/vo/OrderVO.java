@@ -19,6 +19,9 @@ public class OrderVO {
     private LocalDateTime openedAt;
     private Long tripId;
     private String refundNo;
+    private String refundStatus;
+    private String refundKind;
+    private String refundRejectReason;
     private Long routeId;
     private String routeName;
     private String location;

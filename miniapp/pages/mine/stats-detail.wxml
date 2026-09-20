@@ -1,0 +1,43 @@
+<view class="asset-page">
+  <view class="asset-head">
+    <view class="back" bindtap="goBack">‹</view>
+    <view>
+      <view class="title">我的旅行资产</view>
+      <view class="sub">每一次出发，都算进这里</view>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="state">正在整理你的旅行手账…</view>
+  <view wx:elif="{{error}}" class="state error" bindtap="load">{{error}}</view>
+  <view wx:else class="asset-body">
+    <view class="hero-line">
+      <view><text class="hero-num">{{stats.tripCount}}</text><text class="unit"> 次出行</text></view>
+      <view class="rank">{{stats.title}} · Lv.{{stats.levelNo}}</view>
+    </view>
+
+    <view class="asset-grid">
+      <view class="asset-item"><text class="value">{{stats.destinationCount}}</text><text class="label">目的地</text></view>
+      <view class="asset-item"><text class="value">{{stats.monthTrips}}</text><text class="label">本月出行</text></view>
+      <view class="asset-item"><text class="value">{{stats.badgeUnlocked}} / {{stats.badgeTotal}}</text><text class="label">徽章进度</text></view>
+      <view class="asset-item"><text class="value">{{stats.diaryCount}}</text><text class="label">旅行日记</text></view>
+      <view class="asset-item"><text class="value">¥{{stats.spendTotal}}</text><text class="label">累计消费</text></view>
+      <view class="asset-item"><text class="value">¥{{stats.savedTotal}}</text><text class="label">累计省钱</text></view>
+    </view>
+
+    <view class="detail-list">
+      <view class="detail-row"><text>去过的地方</text><text>{{destinationsText}}</text></view>
+      <view class="detail-row"><text>最近心情</text><text>{{recentMoodText}}</text></view>
+      <view class="detail-row"><text>偏好主题</text><text>{{favoriteCategoryText}}</text></view>
+      <view class="detail-row"><text>公益里程</text><text>{{stats.welfareKm}} km</text></view>
+    </view>
+
+    <view class="personality" wx:if="{{personality}}">
+      <view class="mark">{{personality.mark}}</view>
+      <view class="personality-copy">
+        <view class="personality-name">{{personality.name}}</view>
+        <view class="personality-desc">{{personality.description}}</view>
+        <view class="personality-rec">{{personality.recommend}}</view>
+      </view>
+    </view>
+  </view>
+</view>

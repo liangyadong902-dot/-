@@ -352,6 +352,143 @@ page {
   border-bottom-right-radius: 7.69rpx;
 }
 
+.page-ai .markdown-body {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.page-ai .markdown-body .md-p {
+  display: block;
+  margin: 0 0 15.38rpx;
+}
+
+.page-ai .markdown-body .md-p:last-child,
+.page-ai .markdown-body .md-list:last-child,
+.page-ai .markdown-body .md-quote:last-child,
+.page-ai .markdown-body .md-pre:last-child,
+.page-ai .markdown-body .md-table:last-child {
+  margin-bottom: 0;
+}
+
+.page-ai .markdown-body .md-heading {
+  display: block;
+  margin: 7.69rpx 0 11.54rpx;
+  color: var(--ink);
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.page-ai .markdown-body .md-h1,
+.page-ai .markdown-body .md-h2 {
+  font-size: 30.77rpx;
+}
+
+.page-ai .markdown-body .md-h3,
+.page-ai .markdown-body .md-h4,
+.page-ai .markdown-body .md-h5,
+.page-ai .markdown-body .md-h6 {
+  font-size: 26.92rpx;
+}
+
+.page-ai .markdown-body .md-strong {
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.page-ai .markdown-body .md-em {
+  font-style: italic;
+}
+
+.page-ai .markdown-body .md-del {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.page-ai .markdown-body .md-list {
+  display: block;
+  margin: 7.69rpx 0 15.38rpx 34.62rpx;
+  padding-left: 19.23rpx;
+}
+
+.page-ai .markdown-body .md-li {
+  display: list-item;
+  margin: 5.77rpx 0;
+}
+
+.page-ai .markdown-body .md-quote {
+  display: block;
+  margin: 11.54rpx 0 15.38rpx;
+  padding: 9.62rpx 15.38rpx;
+  border-left: 5.77rpx solid var(--sage);
+  background: rgba(144, 166, 135, 0.1);
+  color: var(--muted);
+}
+
+.page-ai .markdown-body .md-inline-code {
+  padding: 1.92rpx 7.69rpx;
+  border-radius: 5.77rpx;
+  background: #eee9df;
+  color: #8a4e36;
+  font-family: monospace;
+  font-size: 23.08rpx;
+}
+
+.page-ai .markdown-body .md-pre {
+  display: block;
+  max-width: 100%;
+  margin: 11.54rpx 0 15.38rpx;
+  padding: 15.38rpx;
+  overflow-x: auto;
+  border-radius: 7.69rpx;
+  background: #302d2a;
+  color: #f8f4eb;
+  white-space: pre-wrap;
+  box-sizing: border-box;
+}
+
+.page-ai .markdown-body .md-code {
+  font-family: monospace;
+  font-size: 21.15rpx;
+  line-height: 1.55;
+}
+
+.page-ai .markdown-body .md-link {
+  color: var(--sage-deep);
+  text-decoration: underline;
+}
+
+.page-ai .markdown-body .md-hr {
+  display: block;
+  height: 2rpx;
+  margin: 15.38rpx 0;
+  border: 0;
+  background: var(--line);
+}
+
+.page-ai .markdown-body .md-table {
+  display: table;
+  width: 100%;
+  margin: 11.54rpx 0 15.38rpx;
+  border-collapse: collapse;
+  font-size: 21.15rpx;
+}
+
+.page-ai .markdown-body .md-th,
+.page-ai .markdown-body .md-td {
+  padding: 7.69rpx;
+  border: 1.92rpx solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.page-ai .markdown-body .md-th {
+  background: #eee9df;
+  color: var(--ink);
+  font-weight: 800;
+}
+
 .page-ai .typing-dots {
   display: flex;
   gap: 7.69rpx;

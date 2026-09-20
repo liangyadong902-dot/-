@@ -1,10 +1,11 @@
 const store = require('./utils/tuge-store')
+const { BASE_URL } = require('./utils/constants')
 
 App({
   onLaunch() {
     store.init()
   },
   globalData: {
-    baseUrl: 'http://localhost:8080/api/v1',
+    baseUrl: BASE_URL,
   },
 })

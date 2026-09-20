@@ -24,8 +24,11 @@
               <span v-else class="pill wait">{{ r.st === 'done' ? '已退回' : r.st === 'reject' ? '已驳回' : r.st }}</span>
             </td>
           </tr>
-          <tr v-if="!kitchen.mergedRefunds.length">
-            <td colspan="7"><div class="empty">暂无退款申请</div></td>
+          <tr v-if="kitchen.transactionsLoading">
+            <td colspan="7"><div class="empty">正在读取退款申请…</div></td>
+          </tr>
+          <tr v-else-if="!kitchen.mergedRefunds.length">
+            <td colspan="7"><div class="empty">{{ kitchen.transactionsError || '暂无退款申请' }}</div></td>
           </tr>
         </tbody>
       </table>

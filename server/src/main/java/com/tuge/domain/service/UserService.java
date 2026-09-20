@@ -27,6 +27,9 @@ public class UserService {
         if (user == null) {
             throw new BusinessException(404, "用户不存在");
         }
+        if (!"normal".equals(user.getStatus())) {
+            throw new BusinessException(403, "账号已被禁用");
+        }
         return user;
     }
 
@@ -47,7 +50,10 @@ public class UserService {
         vo.setGender(user.getGender());
         vo.setCity(user.getCity());
         vo.setRegisterChannel(user.getRegisterChannel());
-        vo.setStatus(user.getStatus());
+        vo.setStatus("normal".equals(user.getStatus()) ? "active" : "disabled");
+        vo.setHasPhone(user.getPhone() != null && !user.getPhone().isBlank());
+        vo.setWechatOpenidBound(user.getWechatOpenid() != null && !user.getWechatOpenid().isBlank());
+        vo.setPersonalityType(user.getPersonalityType());
         return vo;
     }
 }

@@ -23,6 +23,7 @@
       <view class="stat-tile"><text class="strong">{{statLevel}}</text><text class="span">当前等级</text></view>
       <view class="stat-tile"><text class="strong">{{statWelfare}}</text><text class="span">公益里程</text></view>
     </view>
+    <view wx:if="{{statsError}}" class="empty-hint">{{statsError}}</view>
     <view class="menu-list">
       <view class="menu-row" wx:for="{{mineMenu}}" wx:key="key" data-action="{{item.action}}" bindtap="onMenu">
         <text class="b">{{item.b}}</text>

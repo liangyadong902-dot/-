@@ -33,7 +33,7 @@
             </td>
           </tr>
           <tr v-if="!kitchen.routes.length">
-            <td colspan="8"><div class="empty">暂无线路数据</div></td>
+            <td colspan="8"><div class="empty">{{ kitchen.catalogError || '暂无线路数据' }}</div></td>
           </tr>
         </tbody>
       </table>

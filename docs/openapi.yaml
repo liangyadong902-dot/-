@@ -39,6 +39,10 @@ tags:
   - name: 支付回调
     description: 第三方异步通知，不走统一响应体
 
+security:
+  - UserToken: []
+  - AdminToken: []
+
 paths:
   /api/v1/health:
     get:
@@ -207,17 +211,18 @@ paths:
               properties:
                 nickname:
                   type: string
-                  maxLength: 64
+                  maxLength: 30
                 avatarUrl:
                   type: string
                   maxLength: 512
+                  pattern: '^https://'
                 gender:
                   type: integer
                   enum: [0, 1, 2]
                   description: 0 未知 / 1 男 / 2 女
                 city:
                   type: string
-                  maxLength: 64
+                  maxLength: 30
       responses:
         '200':
           description: 更新后的资料
@@ -400,11 +405,11 @@ paths:
     get:
       tags: [用户端-内容]
       summary: 人格测试题目
-      description: 返回题干与选项；**不下发 `score_json` 明细**，计分在服务端做。
+      description: 仅返回启用题目和选项，不返回计分 JSON。
       security: []
       responses:
         '200':
-          description: 题目列表
+          description: 动态题目列表
           content:
             application/json:
               schema:
@@ -421,10 +426,10 @@ paths:
     post:
       tags: [用户端-内容]
       summary: 提交人格测试
-      description: |
-        登录时落库 `personality_test` 并更新 `app_user.personality_type`；
-        游客仅返回结果不落库（`user_id` 为空时也不写行）。
-      security: []
+      description: 游客仅返回结果；登录用户同时保存作答并更新用户人格。
+      security:
+        - {}
+        - UserToken: []
       requestBody:
         required: true
         content:
@@ -435,14 +440,10 @@ paths:
               properties:
                 answers:
                   type: array
-                  description: 每题所选选项的序号（从 0 开始），与题目顺序一致
-                  items:
-                    type: integer
-                  example: [0, 2, 1, 3, 0]
+                  items: { type: integer, minimum: 0 }
                 durationMs:
                   type: integer
                   nullable: true
-                  description: 作答耗时，用于统计
       responses:
         '200':
           description: 人格结果
@@ -455,17 +456,34 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/PersonalityResult'
-  # ═══════════════════════════════════════════════════════
-  # 用户端 · AI
-  # ═══════════════════════════════════════════════════════
+
+  /api/v1/personality/my-result:
+    get:
+      tags: [用户端-内容]
+      summary: 当前用户最近一次人格结果
+      responses:
+        '200':
+          description: 未测试时 data 为 null
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        allOf:
+                          - $ref: '#/components/schemas/PersonalityResult'
+                        nullable: true
+
   /api/v1/ai/config:
     get:
       tags: [用户端-AI]
-      summary: 获取小途配置
+      summary: 小途开场白与快捷问题
       security: []
       responses:
         '200':
-          description: 开场白与快捷问句
+          description: AI 页面公开配置
           content:
             application/json:
               schema:
@@ -479,18 +497,14 @@ paths:
   /api/v1/ai/messages:
     get:
       tags: [用户端-AI]
-      summary: 获取最近对话
-      description: 登录用户返回最近 16 条；游客不落库。
+      summary: 最近聊天消息
       parameters:
         - name: limit
           in: query
-          schema:
-            type: integer
-            default: 16
-            maximum: 50
+          schema: { type: integer, default: 16, maximum: 50 }
       responses:
         '200':
-          description: 消息列表
+          description: 按时间正序返回
           content:
             application/json:
               schema:
@@ -506,11 +520,10 @@ paths:
   /api/v1/ai/chat:
     post:
       tags: [用户端-AI]
-      summary: 与小途对话
-      description: |
-        Spring AI 成功时返回模型回复；失败时走关键词降级并将 `fallback` 设为 true。
-        原生小程序主路径使用整段响应，前端按字符展示打字机效果，不依赖 EventSource。
-      security: []
+      summary: 与小途整段对话
+      security:
+        - {}
+        - UserToken: []
       requestBody:
         required: true
         content:
@@ -519,15 +532,16 @@ paths:
               type: object
               required: [text]
               properties:
-                text:
+                text: { type: string, maxLength: 2000 }
+                viaQuick: { type: boolean, default: false }
+                sessionId:
                   type: string
-                  maxLength: 2000
-                viaQuick:
-                  type: boolean
-                  default: false
+                  maxLength: 64
+                  nullable: true
+                  description: 游客后续请求回传；登录用户忽略
       responses:
         '200':
-          description: 回复
+          description: 模型或降级回复
           content:
             application/json:
               schema:
@@ -541,28 +555,28 @@ paths:
   /api/v1/ai/chat/stream:
     get:
       tags: [用户端-AI]
-      summary: AI 流式对话（H5 增强接口）
-      description: |
-        保留给 H5 / 管理端调试使用。原生小程序不依赖此接口，优先使用 `POST /ai/chat`。
-        后续若验证 `enableChunked` 稳定，再单独启用小程序分块传输。
+      summary: 调试用 SSE 对话
+      description: 返回单个 `message` 事件；小程序正式流程不依赖此接口。
+      security:
+        - {}
+        - UserToken: []
       parameters:
         - name: text
           in: query
           required: true
-          schema:
-            type: string
+          schema: { type: string, minLength: 1, maxLength: 2000 }
         - name: viaQuick
           in: query
-          schema:
-            type: boolean
-            default: false
+          schema: { type: boolean, default: false }
+        - name: sessionId
+          in: query
+          schema: { type: string, maxLength: 64, nullable: true }
       responses:
         '200':
-          description: SSE 流
+          description: "data 为 AiReply 的 SSE message 事件"
           content:
             text/event-stream:
-              schema:
-                type: string
+              schema: { type: string }
 
   # ═══════════════════════════════════════════════════════
   # 用户端 · 订单与支付
@@ -801,7 +815,7 @@ paths:
     post:
       tags: [用户端-行程与我的]
       summary: 生成旅行日记
-      description: 已生成时可直接返回已有日记，或按业务约定返回 409。
+      description: 已生成时直接返回已有日记，保证幂等。
       parameters:
         - $ref: '#/components/parameters/PathId'
       responses:
@@ -815,12 +829,7 @@ paths:
                   - type: object
                     properties:
                       data:
-                        type: object
-                        properties:
-                          diaryText:
-                            type: string
-                          fallback:
-                            type: boolean
+                        $ref: '#/components/schemas/DiaryResult'
 
   /api/v1/me/stats:
     get:
@@ -829,6 +838,23 @@ paths:
       responses:
         '200':
           description: 统计口径见数据库设计 §5
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserStats'
+
+  /api/v1/me/stats-detail:
+    get:
+      tags: [用户端-行程与我的]
+      summary: 我的完整资产统计
+      responses:
+        '200':
+          description: 与 `/me/stats` 使用相同统计口径
           content:
             application/json:
               schema:
@@ -1490,7 +1516,7 @@ paths:
           in: query
           schema:
             type: string
-            enum: [success, fail]
+            enum: [pending, success, fail, closed]
         - name: channel
           in: query
           schema:
@@ -1563,24 +1589,22 @@ paths:
   /api/v1/admin/users/export:
     get:
       tags: [管理端-订单支付用户]
-      summary: 导出用户明细
+      summary: 导出用户 CSV
       responses:
         '200':
-          description: CSV 文件流
+          description: UTF-8 BOM CSV
           content:
             text/csv:
-              schema:
-                type: string
+              schema: { type: string }
 
   /api/v1/admin/users/{id}:
     get:
       tags: [管理端-订单支付用户]
-      summary: 用户详情（四层档案）
-      parameters:
-        - $ref: '#/components/parameters/PathId'
+      summary: 用户完整档案
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
       responses:
         '200':
-          description: 身份 / 资料偏好 / 资产行为 / 成长统计 / 内部
+          description: 资料、统计、徽章、订单、行程与客服信息
           content:
             application/json:
               schema:
@@ -1588,15 +1612,13 @@ paths:
                   - $ref: '#/components/schemas/Result'
                   - type: object
                     properties:
-                      data:
-                        $ref: '#/components/schemas/AdminUserDetail'
+                      data: { $ref: '#/components/schemas/AdminUserDetail' }
 
   /api/v1/admin/users/{id}/status:
     patch:
       tags: [管理端-订单支付用户]
-      summary: 禁用 / 启用用户
-      parameters:
-        - $ref: '#/components/parameters/PathId'
+      summary: 禁用或恢复用户
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
       requestBody:
         required: true
         content:
@@ -1605,51 +1627,39 @@ paths:
               type: object
               required: [status]
               properties:
-                status:
-                  type: string
-                  enum: [active, disabled]
-                reason:
-                  type: string
-                  description: 禁用时必填
+                status: { type: string, enum: [active, disabled] }
+                reason: { type: string, maxLength: 255 }
       responses:
         '200':
           description: 已切换
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/ResultVoid'
+              schema: { $ref: '#/components/schemas/ResultVoid' }
 
-  # ═══════════════════════════════════════════════════════
-  # 管理端 · 工作台 / 统计 / 配置 / 账号  （接口设计.md §9）
-  # ═══════════════════════════════════════════════════════
-  /api/v1/admin/dashboard:
-    get:
-      tags: [管理端-工作台与统计]
-      summary: 工作台聚合
-      parameters:
-        - name: range
-          in: query
-          schema:
-            type: string
-            enum: [today, 7d, 30d]
-            default: today
+  /api/v1/admin/users/{id}/note:
+    patch:
+      tags: [管理端-订单支付用户]
+      summary: 修改客服备注
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note: { type: string, maxLength: 500 }
       responses:
         '200':
-          description: 指标卡 + 趋势 + 待办 + 榜单
+          description: 已保存
           content:
             application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/Result'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Dashboard'
+              schema: { $ref: '#/components/schemas/ResultVoid' }
 
   /api/v1/admin/stats/users:
     get:
       tags: [管理端-工作台与统计]
-      summary: 用户统计（规模 / 漏斗 / 留存 / 复购 / 结构 / 价值 / 偏好）
+      summary: 用户、漏斗、画像与 AI 统计
       parameters:
         - $ref: '#/components/parameters/DateRangeBegin'
         - $ref: '#/components/parameters/DateRangeEnd'
@@ -1663,20 +1673,18 @@ paths:
                   - $ref: '#/components/schemas/Result'
                   - type: object
                     properties:
-                      data:
-                        type: object
-                        additionalProperties: true
+                      data: { $ref: '#/components/schemas/AdminUserStats' }
 
   /api/v1/admin/stats/pay:
     get:
       tags: [管理端-工作台与统计]
-      summary: 支付与收入统计
+      summary: 支付、收入和退款统计
       parameters:
         - $ref: '#/components/parameters/DateRangeBegin'
         - $ref: '#/components/parameters/DateRangeEnd'
       responses:
         '200':
-          description: 渠道构成 / 失败原因 / 退款构成 / 对账差异
+          description: 支付统计聚合
           content:
             application/json:
               schema:
@@ -1684,20 +1692,18 @@ paths:
                   - $ref: '#/components/schemas/Result'
                   - type: object
                     properties:
-                      data:
-                        type: object
-                        additionalProperties: true
+                      data: { $ref: '#/components/schemas/AdminPayStats' }
 
   /api/v1/admin/stats/content:
     get:
       tags: [管理端-工作台与统计]
-      summary: 开盒与内容统计
+      summary: 开盒、盲盒和线路统计
       parameters:
         - $ref: '#/components/parameters/DateRangeBegin'
         - $ref: '#/components/parameters/DateRangeEnd'
       responses:
         '200':
-          description: 按盲盒 / 分类 / 时间的开盒量与转化、线路被抽中次数与占比
+          description: 内容统计聚合
           content:
             application/json:
               schema:
@@ -1705,17 +1711,15 @@ paths:
                   - $ref: '#/components/schemas/Result'
                   - type: object
                     properties:
-                      data:
-                        type: object
-                        additionalProperties: true
+                      data: { $ref: '#/components/schemas/AdminContentStats' }
 
-  /api/v1/admin/configs:
+  /api/v1/admin/ai/config:
     get:
-      tags: [管理端-工作台与统计]
-      summary: 读取系统配置
+      tags: [管理端-AI]
+      summary: 读取非敏感 AI 配置
       responses:
         '200':
-          description: 系统配置键值
+          description: 不包含 Key、base URL 或 endpoint
           content:
             application/json:
               schema:
@@ -1723,122 +1727,247 @@ paths:
                   - $ref: '#/components/schemas/Result'
                   - type: object
                     properties:
-                      data:
-                        type: object
-                        additionalProperties: true
+                      data: { $ref: '#/components/schemas/AdminAiConfig' }
     put:
-      tags: [管理端-工作台与统计]
-      summary: 更新系统配置
+      tags: [管理端-AI]
+      summary: 更新 AI 配置
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              type: object
-              additionalProperties: true
+            schema: { $ref: '#/components/schemas/AdminAiConfig' }
       responses:
         '200':
-          description: 已更新
+          description: 更新后的配置
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResultVoid'
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/AdminAiConfig' }
 
-  /api/v1/admin/admins:
+  /api/v1/admin/ai/quick-questions:
     get:
-      tags: [管理端-工作台与统计]
-      summary: 后台账号列表
-      parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageSize'
-      responses:
-        '200':
-          description: 账号分页
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PagedAdminAccountResult'
+      tags: [管理端-AI]
+      summary: 快捷问题列表
+      responses: { '200': { description: 列表 } }
     post:
-      tags: [管理端-工作台与统计]
-      summary: 新增后台账号
+      tags: [管理端-AI]
+      summary: 新增快捷问题
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              type: object
-              required: [account, password, role]
-              properties:
-                account:
-                  type: string
-                password:
-                  type: string
-                role:
-                  $ref: '#/components/schemas/AdminRole'
-                name:
-                  type: string
-      responses:
-        '200':
-          description: 已创建
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResultVoid'
+            schema: { $ref: '#/components/schemas/AiQuickQuestionAdmin' }
+      responses: { '200': { description: 已新增 } }
 
-  /api/v1/admin/admins/{id}:
+  /api/v1/admin/ai/quick-questions/{id}:
     put:
-      tags: [管理端-工作台与统计]
-      summary: 修改后台账号（含角色与启停）
-      parameters:
-        - $ref: '#/components/parameters/PathId'
+      tags: [管理端-AI]
+      summary: 修改快捷问题
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                role:
-                  $ref: '#/components/schemas/AdminRole'
-                status:
-                  type: string
-                  enum: [active, disabled]
-                password:
-                  type: string
-                  description: 传了就改密，不传则不动
-      responses:
-        '200':
-          description: 已修改
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResultVoid'
+            schema: { $ref: '#/components/schemas/AiQuickQuestionAdmin' }
+      responses: { '200': { description: 已修改 } }
+    delete:
+      tags: [管理端-AI]
+      summary: 删除快捷问题
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
+      responses: { '200': { description: 已删除 } }
 
-  /api/v1/admin/audit-logs:
+  /api/v1/admin/ai/keyword-rules:
     get:
-      tags: [管理端-工作台与统计]
-      summary: 操作日志
-      parameters:
-        - name: adminId
-          in: query
-          schema:
-            type: integer
-        - name: action
-          in: query
-          schema:
-            type: string
-            description: 如 box_update / route_update / refund_approve / user_disable
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageSize'
-      responses:
-        '200':
-          description: 操作日志分页
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PagedAuditLogResult'
+      tags: [管理端-AI]
+      summary: 关键词规则列表
+      responses: { '200': { description: 列表 } }
+    post:
+      tags: [管理端-AI]
+      summary: 新增关键词规则
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AiKeywordRuleAdmin' }
+      responses: { '200': { description: 已新增 } }
+
+  /api/v1/admin/ai/keyword-rules/{id}:
+    put:
+      tags: [管理端-AI]
+      summary: 修改关键词规则
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AiKeywordRuleAdmin' }
+      responses: { '200': { description: 已修改 } }
+    delete:
+      tags: [管理端-AI]
+      summary: 删除关键词规则
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
+      responses: { '200': { description: 已删除 } }
+
+  /api/v1/admin/ai/default-replies:
+    get:
+      tags: [管理端-AI]
+      summary: 默认回复列表
+      responses: { '200': { description: 列表 } }
+    post:
+      tags: [管理端-AI]
+      summary: 新增默认回复
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AiDefaultReplyAdmin' }
+      responses: { '200': { description: 已新增 } }
+
+  /api/v1/admin/ai/default-replies/{id}:
+    put:
+      tags: [管理端-AI]
+      summary: 修改默认回复
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AiDefaultReplyAdmin' }
+      responses: { '200': { description: 已修改 } }
+    delete:
+      tags: [管理端-AI]
+      summary: 删除默认回复
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
+      responses: { '200': { description: 已删除 } }
+
+  /api/v1/admin/ai/diary-templates:
+    get:
+      tags: [管理端-AI]
+      summary: 日记模板列表
+      responses: { '200': { description: 列表 } }
+    post:
+      tags: [管理端-AI]
+      summary: 新增日记模板
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DiaryTemplateAdmin' }
+      responses: { '200': { description: 已新增 } }
+
+  /api/v1/admin/ai/diary-templates/{id}:
+    put:
+      tags: [管理端-AI]
+      summary: 修改日记模板
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DiaryTemplateAdmin' }
+      responses: { '200': { description: 已修改 } }
+    delete:
+      tags: [管理端-AI]
+      summary: 删除日记模板
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
+      responses: { '200': { description: 已删除 } }
+
+  /api/v1/admin/personality/questions:
+    get:
+      tags: [管理端-人格]
+      summary: 题目与计分选项列表
+      responses: { '200': { description: 列表 } }
+    post:
+      tags: [管理端-人格]
+      summary: 新增题目
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdminPersonalityQuestion' }
+      responses: { '200': { description: 已新增 } }
+
+  /api/v1/admin/personality/questions/{id}:
+    put:
+      tags: [管理端-人格]
+      summary: 修改题目
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdminPersonalityQuestion' }
+      responses: { '200': { description: 已修改 } }
+    delete:
+      tags: [管理端-人格]
+      summary: 删除未被作答引用的题目
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
+      responses: { '200': { description: 已删除 }, '409': { $ref: '#/components/responses/Conflict' } }
+
+  /api/v1/admin/personality/questions/{questionId}/options:
+    post:
+      tags: [管理端-人格]
+      summary: 新增选项
+      parameters: [{ $ref: '#/components/parameters/QuestionId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdminPersonalityOption' }
+      responses: { '200': { description: 已新增 } }
+
+  /api/v1/admin/personality/options/{id}:
+    put:
+      tags: [管理端-人格]
+      summary: 修改选项与计分
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdminPersonalityOption' }
+      responses: { '200': { description: 已修改 } }
+    delete:
+      tags: [管理端-人格]
+      summary: 删除未被作答引用的选项
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
+      responses: { '200': { description: 已删除 }, '409': { $ref: '#/components/responses/Conflict' } }
+
+  /api/v1/admin/personality/results:
+    get:
+      tags: [管理端-人格]
+      summary: 人格结果定义列表
+      responses: { '200': { description: 列表 } }
+    post:
+      tags: [管理端-人格]
+      summary: 新增人格结果
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdminPersonalityResult' }
+      responses: { '200': { description: 已新增 } }
+
+  /api/v1/admin/personality/results/{id}:
+    put:
+      tags: [管理端-人格]
+      summary: 修改人格结果
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdminPersonalityResult' }
+      responses: { '200': { description: 已修改 } }
+    delete:
+      tags: [管理端-人格]
+      summary: 删除未被作答引用的人格结果
+      parameters: [{ $ref: '#/components/parameters/PathId' }]
+      responses: { '200': { description: 已删除 }, '409': { $ref: '#/components/responses/Conflict' } }
 
 components:
   securitySchemes:
@@ -1856,6 +1985,13 @@ components:
   parameters:
     PathId:
       name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    QuestionId:
+      name: questionId
       in: path
       required: true
       schema:
@@ -1954,8 +2090,6 @@ components:
         message:
           type: string
           example: ok
-        data:
-          nullable: true
     ResultVoid:
       type: object
       properties:
@@ -1965,6 +2099,7 @@ components:
         message:
           type: string
         data:
+          type: object
           nullable: true
     ResultString:
       type: object
@@ -2183,6 +2318,183 @@ components:
           type: string
           nullable: true
 
+    DiaryResult:
+      type: object
+      required: [diaryText, fallback]
+      properties:
+        diaryText:
+          type: string
+        fallback:
+          type: boolean
+
+    AdminAiConfig:
+      type: object
+      required: [greet, systemPrompt, diaryPrompt, enabled, toolsEnabled, fallbackEnabled]
+      description: 不含 API Key、base URL 或模型 endpoint。
+      properties:
+        greet: { type: string, minLength: 1, maxLength: 500 }
+        systemPrompt: { type: string, minLength: 1, maxLength: 4000 }
+        diaryPrompt: { type: string, minLength: 1, maxLength: 2000 }
+        enabled: { type: boolean }
+        toolsEnabled: { type: boolean }
+        fallbackEnabled: { type: boolean }
+
+    AiQuickQuestionAdmin:
+      type: object
+      required: [text]
+      properties:
+        id: { type: integer, format: int64, readOnly: true }
+        text: { type: string, minLength: 1, maxLength: 128 }
+        sortWeight: { type: integer, default: 0 }
+        status: { type: string, enum: [on, off], default: on }
+        createdAt: { type: string, readOnly: true }
+        updatedAt: { type: string, readOnly: true }
+
+    AiKeywordRuleAdmin:
+      type: object
+      required: [keywords, replyText]
+      properties:
+        id: { type: integer, format: int64, readOnly: true }
+        keywords:
+          type: array
+          minItems: 1
+          items: { type: string, minLength: 1, maxLength: 64 }
+        replyText: { type: string, minLength: 1, maxLength: 500 }
+        recommendBoxIds:
+          type: array
+          items: { type: integer, format: int64 }
+        sortWeight: { type: integer, default: 0 }
+        status: { type: string, enum: [on, off], default: on }
+        createdAt: { type: string, readOnly: true }
+        updatedAt: { type: string, readOnly: true }
+
+    AiDefaultReplyAdmin:
+      type: object
+      required: [text]
+      properties:
+        id: { type: integer, format: int64, readOnly: true }
+        text: { type: string, minLength: 1, maxLength: 500 }
+        sortWeight: { type: integer, default: 0 }
+        status: { type: string, enum: [on, off], default: on }
+        createdAt: { type: string, readOnly: true }
+        updatedAt: { type: string, readOnly: true }
+
+    DiaryTemplateAdmin:
+      type: object
+      required: [content]
+      properties:
+        id: { type: integer, format: int64, readOnly: true }
+        content: { type: string, minLength: 1, maxLength: 4000 }
+        sortWeight: { type: integer, default: 0 }
+        status: { type: string, enum: [on, off], default: on }
+        createdAt: { type: string, readOnly: true }
+        updatedAt: { type: string, readOnly: true }
+
+    AdminPersonalityOption:
+      type: object
+      required: [seq, label, score]
+      properties:
+        id: { type: integer, format: int64, readOnly: true }
+        questionId: { type: integer, format: int64, readOnly: true }
+        seq: { type: integer, minimum: 1 }
+        label: { type: string, minLength: 1, maxLength: 128 }
+        score:
+          type: object
+          minProperties: 1
+          additionalProperties: { type: integer, minimum: 0 }
+
+    AdminPersonalityQuestion:
+      type: object
+      required: [seq, stem]
+      properties:
+        id: { type: integer, format: int64, readOnly: true }
+        seq: { type: integer, minimum: 1 }
+        stem: { type: string, minLength: 1, maxLength: 255 }
+        status: { type: string, enum: [on, off], default: on }
+        options:
+          type: array
+          readOnly: true
+          items: { $ref: '#/components/schemas/AdminPersonalityOption' }
+        updatedAt: { type: string, readOnly: true }
+
+    AdminPersonalityResult:
+      type: object
+      required: [type, name, mark, description, recommend]
+      properties:
+        id: { type: integer, format: int64, readOnly: true }
+        type: { type: string, enum: [nature, city, adventure, culture] }
+        name: { type: string, minLength: 1, maxLength: 32 }
+        mark: { type: string, minLength: 1, maxLength: 4 }
+        description: { type: string, minLength: 1, maxLength: 255 }
+        recommend: { type: string, minLength: 1, maxLength: 255 }
+
+    AdminUserStats:
+      type: object
+      properties:
+        users:
+          type: object
+          properties:
+            registered: { type: integer }
+            new: { type: integer }
+            active: { type: integer }
+        funnel:
+          type: array
+          items:
+            type: object
+            properties:
+              key: { type: string }
+              label: { type: string }
+              count: { type: integer, nullable: true }
+              rate: { type: number, nullable: true }
+        titleDistribution:
+          type: object
+          additionalProperties: { type: integer }
+        moodDistribution:
+          type: object
+          additionalProperties: { type: integer }
+        ai:
+          type: object
+          properties:
+            userCount: { type: integer }
+            messageCount: { type: integer }
+            fallbackCount: { type: integer }
+            fallbackRate: { type: number }
+
+    AdminPayStats:
+      type: object
+      properties:
+        orderCount: { type: integer }
+        paidOrderCount: { type: integer }
+        gmv: { type: number }
+        averageOrderValue: { type: number, nullable: true }
+        refundCount: { type: integer }
+        refundAmount: { type: number }
+        refundRate: { type: number }
+        channels:
+          type: array
+          items:
+            type: object
+            properties:
+              channel: { type: string }
+              count: { type: integer }
+
+    AdminContentStats:
+      type: object
+      properties:
+        openCount: { type: integer }
+        boxStats:
+          type: array
+          items: { $ref: '#/components/schemas/AdminNamedMetric' }
+        routeStats:
+          type: array
+          items: { $ref: '#/components/schemas/AdminNamedMetric' }
+
+    AdminNamedMetric:
+      type: object
+      properties:
+        name: { type: string }
+        count: { type: integer }
+
     OrderCreated:
       type: object
       properties:
@@ -2242,6 +2554,7 @@ components:
         createdAt:
           type: string
         trip:
+          type: object
           allOf:
             - $ref: '#/components/schemas/Trip'
           nullable: true
@@ -2303,6 +2616,9 @@ components:
         savedTotal:
           type: number
           description: 累计省钱 = Σ(票面 − 购入价)，仅有效行程
+        levelNo:
+          type: integer
+          description: 当前等级数字，max(1, tripCount)
         title:
           type: string
         welfareKm:
@@ -2319,6 +2635,9 @@ components:
           type: array
           items:
             type: string
+        destinationCount:
+          type: integer
+          description: 有效行程目的地去重数量
         spendTotal:
           type: number
           description: 累计消费，仅支付成功且未退款
@@ -2570,14 +2889,17 @@ components:
                 minValue:
                   type: number
             payment:
+              type: object
               allOf:
                 - $ref: '#/components/schemas/PayFlow'
               nullable: true
             trip:
+              type: object
               allOf:
                 - $ref: '#/components/schemas/Trip'
               nullable: true
             refund:
+              type: object
               allOf:
                 - $ref: '#/components/schemas/RefundDetail'
               nullable: true
@@ -2592,17 +2914,14 @@ components:
         channel:
           type: string
           enum: [alipay, mock]
-        outerTradeNo:
+        channelTradeNo:
           type: string
           nullable: true
-        amount:
-          type: number
+        amountCent:
+          type: integer
         result:
           type: string
-          enum: [success, fail]
-        failReason:
-          type: string
-          nullable: true
+          enum: [pending, success, fail, closed]
         createdAt:
           type: string
 
@@ -3048,4 +3367,3 @@ components:
           type: integer
         pageSize:
           type: integer
-

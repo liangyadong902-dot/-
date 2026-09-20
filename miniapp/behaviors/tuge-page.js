@@ -16,6 +16,7 @@ module.exports = function makePage(tabIndex, extra) {
       } else {
         this.setData(store.snapshot())
       }
+      store.resumePaymentPolling()
     },
     onUnload() {
       if (this._unsub) {

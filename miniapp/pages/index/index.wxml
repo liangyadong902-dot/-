@@ -139,13 +139,11 @@
       </view>
     </swiper-item>
   </swiper>
-  <view wx:else class="member-banner">
+  <view wx:else class="member-banner empty">
     <view class="copy">
       <view class="kicker">MEMBER BENEFITS</view>
-      <view class="h3">开盒保底 120% 票面</view>
-      <view class="ink-pill" data-id="box_1" bindtap="openUnbox">立即开启</view>
+      <view class="h3">{{contentError || '暂无运营活动'}}</view>
     </view>
-    <image class="photo" src="/assets/covers/box3.jpg" mode="aspectFill" />
   </view>
 
   <view class="section-pad">
@@ -157,7 +155,8 @@
       </view>
       <text class="view-more" bindtap="filterCategoryAll">查看更多 ›</text>
     </view>
-    <view wx:if="{{productsEmpty}}" class="empty-hint">暂无匹配盲盒，换个心情看看</view>
+    <view wx:if="{{!contentLoaded}}" class="empty-hint">正在读取盲盒...</view>
+    <view wx:elif="{{productsEmpty}}" class="empty-hint">{{contentError || '暂无匹配盲盒，换个心情看看'}}</view>
     <view wx:else class="product-grid">
       <view class="product-card" wx:for="{{products}}" wx:key="id">
         <view class="prod-img-wrap">

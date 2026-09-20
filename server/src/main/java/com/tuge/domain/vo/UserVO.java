@@ -12,4 +12,8 @@ public class UserVO {
     private String city;
     private String registerChannel;
     private String status;
+    private boolean hasPhone;
+    private boolean wechatOpenidBound;
+    private String title;
+    private String personalityType;
 }

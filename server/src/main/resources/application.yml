@@ -4,15 +4,18 @@ server:
 spring:
   application:
     name: tuge-server
+  config:
+    import: optional:file:./application-local.yml
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://123.57.181.126:3306/tuge?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
     username: root
     password: ${MYSQL_PASSWORD:1234}
-  redis:
-    host: 123.57.181.126
-    port: 6379
-    password: ${REDIS_PASSWORD:123456}
+  data:
+    redis:
+      host: ${REDIS_HOST:123.57.181.126}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:123456}
   jackson:
     time-zone: Asia/Shanghai
     date-format: yyyy-MM-dd HH:mm:ss
@@ -39,11 +42,40 @@ jwt:
 
 pay:
   mock-enabled: ${PAY_MOCK_ENABLED:false}
+  timeout-minutes: ${PAY_TIMEOUT_MINUTES:15}
+
+alipay:
+  sandbox: ${ALIPAY_SANDBOX:true}
+  gateway: ${ALIPAY_GATEWAY:https://openapi-sandbox.dl.alipaydev.com/gateway.do}
+  app-id: ${ALIPAY_APP_ID:}
+  # 应用私钥（PKCS8）与支付宝公钥，只放 application-local.yml 或环境变量，禁止提交 Git
+  private-key: ${ALIPAY_PRIVATE_KEY:}
+  alipay-public-key: ${ALIPAY_PUBLIC_KEY:}
+  # 公网 HTTPS，支付宝服务器必须能 POST 到该地址
+  notify-url: ${ALIPAY_NOTIFY_URL:}
+  # 同步回跳地址，仅负责把浏览器带回来，不作为入账依据
+  return-url: ${ALIPAY_RETURN_URL:}
 
 wechat:
   app-id: ${WECHAT_APP_ID:wxfc5f96ba8dfc7bca}
   app-secret: ${WECHAT_APP_SECRET:}
   demo-enabled: ${WECHAT_DEMO_ENABLED:false}
+
+ai:
+  enabled: ${AI_ENABLED:false}
+  provider: ${AI_PROVIDER:deepseek}
+  base-url: ${AI_BASE_URL:https://api.deepseek.com}
+  model: ${AI_MODEL:deepseek-chat}
+  api-key: ${AI_API_KEY:}
+  timeout-ms: ${AI_TIMEOUT_MS:12000}
+  memory:
+    window: ${AI_MEMORY_WINDOW:16}
+  tools-enabled: ${AI_TOOLS_ENABLED:true}
+  rag-enabled: ${AI_RAG_ENABLED:false}
+  fallback-enabled: ${AI_FALLBACK_ENABLED:true}
+
+orders:
+  expiry-job-enabled: ${ORDER_EXPIRY_JOB_ENABLED:true}
 
 logging:
   level:

@@ -54,7 +54,7 @@
           <button class="linkish" type="button" @click="confirmAction('确定删除这个盲盒吗？') && kitchen.deleteBox(b.id)">删除</button>
         </div>
       </ProductCard>
-      <div v-if="!kitchen.filteredBoxes.length" class="empty" style="grid-column:1/-1">没有匹配的盒子</div>
+      <div v-if="!kitchen.filteredBoxes.length" class="empty" style="grid-column:1/-1">{{ kitchen.catalogError || '没有匹配的盒子' }}</div>
     </div>
   </section>
 </template>

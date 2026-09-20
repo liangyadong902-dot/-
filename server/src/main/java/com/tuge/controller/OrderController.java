@@ -6,7 +6,6 @@ import com.tuge.common.result.Result;
 import com.tuge.domain.dto.CreateOrderRequest;
 import com.tuge.domain.dto.PayRequest;
 import com.tuge.domain.dto.RefundRequest;
-import com.tuge.domain.entity.RefundOrder;
 import com.tuge.domain.service.OrderService;
 import com.tuge.domain.vo.OrderVO;
 import com.tuge.domain.vo.PayVO;
@@ -58,8 +57,8 @@ public class OrderController {
     }
 
     @PostMapping("/{orderNo}/refund")
-    public Result<String> refund(@PathVariable String orderNo, @Valid @RequestBody RefundRequest request) {
-        RefundOrder refund = orderService.requestRefund(JwtContext.getUserId(), orderNo, request);
-        return Result.success(refund.getRefundNo());
+    public Result<Void> refund(@PathVariable String orderNo, @Valid @RequestBody RefundRequest request) {
+        orderService.requestRefund(JwtContext.getUserId(), orderNo, request);
+        return Result.success();
     }
 }

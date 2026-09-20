@@ -12,6 +12,9 @@ function pageH() {
 
 Page(makePage(1, {
   data: Object.assign({ tabIndex: 1, draft: '', pageH: pageH(), chatH: 200 }, store.snapshot()),
+  onLoad() {
+    store.hydrateAi()
+  },
   onReady() {
     this.relayout()
     setTimeout(() => this.relayout(), 80)

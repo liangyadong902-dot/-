@@ -1,6 +1,7 @@
 package com.tuge.common.auth;
 
 import com.tuge.common.exception.UnauthenticatedException;
+import com.tuge.common.exception.BusinessException;
 import com.tuge.common.jwt.JwtContext;
 import com.tuge.common.jwt.JwtTokenUtil;
 import com.tuge.domain.entity.AppUser;
@@ -36,9 +37,10 @@ public class AuthInterceptor implements HandlerInterceptor {
         Long userId = jwtTokenUtil.parseUserId(token);
         String role = jwtTokenUtil.parseRole(token);
         AppUser user = appUserMapper.selectById(userId);
-        if (user == null || !"user".equals(role) || !"normal".equals(user.getStatus())) {
+        if (user == null || !"user".equals(role)) {
             throw new UnauthenticatedException();
         }
+        if (!"normal".equals(user.getStatus())) throw new BusinessException(403, "账号已被禁用");
         JwtContext.set(userId, role);
         return true;
     }

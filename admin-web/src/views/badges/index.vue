@@ -15,7 +15,7 @@
         <div style="font-size:11px;color:var(--sage-deep);margin-top:2px;">{{ b.routes }} 条线路</div>
         <button class="linkish" type="button" style="margin-top:8px;" @click="kitchen.editBadge(b.id || null)">编辑</button>
       </article>
-      <div v-if="!kitchen.badges.length" class="empty" style="grid-column:1/-1">还没有徽章数据</div>
+      <div v-if="!kitchen.badges.length" class="empty" style="grid-column:1/-1">{{ kitchen.catalogError || '还没有徽章数据' }}</div>
     </div>
   </section>
 </template>

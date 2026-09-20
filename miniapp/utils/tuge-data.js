@@ -1,35 +1,3 @@
-const TUGE_BOXES = [
-  { id: 'box_1', rank: 'TOP1', name: '周边微度假盲盒', category: 'nearby', desc: '1天短途，周末说走就走', price: 99, guarantee: 120, moods: ['happy', 'emo', 'bored'], img: '/assets/covers/box1.jpg' },
-  { id: 'box_2', rank: 'TOP2', name: '隐世古村慢生活盒', category: 'nearby', desc: '青石古街，非遗打糍粑', price: 129, guarantee: 160, moods: ['emo', 'curious'], img: '/assets/covers/box2.jpg' },
-  { id: 'box_3', rank: 'TOP3', name: '山野露营观星盲盒', category: 'nearby', desc: '湖畔星空，篝火治愈夜', price: 159, guarantee: 200, moods: ['emo', 'curious', 'bored'], img: '/assets/covers/box3.jpg' },
-  { id: 'box_4', rank: 'HOT', name: '省内仙山问道二日', category: 'province', desc: '云海奇峰，探秘古建', price: 299, guarantee: 380, moods: ['happy', 'curious'], img: '/assets/covers/box4.jpg' },
-  { id: 'box_5', rank: 'NEW', name: '跨省限定冒险盲盒', category: 'cross', desc: '大山大河，说走就走', price: 599, guarantee: 750, moods: ['bored', 'curious'], img: '/assets/covers/box5.jpg' },
-  { id: 'box_6', rank: 'HOT', name: '老城寻味美食专线', category: 'theme', desc: '街角早茶，烟火气', price: 119, guarantee: 150, moods: ['happy', 'bored'], img: '/assets/covers/box6.jpg' },
-]
-
-const TUGE_ROUTES = [
-  { id: 'r1', category: 'nearby', name: '渼陂古村非遗一日游', dest: '吉安 · 青原区', value: 148, badge: '古村', moodText: '古村的风会吹走所有烦恼', img: '/assets/covers/box2.jpg' },
-  { id: 'r2', category: 'nearby', name: '云雾茶山徒步采风', dest: '武夷山周边', value: 135, badge: '山野', moodText: '穿过云雾，听见心跳', img: '/assets/covers/box1.jpg' },
-  { id: 'r3', category: 'nearby', name: '湖畔星空营地之夜', dest: '仙女湖畔', value: 218, badge: '露营', moodText: '星空不说话，但够温暖', img: '/assets/covers/box3.jpg' },
-  { id: 'r4', category: 'province', name: '三清山松云问道二日', dest: '上饶 · 玉山', value: 420, badge: '徽派', moodText: '站在高处，天地开朗', img: '/assets/covers/box4.jpg' },
-  { id: 'r5', category: 'cross', name: '大理苍山洱海', dest: '云南 · 大理', value: 880, badge: '文艺', moodText: '去有风的地方重新开始', img: '/assets/covers/box5.jpg' },
-  { id: 'r6', category: 'theme', name: '西关深巷寻味记', dest: '广州 · 西关', value: 168, badge: '美食', moodText: '烟火气是最好的良药', img: '/assets/covers/box6.jpg' },
-]
-
-const TUGE_BADGES = [
-  { name: '古村', mark: '村' }, { name: '山野', mark: '山' }, { name: '美食', mark: '味' },
-  { name: '徽派', mark: '徽' }, { name: '文艺', mark: '文' }, { name: '海滨', mark: '海' },
-  { name: '红色', mark: '红' }, { name: '乡村', mark: '乡' }, { name: '探险', mark: '探' },
-  { name: '露营', mark: '营' }, { name: '研学', mark: '学' }, { name: '摄影', mark: '影' },
-]
-
-const SERVICE_BY_CAT = {
-  nearby: ['往返交通', '午餐一份', '向导陪同'],
-  province: ['大巴往返', '两日住宿', '向导陪同', '景区门票'],
-  cross: ['交通衔接', '住宿', '向导', '行程保险'],
-  theme: ['市内交通', '美食体验', '向导讲解'],
-}
-
 const TEST_QUESTIONS = [
   {
     question: '周末有空你更倾向于？',
@@ -119,10 +87,6 @@ const REFUND_REASONS = [
 ]
 
 module.exports = {
-  TUGE_BOXES,
-  TUGE_ROUTES,
-  TUGE_BADGES,
-  SERVICE_BY_CAT,
   TEST_QUESTIONS,
   PERSONALITY_RESULTS,
   AI_GREET,

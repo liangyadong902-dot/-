@@ -23,7 +23,7 @@
           <button class="linkish" type="button" @click="confirmAction('确定删除这个运营位吗？') && kitchen.deleteBanner(b.id)">删除</button>
         </div>
       </div>
-      <div v-if="!kitchen.banners.length" class="empty">还没有运营位数据</div>
+      <div v-if="!kitchen.banners.length" class="empty">{{ kitchen.catalogError || '还没有运营位数据' }}</div>
     </div>
   </section>
 </template>

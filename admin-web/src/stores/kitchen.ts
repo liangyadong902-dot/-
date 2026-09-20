@@ -167,6 +167,9 @@ export const useKitchenStore = defineStore('kitchen', () => {
   const poolOk = ref(false)
   const poolLoading = ref(false)
   const loaded = ref(false)
+  const catalogError = ref('')
+  const transactionsError = ref('')
+  const transactionsLoading = ref(false)
 
   function wxNickOf(obj: GuestLike | null | undefined) {
     if (!obj) return ''
@@ -198,6 +201,7 @@ export const useKitchenStore = defineStore('kitchen', () => {
   )
 
   async function loadCatalog() {
+    catalogError.value = ''
     const [boxRes, routeRes, bannerRes, badgeRes] = await Promise.allSettled([
       listAdminBoxes({ page: 1, pageSize: 100 }),
       listAdminRoutes({ page: 1, pageSize: 100 }),
@@ -206,12 +210,21 @@ export const useKitchenStore = defineStore('kitchen', () => {
     ])
     if (boxRes.status === 'fulfilled') {
       boxes.splice(0, boxes.length, ...(boxRes.value.data?.list || []).map(mapBox))
+    } else {
+      boxes.splice(0, boxes.length)
+      catalogError.value = '内容数据加载失败，请重试'
     }
     if (routeRes.status === 'fulfilled') {
       routes.splice(0, routes.length, ...(routeRes.value.data?.list || []).map(mapRoute))
+    } else {
+      routes.splice(0, routes.length)
+      catalogError.value = '内容数据加载失败，请重试'
     }
     if (bannerRes.status === 'fulfilled') {
       banners.splice(0, banners.length, ...(bannerRes.value.data?.list || []).map(mapBanner))
+    } else {
+      banners.splice(0, banners.length)
+      catalogError.value = '内容数据加载失败，请重试'
     }
     if (badgeRes.status === 'fulfilled') {
       badges.splice(
@@ -227,39 +240,54 @@ export const useKitchenStore = defineStore('kitchen', () => {
           routes: b.routeCount,
         })),
       )
+    } else {
+      badges.splice(0, badges.length)
+      catalogError.value = '内容数据加载失败，请重试'
     }
     loaded.value = true
     await loadTransactions()
   }
 
   async function loadTransactions() {
-    const [orderRes, refundRes] = await Promise.allSettled([
-      listAdminOrders({ page: 1, pageSize: 100 }),
-      listAdminRefunds({ page: 1, pageSize: 100 }),
-    ])
-    if (orderRes.status === 'fulfilled') {
-      orders.splice(0, orders.length, ...(orderRes.value.data?.list || []).map((row) => ({
-        no: row.orderNo,
-        user: row.userName || `用户${row.userId}`,
-        phone: row.phone || '未绑定',
-        box: row.boxName,
-        pay: Number(row.paidCent || row.priceCent || 0) / 100,
-        ch: row.payChannel === 'mock' ? '支付宝沙箱' : (row.payChannel || '—'),
-        st: row.status,
-        route: row.routeName || '—',
-        time: row.createdAt || '',
-      })))
-    }
-    if (refundRes.status === 'fulfilled') {
-      refunds.splice(0, refunds.length, ...(refundRes.value.data?.list || []).map((row) => ({
-        no: row.refundNo,
-        order: row.orderNo,
-        user: row.userName || `用户${row.userId}`,
-        reason: row.reason,
-        amount: Number(row.amountCent || 0) / 100,
-        type: row.kind === 'draw_fail' ? '自动' as const : '人工' as const,
-        st: row.status === 'pending_review' ? 'wait' as const : row.status === 'rejected' ? 'reject' as const : 'done' as const,
-      })))
+    transactionsLoading.value = true
+    transactionsError.value = ''
+    try {
+      const [orderRes, refundRes] = await Promise.allSettled([
+        listAdminOrders({ page: 1, pageSize: 100 }),
+        listAdminRefunds({ page: 1, pageSize: 100 }),
+      ])
+      if (orderRes.status === 'fulfilled') {
+        orders.splice(0, orders.length, ...(orderRes.value.data?.list || []).map((row) => ({
+          no: row.orderNo,
+          user: row.userName || `用户${row.userId}`,
+          phone: row.phone || '未绑定',
+          box: row.boxName,
+          pay: Number(row.paidCent || row.priceCent || 0) / 100,
+          ch: row.payChannel === 'mock' ? '支付宝沙箱' : (row.payChannel || '—'),
+          st: row.status,
+          route: row.routeName || '—',
+          time: row.createdAt || '',
+        })))
+      } else {
+        orders.splice(0, orders.length)
+        transactionsError.value = '交易数据加载失败，请重试'
+      }
+      if (refundRes.status === 'fulfilled') {
+        refunds.splice(0, refunds.length, ...(refundRes.value.data?.list || []).map((row) => ({
+          no: row.refundNo,
+          order: row.orderNo,
+          user: row.userName || `用户${row.userId}`,
+          reason: row.reason,
+          amount: Number(row.amountCent || 0) / 100,
+          type: row.kind === 'draw_fail' ? '自动' as const : '人工' as const,
+          st: row.status === 'pending_review' ? 'wait' as const : row.status === 'rejected' ? 'reject' as const : 'done' as const,
+        })))
+      } else {
+        refunds.splice(0, refunds.length)
+        transactionsError.value = '交易数据加载失败，请重试'
+      }
+    } finally {
+      transactionsLoading.value = false
     }
   }
 
@@ -509,6 +537,9 @@ export const useKitchenStore = defineStore('kitchen', () => {
     poolOk,
     poolLoading,
     loaded,
+    catalogError,
+    transactionsError,
+    transactionsLoading,
     wxNickOf,
     mergedUsers,
     mergedOrders,

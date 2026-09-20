@@ -6,6 +6,7 @@
     "pages/badges/index",
     "pages/trips/index",
     "pages/mine/index",
+    "pages/mine/stats-detail",
     "pages/login/login"
   ],
   "window": {

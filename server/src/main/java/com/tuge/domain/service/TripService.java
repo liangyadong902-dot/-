@@ -27,10 +27,13 @@ public class TripService {
         this.objectMapper = objectMapper;
     }
 
-    public PageResult<TripVO> list(Long userId, long page, long pageSize) {
+    public PageResult<TripVO> list(Long userId, String validity, long page, long pageSize) {
+        String effectiveValidity = validity == null || validity.isBlank() ? "valid" : validity;
         Page<Trip> result = new Page<>(safePage(page), safePageSize(pageSize));
         Page<Trip> rows = tripMapper.selectPage(result, new LambdaQueryWrapper<Trip>()
-                .eq(Trip::getUserId, userId).orderByDesc(Trip::getOpenedDate).orderByDesc(Trip::getId));
+                .eq(Trip::getUserId, userId)
+                .eq(Trip::getValidity, effectiveValidity)
+                .orderByDesc(Trip::getOpenedDate).orderByDesc(Trip::getId));
         return PageResult.of(rows.getRecords().stream().map(this::toVO).toList(), rows.getTotal(), rows.getCurrent(), rows.getSize());
     }
 
@@ -42,8 +45,13 @@ public class TripService {
     public String diary(Long userId, Long id) {
         Trip trip = find(userId, id);
         if (trip.getDiaryText() == null || trip.getDiaryText().isBlank()) {
-            trip.setDiaryText("今天打开了「" + trip.getBoxName() + "」，目的地是" + trip.getLocation()
-                    + "。" + trip.getMoodText() + " 期待在" + trip.getRouteName() + "留下新的风景。");
+            // 阶段三模板降级：目的地 + 亮点拼接；阶段四替换为模型生成
+            String highlight = trip.getHighlight() == null || trip.getHighlight().isBlank()
+                    ? "这一路的风景刚刚好。" : trip.getHighlight();
+            trip.setDiaryText("今天在" + trip.getLocation() + "走了一段" + trip.getRouteName() + "。"
+                    + highlight
+                    + " 购入价" + String.format("%.0f", trip.getPriceCent() / 100.0) + "元，"
+                    + "票面" + String.format("%.0f", trip.getValueCent() / 100.0) + "元。\n—— AI生成");
             trip.setDiaryAt(LocalDateTime.now());
             tripMapper.updateById(trip);
         }

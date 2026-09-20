@@ -23,6 +23,7 @@ Component({
     noop() {},
     closeModal() { store.closeModal() },
     goCheckout() { store.goCheckout() },
+    copyPayUrl() { store.copyPayUrl() },
     confirmSandboxPay() { store.confirmSandboxPay() },
     cancelCurrentOrder() { store.cancelCurrentOrder() },
     acceptRouteResult() { store.acceptRouteResult() },
@@ -38,6 +39,12 @@ Component({
     viewOrderTrip(e) { store.viewOrderTrip(e.currentTarget.dataset.no) },
     openRefundModal(e) { store.openRefundModal(e.currentTarget.dataset.no) },
     closeLogin() { store.closeLogin() },
+    closeProfileEditor() { store.closeProfileEditor() },
+    onProfileNickname(e) { store.setProfileNickname(e.detail.value) },
+    onProfileCity(e) { store.setProfileCity(e.detail.value) },
+    pickProfileGender(e) { store.setProfileGender(e.currentTarget.dataset.gender) },
+    onProfileChooseAvatar(e) { store.applyChosenAvatar(e) },
+    submitProfile() { store.submitProfile() },
     onLoginPhone(e) {
       this.setData({ loginPhone: e.detail.value })
       store.setLoginPhone(e.detail.value)
