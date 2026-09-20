@@ -1,0 +1,142 @@
+<view class="guide-page">
+  <view wx:if="{{loading}}" class="gd-state">正在整理攻略…</view>
+  <view wx:elif="{{error}}" class="gd-state">{{error}}</view>
+  <block wx:else>
+    <view class="guide-hero">
+      <image wx:if="{{img}}" class="guide-hero-img" src="{{img}}" mode="aspectFill" />
+      <view class="guide-hero-shade" />
+      <view class="detail-back" bindtap="goBack">←</view>
+      <view class="guide-hero-copy">
+        <view class="guide-kicker">{{kicker}}</view>
+        <view class="guide-title">{{title}}</view>
+        <view class="guide-place"><text class="guide-place-pin">◎</text><text>{{place}}</text></view>
+        <scroll-view class="guide-meta" scroll-x>
+          <view wx:for="{{metas}}" wx:key="*this" class="guide-meta-chip">{{item}}</view>
+        </scroll-view>
+      </view>
+    </view>
+
+    <view class="guide-anchorbar">
+      <view
+        wx:for="{{anchors}}"
+        wx:key="id"
+        class="guide-anchor {{activeAnchor === index ? 'active' : ''}}"
+        data-id="{{item.id}}"
+        data-index="{{index}}"
+        bindtap="jumpAnchor"
+      >{{item.label}}</view>
+    </view>
+
+    <view class="guide-body">
+      <view class="guide-weather">
+        <text class="guide-weather-icon">☁</text>
+        <view class="guide-weather-copy">
+          <view class="guide-weather-title">出发前提醒</view>
+          <view class="guide-weather-text">{{weather}}</view>
+        </view>
+      </view>
+
+      <view class="guide-facts">
+        <view
+          wx:for="{{facts}}"
+          wx:key="label"
+          class="guide-fact {{index % 2 === 1 ? 'fact-nr' : ''}} {{index >= 2 ? 'fact-nb' : ''}}"
+        >
+          <text class="guide-fact-label">{{item.label}}</text>
+          <text class="guide-fact-value">{{item.value}}</text>
+        </view>
+      </view>
+
+      <view class="guide-section" id="guideRoute">
+        <view class="guide-section-head">
+          <text class="guide-section-title">分时行程</text>
+          <text class="guide-section-sub">{{routeLabel}}</text>
+        </view>
+        <view class="guide-summary">{{summary}}</view>
+        <view class="guide-timeline">
+          <view wx:for="{{schedule}}" wx:key="time" class="guide-stop">
+            <text class="guide-stop-time">{{item.time}}</text>
+            <view class="guide-stop-title">{{item.title}}</view>
+            <view class="guide-stop-desc">{{item.desc}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="guide-section" id="guideTransit">
+        <view class="guide-section-head">
+          <text class="guide-section-title">交通与集合</text>
+          <text class="guide-section-sub">建议提前确认</text>
+        </view>
+        <view wx:for="{{transitRows}}" wx:key="title" class="guide-transit-row">
+          <view class="guide-row-title">{{item.title}}</view>
+          <view class="guide-row-desc">{{item.desc}}</view>
+        </view>
+      </view>
+
+      <view class="guide-section" id="guideBudget">
+        <view class="guide-section-head">
+          <text class="guide-section-title">费用明细</text>
+          <text class="guide-section-sub">实际以订单为准</text>
+        </view>
+        <view wx:for="{{costs}}" wx:key="label" class="guide-cost-row">
+          <text class="guide-cost-label">{{item.label}}</text>
+          <text class="guide-cost-value">{{item.value}}</text>
+        </view>
+      </view>
+
+      <view class="guide-section" id="guidePrepare">
+        <view class="guide-section-head">
+          <text class="guide-section-title">出发清单</text>
+          <text class="guide-section-sub">点击可勾选</text>
+        </view>
+        <view class="guide-checks">
+          <view
+            wx:for="{{checks}}"
+            wx:key="text"
+            class="guide-check {{item.done ? 'done' : ''}}"
+            data-index="{{index}}"
+            bindtap="toggleCheck"
+          >
+            <text class="guide-check-box">{{item.done ? '✓' : ''}}</text>
+            <text class="guide-check-text">{{item.text}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="guide-section">
+        <view class="guide-section-head">
+          <text class="guide-section-title">天气与备选</text>
+          <text class="guide-section-sub">Plan B</text>
+        </view>
+        <view class="guide-planb">
+          <view wx:for="{{planB}}" wx:key="label" class="guide-planb-row">
+            <text class="guide-planb-label">{{item.label}}</text>
+            <text class="guide-planb-text">{{item.text}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="guide-section guide-section-last" id="guideKnow">
+        <view class="guide-section-head">
+          <text class="guide-section-title">预约与安全</text>
+          <text class="guide-section-sub">出发前必读</text>
+        </view>
+        <view wx:for="{{tips}}" wx:key="no" class="guide-tip">
+          <text class="guide-tip-no">{{item.no}}</text>
+          <view class="guide-row-desc">{{item.text}}</view>
+        </view>
+        <view class="guide-emergency">
+          <text class="guide-emergency-title">应急信息</text>
+          <text class="guide-emergency-line">订单服务：在“我的订单”中联系客服</text>
+          <text class="guide-emergency-line">紧急求助：报警 110 · 急救 120</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="guide-actions">
+      <button class="btn-block {{saved ? 'btn-sage' : 'btn-line'}}" bindtap="toggleSave">{{saved ? '已收藏' : '收藏攻略'}}</button>
+      <button class="btn-block btn-sage" bindtap="askAi">问问 AI 搭子</button>
+    </view>
+    <view class="guide-actions-safe" />
+  </block>
+</view>

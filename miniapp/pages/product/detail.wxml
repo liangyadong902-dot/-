@@ -1,0 +1,52 @@
+<view class="product-page">
+  <view wx:if="{{loading}}" class="state">正在打开商品…</view>
+  <view wx:elif="{{error}}" class="state">{{error}}<button bindtap="load">重试</button></view>
+  <block wx:elif="{{box}}">
+    <view class="pd-hero">
+      <swiper class="pd-hero-swiper" indicator-dots="{{box.hasMultipleImages}}" circular="{{box.hasMultipleImages}}">
+        <swiper-item wx:for="{{box.gallery}}" wx:key="*this"><image class="pd-hero-img" src="{{item}}" mode="aspectFill" /></swiper-item>
+      </swiper>
+      <view class="pd-hero-fade"></view>
+      <view class="pd-back" bindtap="goBack">←</view>
+      <view class="pd-rank">精选</view>
+    </view>
+    <view class="pd-body">
+      <view class="pd-title">{{box.name}}</view>
+      <view class="pd-desc">{{box.description || box.intro}}</view>
+      <view class="pd-price-row">
+        <view class="pd-price">¥{{box.price}}<text class="pd-price-unit">开盒价</text></view>
+        <view class="pd-seal">
+          <view class="pd-seal-strong">≥ ¥{{box.minValue}}</view>
+          <view class="pd-seal-span">票面价值 {{box.ratePercent}}% 起</view>
+        </view>
+      </view>
+      <view class="pd-section">
+        <view class="pd-section-title">服务包含</view>
+        <view class="pd-service-grid">
+          <view wx:for="{{box.includes}}" wx:key="*this" class="pd-service-item">
+            <view class="pd-service-mark">✓</view>
+            <view class="pd-service-text">{{item}}</view>
+          </view>
+        </view>
+      </view>
+      <view class="pd-section pd-section-last">
+        <view class="pd-section-title">开盒说明</view>
+        <view class="pd-note">付款后随机解锁对应主题线路，票面价值不低于页面标注的保底金额。未出行且符合保障规则时，可在“我的订单”中申请退换。</view>
+        <view class="pd-guide-entry" bindtap="openGuide">
+          <view class="pd-guide-icon">册</view>
+          <view class="pd-guide-copy">
+            <view class="pd-guide-title">查看主题出行攻略</view>
+            <view class="pd-guide-sub">行程节奏、交通方案、费用与必带物品</view>
+          </view>
+          <view class="pd-guide-arrow">›</view>
+        </view>
+      </view>
+      <view wx:if="{{box.status !== 'on'}}" class="pd-offline">商品已下架，可查看历史详情但暂不可购买</view>
+      <view class="pd-cart-row"><button class="pd-cart-btn" disabled="{{box.status !== 'on'}}" bindtap="addCart">＋ 加入购物车</button></view>
+    </view>
+    <view class="pd-actions-bar">
+      <button class="btn-block btn-line {{saved ? 'pd-saved' : ''}}" bindtap="toggleSave">{{saved ? '已收藏' : '收藏盲盒'}}</button>
+      <button class="btn-block btn-sage" disabled="{{box.status !== 'on'}}" bindtap="buy">{{box.status === 'on' ? '立即开盒' : '商品已下架'}}</button>
+    </view>
+  </block>
+</view>

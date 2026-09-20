@@ -1,0 +1,207 @@
+/* 攻略页：对照 index-app-latest.html #tab-guide，390px → 750rpx */
+.guide-page { min-height: 100vh; background: var(--cream); }
+.gd-state { min-height: 70vh; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 23.08rpx; }
+
+/* —— hero —— */
+.guide-hero { position: relative; height: 538.46rpx; overflow: hidden; background: var(--cream-2); color: #fff; }
+.guide-hero-img { width: 100%; height: 100%; display: block; }
+.guide-hero-shade { position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: linear-gradient(180deg, rgba(28, 24, 20, 0.1) 8%, rgba(28, 24, 20, 0.76) 100%); }
+.detail-back {
+  position: absolute;
+  top: 103.85rpx;
+  left: 30.77rpx;
+  z-index: 3;
+  width: 84.62rpx;
+  height: 84.62rpx;
+  border-radius: 50%;
+  background: rgba(255, 253, 248, 0.92);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36.54rpx;
+  box-shadow: 0 7.69rpx 26.92rpx rgba(60, 52, 44, 0.16);
+}
+.guide-hero-copy { position: absolute; left: 34.62rpx; right: 34.62rpx; bottom: 38.46rpx; z-index: 2; }
+.guide-kicker { font-size: 19.23rpx; font-weight: 700; letter-spacing: 0.12em; opacity: 0.88; }
+.guide-title { margin: 9.62rpx 0 15.38rpx; font-family: "Noto Serif SC", "Songti SC", serif; font-size: 46.15rpx; font-weight: 900; line-height: 1.3; }
+.guide-place { display: flex; align-items: center; gap: 9.62rpx; font-size: 21.15rpx; opacity: 0.92; }
+.guide-place-pin { font-size: 23.08rpx; line-height: 1; }
+.guide-meta { display: flex; gap: 11.54rpx; margin-top: 21.15rpx; white-space: nowrap; width: 100%; }
+.guide-meta-chip {
+  flex-shrink: 0;
+  padding: 7.69rpx 15.38rpx;
+  border: 1.92rpx solid rgba(255, 255, 255, 0.32);
+  border-radius: 999rpx;
+  background: rgba(255, 253, 248, 0.18);
+  color: #fff;
+  font-size: 17.31rpx;
+  font-weight: 600;
+}
+
+/* —— 锚点导航 —— */
+.guide-anchorbar {
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding: 15.38rpx 26.92rpx;
+  background: rgba(255, 253, 248, 0.96);
+  border-bottom: 1.92rpx solid var(--line);
+}
+.guide-anchor {
+  height: 69.23rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 21.15rpx;
+  font-weight: 600;
+  position: relative;
+}
+.guide-anchor.active { color: var(--ink); font-weight: 800; }
+.guide-anchor.active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 30.77rpx;
+  height: 3.85rpx;
+  transform: translateX(-50%);
+  background: var(--sage-deep);
+}
+
+/* —— 主体 —— */
+.guide-body { padding: 32.69rpx 34.62rpx 53.85rpx; }
+
+.guide-weather {
+  display: flex;
+  gap: 21.15rpx;
+  padding: 25rpx;
+  background: var(--sage-mist);
+  border-radius: 15.38rpx;
+  margin-bottom: 42.31rpx;
+}
+.guide-weather-icon { flex-shrink: 0; color: var(--sage-deep); font-size: 42.31rpx; line-height: 1; }
+.guide-weather-title { font-size: 23.08rpx; font-weight: 700; margin-bottom: 5.77rpx; }
+.guide-weather-text { color: var(--muted); font-size: 19.23rpx; line-height: 1.6; }
+
+.guide-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1.92rpx solid var(--line);
+  border-radius: 15.38rpx;
+  overflow: hidden;
+  margin-bottom: 50rpx;
+}
+.guide-fact {
+  min-height: 119.23rpx;
+  padding: 19.23rpx 21.15rpx;
+  background: var(--paper);
+  border-right: 1.92rpx solid var(--line);
+  border-bottom: 1.92rpx solid var(--line);
+}
+.guide-fact.fact-nr { border-right: 0; }
+.guide-fact.fact-nb { border-bottom: 0; }
+.guide-fact-label { display: block; color: var(--muted); font-size: 17.31rpx; margin-bottom: 7.69rpx; }
+.guide-fact-value { display: block; font-size: 21.15rpx; font-weight: 700; line-height: 1.45; }
+
+.guide-section { padding-bottom: 48.08rpx; margin-bottom: 44.23rpx; border-bottom: 1.92rpx solid var(--line); }
+.guide-section-last { border-bottom: 0; }
+.guide-section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 23.08rpx; margin-bottom: 26.92rpx; }
+.guide-section-title { font-family: "Noto Serif SC", "Songti SC", serif; font-size: 36.54rpx; font-weight: 900; }
+.guide-section-sub { color: var(--muted); font-size: 19.23rpx; }
+.guide-summary { color: var(--muted); font-size: 23.08rpx; line-height: 1.75; margin: -9.62rpx 0 28.85rpx; }
+
+/* 分时行程 */
+.guide-timeline { position: relative; padding-left: 51.92rpx; }
+.guide-timeline::before { content: ""; position: absolute; left: 13.46rpx; top: 13.46rpx; bottom: 13.46rpx; width: 1.92rpx; background: var(--sage-soft); }
+.guide-stop { position: relative; padding-bottom: 34.62rpx; }
+.guide-stop:last-child { padding-bottom: 0; }
+.guide-stop::before {
+  content: "";
+  position: absolute;
+  left: -48.08rpx;
+  top: 9.62rpx;
+  width: 19.23rpx;
+  height: 19.23rpx;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 3.85rpx solid var(--sage-deep);
+}
+.guide-stop-time { display: block; color: var(--sage-deep); font-size: 19.23rpx; font-weight: 800; margin-bottom: 5.77rpx; }
+.guide-stop-title { font-size: 25rpx; font-weight: 700; margin-bottom: 7.69rpx; }
+.guide-stop-desc { color: var(--muted); font-size: 21.15rpx; line-height: 1.65; }
+
+/* 交通 / 费用 / 提示行 */
+.guide-transit-row, .guide-cost-row, .guide-tip { border-bottom: 1.92rpx solid var(--line); padding: 21.15rpx 0; }
+.guide-transit-row:last-child, .guide-cost-row:last-child, .guide-tip:last-child { border-bottom: 0; }
+.guide-row-title { display: block; font-size: 23.08rpx; font-weight: 700; }
+.guide-row-desc { color: var(--muted); font-size: 19.23rpx; line-height: 1.65; margin-top: 5.77rpx; }
+.guide-cost-row { display: flex; justify-content: space-between; gap: 23.08rpx; font-size: 21.15rpx; }
+.guide-cost-label { color: var(--muted); }
+.guide-cost-value { font-weight: 700; }
+
+/* 出发清单 */
+.guide-checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15.38rpx; }
+.guide-check {
+  min-height: 84.62rpx;
+  padding: 15.38rpx 17.31rpx;
+  display: flex;
+  align-items: center;
+  gap: 15.38rpx;
+  border: 1.92rpx solid var(--line);
+  border-radius: 15.38rpx;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 19.23rpx;
+  font-weight: 600;
+  text-align: left;
+}
+.guide-check-box {
+  width: 34.62rpx;
+  height: 34.62rpx;
+  flex-shrink: 0;
+  border: 1.92rpx solid var(--sage);
+  border-radius: 7.69rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19.23rpx;
+  color: #fff;
+}
+.guide-check-text { flex: 1; min-width: 0; line-height: 1.4; }
+.guide-check.done { color: var(--muted); }
+.guide-check.done .guide-check-text { text-decoration: line-through; }
+.guide-check.done .guide-check-box { background: var(--sage); }
+
+/* Plan B / 应急 */
+.guide-planb { padding: 25rpx 26.92rpx; background: var(--sage-mist); border-radius: 15.38rpx; }
+.guide-planb-row { padding: 13.46rpx 0; color: var(--muted); font-size: 19.23rpx; line-height: 1.6; }
+.guide-planb-label { color: var(--sage-deep); font-weight: 700; margin-right: 15.38rpx; }
+.guide-emergency {
+  margin-top: 26.92rpx;
+  padding: 23.08rpx 25rpx;
+  background: var(--paper);
+  border: 1.92rpx solid var(--line);
+  border-radius: 15.38rpx;
+  font-size: 21.15rpx;
+  line-height: 1.8;
+}
+.guide-emergency-title { display: block; font-weight: 800; margin-bottom: 5.77rpx; }
+
+/* 底部双按钮 —— 对照原型 .guide-actions（与商品页 actions-bar 共用样式） */
+.guide-actions {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 17.31rpx;
+  padding: 21.15rpx 34.62rpx calc(23.08rpx + env(safe-area-inset-bottom));
+  background: rgba(246, 241, 230, 0.96);
+  border-top: 1.92rpx solid var(--line);
+}
+.guide-actions .btn-block { margin: 0; }
+.guide-actions-safe { height: calc(161.54rpx + env(safe-area-inset-bottom)); }

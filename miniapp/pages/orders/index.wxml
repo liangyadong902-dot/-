@@ -1,0 +1,8 @@
+<view class="page-shell">
+  <view class="head"><text class="kicker">MY ORDERS</text><text class="title">我的订单</text><text class="desc">每一笔开盒，都有一张可追溯的旅程票根</text></view>
+  <scroll-view class="tabs" scroll-x><view wx:for="{{tabs}}" wx:key="key" class="tab {{active === item.key ? 'active' : ''}}" data-key="{{item.key}}" bindtap="switchTab">{{item.label}}</view></scroll-view>
+  <view wx:if="{{loading}}" class="state">正在读取订单…</view>
+  <view wx:elif="{{error}}" class="state"><text>{{error}}</text><button class="ghost" bindtap="load">重试</button></view>
+  <view wx:elif="{{empty}}" class="state"><text>还没有符合条件的订单</text><button class="sage" bindtap="goMarket">去逛逛</button></view>
+  <view wx:else class="list"><view class="order-card" wx:for="{{orders}}" wx:key="orderNo" data-no="{{item.orderNo}}" bindtap="openOrder"><view class="row"><text class="name">{{item.boxName}}</text><text class="status">{{item.statusText}}</text></view><view class="meta">订单号 {{item.orderNo}}</view><view class="row foot"><text>{{item.createdAt || item.paidAt || '待支付'}}</text><text class="price">¥{{item.amountText}}</text></view></view></view>
+</view>
