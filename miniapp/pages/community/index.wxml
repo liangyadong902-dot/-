@@ -76,7 +76,7 @@
         <view class="community-card-copy">
           <view class="community-card-title">{{item.title}}</view>
           <view class="community-card-foot">
-            <view class="community-author">
+            <view class="community-author" data-id="{{item.author.userId}}" catchtap="openAuthor">
               <view class="community-avatar">
                 <image wx:if="{{item.authorAvatar}}" class="avatar-img" src="{{item.authorAvatar}}" mode="aspectFill" />
                 <block wx:else>{{item.authorMark}}</block>

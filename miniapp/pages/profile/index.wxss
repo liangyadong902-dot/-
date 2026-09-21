@@ -1,0 +1,25 @@
+.profile-page { min-height:100vh; background:var(--cream); padding-bottom:60rpx; }
+.profile-head { padding:60rpx 34rpx 40rpx; background:linear-gradient(180deg,#e3edd6,var(--cream)); }
+.profile-hero { display:flex; align-items:center; gap:26rpx; }
+.avatar-ring { width:130rpx; height:130rpx; border-radius:50%; border:4rpx solid var(--sage-deep); overflow:hidden; flex-shrink:0; background:var(--paper); }
+.profile-avatar { width:100%; height:100%; }
+.avatar-fallback { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-family:serif; font-size:56rpx; font-weight:900; color:var(--sage-deep); }
+.profile-name { font-family:serif; font-size:40rpx; font-weight:900; }
+.profile-meta { margin-top:10rpx; color:var(--muted); font-size:21rpx; }
+.profile-stats { margin-top:36rpx; display:grid; grid-template-columns:repeat(4,1fr); gap:12rpx; }
+.pstat { background:var(--paper); border:1rpx solid var(--line); border-radius:16rpx; padding:18rpx 0; display:flex; flex-direction:column; align-items:center; gap:6rpx; }
+.pstat .strong { font-size:30rpx; font-weight:900; color:var(--sage-deep); }
+.pstat .span { font-size:19rpx; color:var(--muted); }
+.profile-actions { margin-top:28rpx; display:flex; gap:16rpx; }
+.act-btn { flex:1; height:76rpx; line-height:76rpx; text-align:center; border-radius:999rpx; background:var(--sage); color:#fff; font-size:25rpx; font-weight:800; }
+.act-btn.primary.ghost { background:var(--paper); color:var(--sage-deep); border:1rpx solid var(--sage-deep); }
+.profile-selfhint { margin-top:28rpx; text-align:center; color:var(--muted); font-size:21rpx; }
+.works { padding:10rpx 34rpx 60rpx; }
+.works-label { margin:26rpx 0 18rpx; color:var(--sage-deep); font-weight:800; font-size:24rpx; }
+.works-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:18rpx; }
+.work-card { background:var(--paper); border:1rpx solid var(--line); border-radius:18rpx; overflow:hidden; }
+.work-cover { width:100%; aspect-ratio:4/3; background:var(--cream); display:block; }
+.work-cover-empty { display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:24rpx; }
+.work-title { padding:14rpx 16rpx 4rpx; font-size:24rpx; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.work-meta { padding:0 16rpx 16rpx; color:var(--muted); font-size:19rpx; }
+.empty-hint { padding:60rpx 0; text-align:center; color:var(--muted); font-size:22rpx; }

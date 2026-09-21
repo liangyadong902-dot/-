@@ -1,0 +1,27 @@
+<view class="chat-page">
+  <scroll-view class="chat-scroll" scroll-y scroll-into-view="{{bottomAnchor}}" scroll-with-animation>
+    <view wx:if="{{!messages.length}}" class="empty-hint">打个招呼吧～</view>
+    <view class="chat-list">
+      <view class="msg-row {{item.mine ? 'mine' : ''}}" wx:for="{{messages}}" wx:key="id" id="msg-{{item.id}}">
+        <image wx:if="{{!item.mine && peerAvatar}}" src="{{peerAvatar}}" mode="aspectFill" class="m-avatar" />
+        <view wx:elif="{{!item.mine}}" class="m-avatar m-avatar-fb">{{peerNickname[0]}}</view>
+        <view class="m-col">
+          <view class="m-bubble">{{item.content}}</view>
+          <view class="m-time">{{item.time}}</view>
+        </view>
+        <image wx:if="{{item.mine && myAvatar}}" src="{{myAvatar}}" mode="aspectFill" class="m-avatar" />
+        <view wx:elif="{{item.mine}}" class="m-avatar m-avatar-fb">我</view>
+      </view>
+    </view>
+    <view class="chat-pad"></view>
+  </scroll-view>
+
+  <view class="chat-footer">
+    <emoji-picker wx:if="{{emojiOpen}}" bind:select="onEmojiSelect" />
+    <view class="chat-bar">
+      <view class="emoji-btn {{emojiOpen ? 'on' : ''}}" bindtap="toggleEmoji">表情</view>
+      <input class="chat-input" value="{{input}}" confirm-type="send" placeholder="说点什么…" bindinput="onInput" bindconfirm="send" />
+      <view class="send-btn {{input ? '' : 'dim'}}" bindtap="send">{{sending ? '…' : '发送'}}</view>
+    </view>
+  </view>
+</view>

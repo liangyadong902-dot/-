@@ -17,6 +17,15 @@
     </view>
   </view>
   <view class="page-pad">
+    <view class="menu-list mine-quick">
+      <view class="menu-row" bindtap="goProfile">
+        <text class="b">我的主页</text><text class="small">作品与关注 ›</text>
+      </view>
+      <view class="menu-row" bindtap="goMessages">
+        <view class="quick-msg"><text class="b">消息中心</text><view wx:if="{{msgBadge}}" class="msg-badge">{{msgBadge > 99 ? '99+' : msgBadge}}</view></view>
+        <text class="small">通知与私信 ›</text>
+      </view>
+    </view>
     <view class="stats-4grid">
       <view class="stat-tile"><text class="strong">{{statTrips}}</text><text class="span">出行次数</text></view>
       <view class="stat-tile"><text class="strong">{{statSaved}}</text><text class="span">累计省钱</text></view>

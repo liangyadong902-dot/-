@@ -1,0 +1,90 @@
+<Slide style={{ width: 1280, height: 720, background: '#F6F1E6', padding: '20px 64px', position: 'relative', overflow: 'hidden' }}>
+    <Box style={{ position: 'absolute', top: -80, right: -60, width: 300, height: 190, borderRadius: '50%', background: '#E4EDD8', opacity: 0.45 }} />
+    <Box style={{ position: 'absolute', bottom: -120, left: -80, width: 340, height: 210, borderRadius: '50%', background: '#EFE6D6', opacity: 0.5 }} />
+
+    {/* A 标题块 */}
+    <Box style={{ height: 100, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+        <Box style={{ gap: 4, paddingBottom: 6 }}>
+            <Text style={{ fontFamily: 'Caveat, cursive', fontSize: 17, fontWeight: 700, color: '#8EA47C', letterSpacing: 1 }}>04 · Pain Points</Text>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 34, fontWeight: 900, color: '#3C342C' }}>用户痛点</Text>
+            <Box style={{ width: 56, height: 6, borderRadius: 3, background: '#8EA47C', marginTop: 6 }} />
+        </Box>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 15, color: '#8F8376', width: 460, textAlign: 'right', lineHeight: 1.7, paddingBottom: 10 }}>
+            调研把问题拆成五个具体摩擦点，并追溯到供给侧的四个成因。
+        </Text>
+    </Box>
+
+    {/* B 内容区 */}
+    <Box style={{ height: 520, flexDirection: 'row', gap: 30, position: 'relative', zIndex: 1 }}>
+        {/* 左：大引语 */}
+        <Box style={{ width: '35%', justifyContent: 'center', gap: 0 }}>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 110, fontWeight: 900, color: '#C9D6B8', lineHeight: 0.8, marginBottom: 8 }}>「</Text>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 30, fontWeight: 900, color: '#3C342C', lineHeight: 1.65 }}>
+                出发前的疲惫，
+                <br />
+                正在吞掉旅行
+                <br />
+                本该有的期待。
+            </Text>
+            <Box style={{ marginTop: 30, borderLeft: '4px solid #E8B4A2', paddingLeft: 16 }}>
+                <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 16, fontWeight: 600, color: '#6C7E58', lineHeight: 1.7 }}>
+                    结果：想出发，
+                    <br />
+                    但第一步总被推迟。
+                </Text>
+            </Box>
+        </Box>
+
+        {/* 右：摩擦点网格 + 根因 */}
+        <Box style={{ flex: 1, gap: 16 }}>
+            <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 14, fontWeight: 600, color: '#6C7E58', letterSpacing: 2 }}>五个摩擦点 · FRICTIONS</Text>
+            <Box style={{ flexDirection: 'row', gap: 16 }}>
+                {[
+                    { t: '规划成本高', d: '查资料、比路线、做预算，出发前先累一遍。' },
+                    { t: '体验过于固化', d: '模板化攻略，让每次旅行都像复制粘贴。' },
+                    { t: '匹配度不足', d: '通用内容，回应不了真实兴趣和当下心情。' },
+                ].map((item, idx) => (
+                    <Box key={idx} style={{ flex: 1, height: 148, background: '#FFFDF8', borderRadius: 16, border: '1px solid #E7DCCE', boxShadow: '0 4px 16px rgba(60,52,44,0.06)', padding: 18 }}>
+                        <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 18, fontWeight: 700, color: '#3C342C', marginBottom: 8 }}>{item.t}</Text>
+                        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376', lineHeight: 1.65 }}>{item.d}</Text>
+                    </Box>
+                ))}
+            </Box>
+            <Box style={{ flexDirection: 'row', gap: 16 }}>
+                {[
+                    { t: '社交不安全', d: '想结伴，又担心隐私泄露和低质量撮合。' },
+                    { t: '缺少仪式感', d: '信息很多，却没有「打开它」的期待。' },
+                ].map((item, idx) => (
+                    <Box key={idx} style={{ width: '31.8%', height: 148, background: '#FFFDF8', borderRadius: 16, border: '1px solid #E7DCCE', boxShadow: '0 4px 16px rgba(60,52,44,0.06)', padding: 18 }}>
+                        <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 18, fontWeight: 700, color: '#3C342C', marginBottom: 8 }}>{item.t}</Text>
+                        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376', lineHeight: 1.65 }}>{item.d}</Text>
+                    </Box>
+                ))}
+            </Box>
+            {/* 根因条 */}
+            <Box style={{
+                flex: 1,
+                background: '#E4EDD8',
+                borderRadius: 16,
+                padding: '16px 22px',
+                justifyContent: 'center',
+                gap: 10,
+            }}>
+                <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 14, fontWeight: 700, color: '#6C7E58' }}>供给侧根因</Text>
+                <Box style={{ flexDirection: 'row', gap: 12 }}>
+                    {['传统模式固化', '市场细分空白', '轻量创新缺失', '社交体系不规范'].map((tag, idx) => (
+                        <Box key={idx} style={{ background: '#FFFDF8', borderRadius: 999, padding: '7px 16px', border: '1px solid #C9D6B8' }}>
+                            <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 14, fontWeight: 600, color: '#3C342C' }}>{tag}</Text>
+                        </Box>
+                    ))}
+                </Box>
+            </Box>
+        </Box>
+    </Box>
+
+    {/* C 页脚 */}
+    <Box style={{ height: 60, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #E7DCCE', position: 'relative', zIndex: 1 }}>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>途个惊喜 · 随盒出发</Text>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>05 / 15</Text>
+    </Box>
+</Slide>

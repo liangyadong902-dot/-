@@ -1,0 +1,96 @@
+<Slide style={{ width: 1280, height: 720, background: '#F6F1E6', padding: '20px 64px', position: 'relative', overflow: 'hidden' }}>
+    <Box style={{ position: 'absolute', top: -80, right: -60, width: 300, height: 190, borderRadius: '50%', background: '#E4EDD8', opacity: 0.45 }} />
+    <Box style={{ position: 'absolute', bottom: -120, left: -80, width: 340, height: 210, borderRadius: '50%', background: '#EFE6D6', opacity: 0.5 }} />
+
+    {/* A 标题块 */}
+    <Box style={{ height: 100, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+        <Box style={{ gap: 4, paddingBottom: 6 }}>
+            <Text style={{ fontFamily: 'Caveat, cursive', fontSize: 17, fontWeight: 700, color: '#8EA47C', letterSpacing: 1 }}>12 · Operation Loop</Text>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 34, fontWeight: 900, color: '#3C342C' }}>运营闭环</Text>
+            <Box style={{ width: 56, height: 6, borderRadius: 3, background: '#8EA47C', marginTop: 6 }} />
+        </Box>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 15, color: '#8F8376', width: 460, textAlign: 'right', lineHeight: 1.7, paddingBottom: 10 }}>
+            管理端配置一次，用户端每次都能看到真实、可售、可更新的内容。
+        </Text>
+    </Box>
+
+    {/* B 内容区 */}
+    <Box style={{ height: 520, position: 'relative', zIndex: 1, justifyContent: 'center', gap: 26 }}>
+        {/* 五角色流 */}
+        <Box style={{ flexDirection: 'row', alignItems: 'stretch', justifyContent: 'space-between' }}>
+            {[
+                { n: '1', t: '管理端', d: '盲盒 / 线路 / 徽章 / Banner' },
+                { n: '2', t: '内容服务', d: '状态 / 标签 / 保底 / 权限' },
+                { n: '3', t: '用户端', d: '首页 / 图鉴 / 心情筛选' },
+                { n: '4', t: '行为数据', d: '心情 / 浏览 / 开盒 / 收集' },
+                { n: '5', t: '智能留存', d: 'AI 搭子 / 推荐 / 日记' },
+            ].map((item, idx) => (
+                <Box key={idx} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Box style={{
+                        width: 196,
+                        background: '#FFFDF8',
+                        borderRadius: 16,
+                        border: '1px solid #E7DCCE',
+                        boxShadow: '0 4px 16px rgba(60,52,44,0.06)',
+                        padding: '20px 18px',
+                        gap: 10,
+                    }}>
+                        <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                            <Box style={{
+                                width: 34,
+                                height: 34,
+                                borderRadius: '50%',
+                                background: 'linear-gradient(135deg, #8EA47C 0%, #6C7E58 100%)',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}>
+                                <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 16, fontWeight: 900, color: '#FFFDF8' }}>{item.n}</Text>
+                            </Box>
+                            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 18, fontWeight: 700, color: '#3C342C' }}>{item.t}</Text>
+                        </Box>
+                        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376', lineHeight: 1.6 }}>{item.d}</Text>
+                    </Box>
+                    {idx < 4 && (
+                        <Box style={{ width: 28, alignItems: 'center', justifyContent: 'center' }}>
+                            <FAIcon name="arrow-right" style={{ fill: '#C9D6B8', width: 18, height: 18 }} />
+                        </Box>
+                    )}
+                </Box>
+            ))}
+        </Box>
+
+        {/* 回流箭头 */}
+        <Box style={{ alignItems: 'center', gap: 8 }}>
+            <svg width={900} height={54} viewBox="0 0 900 54">
+                <path d="M 850 6 L 850 30 L 50 30 L 50 44" fill="none" stroke="#C9D6B8" strokeWidth="2.5" strokeDasharray="7 6" />
+                <path d="M 42 38 L 50 48 L 58 38" fill="none" stroke="#C9D6B8" strokeWidth="2.5" />
+                <rect x="350" y="16" width="200" height="28" rx="14" fill="#E4EDD8" />
+                <text x="450" y="35" textAnchor="middle" fontSize="14" fill="#6C7E58" fontWeight="600">数据回流，配置越调越准</text>
+            </svg>
+        </Box>
+
+        {/* 阶段二价值 */}
+        <Box style={{
+            height: 74,
+            borderRadius: 16,
+            background: 'linear-gradient(135deg, #8EA47C 0%, #6C7E58 100%)',
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: '0 28px',
+            gap: 18,
+            boxShadow: '0 10px 24px rgba(108,126,88,0.26)',
+        }}>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 17, fontWeight: 700, color: '#FFFDF8' }}>阶段二的价值</Text>
+            <Box style={{ width: 1, height: 28, background: 'rgba(255,253,248,0.4)' }} />
+            <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 15, color: '#FFFDF8', lineHeight: 1.6 }}>
+                先让「配置下发 → 用户看见」成为稳定可验证的产品能力——内容域跑通，交易、AI、统计和社交才有地基。
+            </Text>
+        </Box>
+    </Box>
+
+    {/* C 页脚 */}
+    <Box style={{ height: 60, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #E7DCCE', position: 'relative', zIndex: 1 }}>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>途个惊喜 · 随盒出发</Text>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>13 / 15</Text>
+    </Box>
+</Slide>

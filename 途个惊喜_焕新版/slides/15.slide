@@ -1,0 +1,35 @@
+<Slide style={{ width: 1280, height: 720, background: '#F6F1E6', padding: 0, position: 'relative', overflow: 'hidden' }}>
+    {/* 底部全幅插画 */}
+    <Box style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 420 }}>
+        <Image src="assets/ending_dog_road.png" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    </Box>
+    {/* 顶部奶油渐变过渡 */}
+    <Box style={{
+        position: 'absolute',
+        bottom: 300,
+        left: 0,
+        right: 0,
+        height: 140,
+        background: 'linear-gradient(180deg, #F6F1E6 0%, rgba(246,241,230,0) 100%)',
+    }} />
+
+    {/* 上部金句 */}
+    <Box style={{ position: 'relative', zIndex: 1, alignItems: 'center', paddingTop: 96, gap: 0 }}>
+        <Text style={{ fontFamily: 'Caveat, cursive', fontSize: 26, fontWeight: 700, color: '#8EA47C', marginBottom: 18 }}>
+            Open a New Route
+        </Text>
+        <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 50, fontWeight: 900, color: '#3C342C', letterSpacing: 3, lineHeight: 1.4 }}>
+            把选择交给心情，
+        </Text>
+        <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 50, fontWeight: 900, color: '#6C7E58', letterSpacing: 3, lineHeight: 1.4 }}>
+            把惊喜留给旅程。
+        </Text>
+        <Box style={{ width: 64, height: 6, borderRadius: 3, background: '#8EA47C', marginTop: 26, marginBottom: 20 }} />
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 16, color: '#8F8376', letterSpacing: 1 }}>
+            途个惊喜 · 一个面向年轻人的轻量化文旅创新项目
+        </Text>
+        <Text style={{ fontFamily: 'Caveat, cursive', fontSize: 30, fontWeight: 700, color: '#3C342C', marginTop: 14 }}>
+            Thank You
+        </Text>
+    </Box>
+</Slide>

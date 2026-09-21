@@ -173,5 +173,9 @@ Page(makePage(2, {
     }
   },
   openPost(e) { wx.navigateTo({ url: '/pages/community/post-detail?id=' + e.currentTarget.dataset.id }) },
+  openAuthor(e) {
+    const id = e.currentTarget.dataset.id
+    if (id) wx.navigateTo({ url: '/pages/profile/index?id=' + id })
+  },
   openPublish() { wx.navigateTo({ url: '/pages/community/publish' }) },
 }))

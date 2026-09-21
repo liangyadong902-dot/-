@@ -1,0 +1,112 @@
+<Slide style={{ width: 1280, height: 720, background: '#F6F1E6', padding: '20px 64px', position: 'relative', overflow: 'hidden' }}>
+    <Box style={{ position: 'absolute', top: -80, right: -60, width: 300, height: 190, borderRadius: '50%', background: '#E4EDD8', opacity: 0.45 }} />
+    <Box style={{ position: 'absolute', bottom: -120, left: -80, width: 340, height: 210, borderRadius: '50%', background: '#EFE6D6', opacity: 0.5 }} />
+
+    {/* A 标题块 */}
+    <Box style={{ height: 100, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+        <Box style={{ gap: 4, paddingBottom: 6 }}>
+            <Text style={{ fontFamily: 'Caveat, cursive', fontSize: 17, fontWeight: 700, color: '#8EA47C', letterSpacing: 1 }}>11 · Tech &amp; Risk Control</Text>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 34, fontWeight: 900, color: '#3C342C' }}>技术与风控</Text>
+            <Box style={{ width: 56, height: 6, borderRadius: 3, background: '#8EA47C', marginTop: 6 }} />
+        </Box>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 15, color: '#8F8376', width: 460, textAlign: 'right', lineHeight: 1.7, paddingBottom: 10 }}>
+            轻量化产品，也可以有完整的工程承重墙。
+        </Text>
+    </Box>
+
+    {/* B 内容区：架构图 */}
+    <Box style={{ height: 520, position: 'relative', zIndex: 1, justifyContent: 'center', gap: 0 }}>
+        {/* 三端 */}
+        <Box style={{ flexDirection: 'row', justifyContent: 'center', gap: 60 }}>
+            {[
+                { icon: 'mobile-alt', t: '微信小程序', d: '用户主阵地' },
+                { icon: 'desktop', t: '管理端 Web', d: '内容与运营配置' },
+                { icon: 'credit-card', t: '支付宝沙箱', d: '可演示交易' },
+            ].map((item, idx) => (
+                <Box key={idx} style={{
+                    width: 280,
+                    background: '#FFFDF8',
+                    borderRadius: 16,
+                    border: '1px solid #E7DCCE',
+                    boxShadow: '0 4px 16px rgba(60,52,44,0.06)',
+                    padding: '16px 20px',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 14,
+                }}>
+                    <Box style={{ width: 44, height: 44, borderRadius: 12, background: '#E4EDD8', alignItems: 'center', justifyContent: 'center' }}>
+                        <FAIcon name={item.icon} style={{ fill: '#6C7E58', width: 22, height: 22 }} />
+                    </Box>
+                    <Box style={{ gap: 2 }}>
+                        <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 17, fontWeight: 700, color: '#3C342C' }}>{item.t}</Text>
+                        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 12, color: '#8F8376' }}>{item.d}</Text>
+                    </Box>
+                </Box>
+            ))}
+        </Box>
+
+        {/* 连接 */}
+        <Box style={{ flexDirection: 'row', justifyContent: 'center', gap: 60, height: 34 }}>
+            {[0, 1, 2].map((idx) => (
+                <Box key={idx} style={{ width: 280, alignItems: 'center', justifyContent: 'center' }}>
+                    <FAIcon name="arrow-down" style={{ fill: '#C9D6B8', width: 18, height: 18 }} />
+                </Box>
+            ))}
+        </Box>
+
+        {/* 服务层 */}
+        <Box style={{
+            background: 'linear-gradient(135deg, #8EA47C 0%, #6C7E58 100%)',
+            borderRadius: 16,
+            padding: '20px 28px',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 20,
+            boxShadow: '0 10px 24px rgba(108,126,88,0.26)',
+        }}>
+            <FAIcon name="server" style={{ fill: '#FFFDF8', width: 24, height: 24 }} />
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 20, fontWeight: 900, color: '#FFFDF8', letterSpacing: 1 }}>
+                Spring Boot 3 · MyBatis-Plus · JWT · Spring AI
+            </Text>
+        </Box>
+
+        <Box style={{ alignItems: 'center', justifyContent: 'center', height: 34 }}>
+            <FAIcon name="arrow-down" style={{ fill: '#C9D6B8', width: 18, height: 18 }} />
+        </Box>
+
+        {/* 数据与安全层 */}
+        <Box style={{ flexDirection: 'row', gap: 20 }}>
+            {[
+                { icon: 'database', t: 'MySQL', d: '业务数据 / 内容池' },
+                { icon: 'bolt', t: 'Redis', d: '验证码 / 会话 / AI 记忆' },
+                { icon: 'shield', t: '内容安全', d: '权限 / 脱敏 / 审核' },
+                { icon: 'check-circle', t: '交易闭环', d: '沙箱支付 / 异步通知' },
+            ].map((item, idx) => (
+                <Box key={idx} style={{
+                    flex: 1,
+                    background: '#E4EDD8',
+                    borderRadius: 16,
+                    padding: '18px 20px',
+                    gap: 8,
+                }}>
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <FAIcon name={item.icon} style={{ fill: '#6C7E58', width: 20, height: 20 }} />
+                        <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 17, fontWeight: 700, color: '#3C342C' }}>{item.t}</Text>
+                    </Box>
+                    <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376', lineHeight: 1.6 }}>{item.d}</Text>
+                </Box>
+            ))}
+        </Box>
+
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 14, color: '#8F8376', textAlign: 'center', marginTop: 22, lineHeight: 1.7 }}>
+            技术架构围绕内容下发、交易闭环、智能推荐与隐私合规展开——每一层都对应一个可演示的产品能力。
+        </Text>
+    </Box>
+
+    {/* C 页脚 */}
+    <Box style={{ height: 60, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #E7DCCE', position: 'relative', zIndex: 1 }}>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>途个惊喜 · 随盒出发</Text>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>12 / 15</Text>
+    </Box>
+</Slide>

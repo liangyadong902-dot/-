@@ -1,0 +1,1 @@
+<view class="emoji-panel"><view class="emoji-grid"><view class="emoji-row" wx:for="{{rows}}" wx:for-item="row" wx:key="index"><text class="emoji" wx:for="{{row}}" wx:for-item="emoji" wx:key="*this" data-emoji="{{emoji}}" bindtap="onPick">{{emoji}}</text></view></view></view>

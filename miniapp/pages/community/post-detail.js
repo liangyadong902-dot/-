@@ -76,7 +76,7 @@ function buildComments(list, postAuthorId) {
 }
 
 Page(makePage(-1, {
-  data: { post: null, comments: [], loading: true, error: '', input: '', sending: false, authorMark: '途', statusBarHeight: 20, navBarHeight: 44, mediaIndex: 0, replyName: '' },
+  data: { post: null, comments: [], loading: true, error: '', input: '', sending: false, authorMark: '途', statusBarHeight: 20, navBarHeight: 44, mediaIndex: 0, mediaWindow: [], replyName: '' },
   onLoad(options) { this.postId = options.id; this.setNavMetrics(); this.load() },
   setNavMetrics() {
     try {
@@ -108,16 +108,20 @@ Page(makePage(-1, {
         comments: buildComments(comments.list, post.author && post.author.userId),
         loading: false,
         mediaIndex: 0,
+        mediaWindow: (post.imageUrls || []).map((_, i) => i <= 1),
         replyName: '',
       })
       this.replyTarget = null
       this.hydrateMedia()
     } catch (e) { this.setData({ loading: false, error: '帖子暂时不可见' }) }
   },
-  // 图片轮播切换：更新小红书风格的圆点指示器
+  // 图片轮播切换：更新小红书风格的圆点指示器 + 滑动窗口（只渲染当前±1张，避免多图同时解码卡顿）
   onMediaChange(e) {
     const current = e.detail && typeof e.detail.current === 'number' ? e.detail.current : 0
-    if (current !== this.data.mediaIndex) this.setData({ mediaIndex: current })
+    if (current !== this.data.mediaIndex) {
+      const urls = (this.data.post && this.data.post.imageUrls) || []
+      this.setData({ mediaIndex: current, mediaWindow: urls.map((_, i) => Math.abs(i - current) <= 1) })
+    }
   },
   // 真机 image 渲染层加载不了明文 http 图片：先下载到本地临时文件再替换显示地址；
   // 点赞/收藏返回的 post 会重置图片地址，也需重新执行（有缓存，很快）
@@ -163,6 +167,12 @@ Page(makePage(-1, {
     if (!this.data.post || !this.data.post.author) return
     try { const author = await api.followCommunityUser(this.data.post.author.userId, !this.data.post.author.followed); this.setData({ 'post.author': resolveAuthor(author) }); this.hydrateMedia() } catch (e) {}
   },
+  openAuthorProfile() {
+    const author = this.data.post && this.data.post.author
+    if (author && author.userId) wx.navigateTo({ url: '/pages/profile/index?id=' + author.userId })
+  },
+  toggleEmoji() { this.setData({ emojiOpen: !this.data.emojiOpen }) },
+  onEmojiSelect(e) { this.setData({ input: (this.data.input || '') + e.detail.emoji }) },
   goBack() { wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/community/index' }) }) },
   openBox(e) { wx.navigateTo({ url: '/pages/product/detail?id=' + e.currentTarget.dataset.id }) },
   openTrip(e) { wx.navigateTo({ url: '/pages/trips/detail?id=' + e.currentTarget.dataset.id }) },

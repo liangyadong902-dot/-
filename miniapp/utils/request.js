@@ -16,26 +16,129 @@ function resolveMedia(url) {
   return value
 }
 
-// 真机上 image 组件渲染层会拦截明文 http 图片（iOS WKWebView 安全策略），
+// 真机上 image 组件渲染层加载不了明文 http 图片（iOS WKWebView 安全策略），
 // 而 wx.request / wx.uploadFile / wx.downloadFile 走原生层不受影响。
-// 因此 http 媒体先经 downloadFile 落到本地临时文件，再交给 image 显示；
+// 因此 http 媒体先经 downloadFile 落到本地，再交给 image 显示；
 // https / 本地路径 / dataURL 原样返回，下载失败回退原地址（开发工具中仍可显示）。
+//
+// 缓存分两层：内存 Map（本次会话）+ USER_DATA_PATH 固定目录（跨冷启动持久化，
+// 索引存 storage），解决社区多图浏览每次进帖全量重下原图的卡顿；
+// 持久层总量超 150MB 时按最近访问时间 LRU 清理。
+const FS = wx.getFileSystemManager ? wx.getFileSystemManager() : null
+const MEDIA_DIR = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/media_cache'
+const MEDIA_INDEX_KEY = 'media_cache_index_v1'
+const MEDIA_CACHE_LIMIT = 150 * 1024 * 1024
+
 const displayMediaCache = new Map()
+let mediaIndex = null
+let mediaDirReady = false
+
+function hashMediaUrl(url) {
+  let h = 0x811c9dc5
+  for (let i = 0; i < url.length; i++) {
+    h ^= url.charCodeAt(i)
+    h = (h * 0x01000193) >>> 0
+  }
+  return h.toString(16) + '-' + url.length.toString(36)
+}
+
+function mediaExt(url) {
+  const m = /\.(jpe?g|png|webp|gif)(?:\?|$)/i.exec(url)
+  return m ? '.' + m[1].toLowerCase() : '.jpg'
+}
+
+function loadMediaIndex() {
+  if (mediaIndex) return mediaIndex
+  try { mediaIndex = wx.getStorageSync(MEDIA_INDEX_KEY) || {} } catch (e) { mediaIndex = {} }
+  return mediaIndex
+}
+
+function saveMediaIndex() {
+  try { wx.setStorageSync(MEDIA_INDEX_KEY, mediaIndex || {}) } catch (e) {}
+}
+
+function ensureMediaDir() {
+  if (mediaDirReady || !FS) return
+  try { FS.mkdirSync(MEDIA_DIR, true) } catch (e) {}
+  mediaDirReady = true
+}
+
+function headerSize(res) {
+  const header = res.header || {}
+  const raw = header['Content-Length'] || header['content-length']
+  const size = raw ? parseInt(raw, 10) : NaN
+  return Number.isNaN(size) ? 0 : size
+}
+
+function cachedMediaPath(url) {
+  const entry = loadMediaIndex()[url]
+  if (!entry || !entry.p || !FS) return ''
+  try {
+    FS.accessSync(entry.p)
+    entry.at = Date.now()
+    saveMediaIndex()
+    return entry.p
+  } catch (e) {
+    delete loadMediaIndex()[url]
+    saveMediaIndex()
+    return ''
+  }
+}
+
+function rememberMedia(url, filePath, size) {
+  displayMediaCache.set(url, filePath)
+  const index = loadMediaIndex()
+  index[url] = { p: filePath, s: size || 0, at: Date.now() }
+  saveMediaIndex()
+}
+
+function trimMediaCache() {
+  if (!FS) return
+  const index = loadMediaIndex()
+  const entries = Object.keys(index).map((url) => ({ url, p: index[url].p, s: index[url].s || 0, at: index[url].at || 0 }))
+  let total = entries.reduce((sum, e) => sum + e.s, 0)
+  if (total <= MEDIA_CACHE_LIMIT) return
+  entries.sort((a, b) => a.at - b.at)
+  for (let i = 0; i < entries.length && total > MEDIA_CACHE_LIMIT; i++) {
+    try { FS.unlinkSync(entries[i].p) } catch (e) {}
+    total -= entries[i].s
+    delete index[entries[i].url]
+    displayMediaCache.delete(entries[i].url)
+  }
+  saveMediaIndex()
+}
 
 function fetchDisplayMedia(url) {
   const target = resolveMedia(url)
   if (!target || !/^http:\/\//i.test(target)) return Promise.resolve(target)
   if (displayMediaCache.has(target)) return Promise.resolve(displayMediaCache.get(target))
+  const local = cachedMediaPath(target)
+  if (local) {
+    displayMediaCache.set(target, local)
+    return Promise.resolve(local)
+  }
   return new Promise((resolve) => {
     wx.downloadFile({
       url: target,
       success: (res) => {
-        if (res.statusCode === 200 && res.tempFilePath) {
-          displayMediaCache.set(target, res.tempFilePath)
-          resolve(res.tempFilePath)
-        } else {
-          resolve(target)
-        }
+        if (res.statusCode !== 200 || !res.tempFilePath) { resolve(target); return }
+        if (!FS) { displayMediaCache.set(target, res.tempFilePath); resolve(res.tempFilePath); return }
+        ensureMediaDir()
+        const filePath = MEDIA_DIR + '/' + hashMediaUrl(target) + mediaExt(target)
+        try { FS.unlinkSync(filePath) } catch (e) {}
+        FS.saveFile({
+          tempFilePath: res.tempFilePath,
+          filePath,
+          success: () => {
+            rememberMedia(target, filePath, headerSize(res))
+            trimMediaCache()
+            resolve(filePath)
+          },
+          fail: () => {
+            displayMediaCache.set(target, res.tempFilePath)
+            resolve(res.tempFilePath)
+          },
+        })
       },
       fail: () => resolve(target),
     })

@@ -1,0 +1,59 @@
+<Slide style={{ width: 1280, height: 720, background: '#F6F1E6', padding: '20px 64px', position: 'relative', overflow: 'hidden' }}>
+    <Box style={{ position: 'absolute', top: -80, right: -60, width: 300, height: 190, borderRadius: '50%', background: '#E4EDD8', opacity: 0.45 }} />
+    <Box style={{ position: 'absolute', bottom: -120, left: -80, width: 340, height: 210, borderRadius: '50%', background: '#EFE6D6', opacity: 0.5 }} />
+
+    {/* A 标题块 */}
+    <Box style={{ height: 100, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+        <Box style={{ gap: 4, paddingBottom: 6 }}>
+            <Text style={{ fontFamily: 'Caveat, cursive', fontSize: 17, fontWeight: 700, color: '#8EA47C', letterSpacing: 1 }}>08 · Innovation</Text>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 34, fontWeight: 900, color: '#3C342C' }}>三大创新</Text>
+            <Box style={{ width: 56, height: 6, borderRadius: 3, background: '#8EA47C', marginTop: 6 }} />
+        </Box>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 15, color: '#8F8376', width: 460, textAlign: 'right', lineHeight: 1.7, paddingBottom: 10 }}>
+            创新不只在界面，更在产品逻辑、内容方法和关系边界。
+        </Text>
+    </Box>
+
+    {/* B 内容区：三条大数字横带 */}
+    <Box style={{ height: 520, justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+        {[
+            { n: '01', t: '玩法创新 · 攻略盲盒化', d: '把被动搜索变成一次开箱：随机、稀有度、动效和收集，凑齐一次出发的仪式感。', k: '惊喜感' },
+            { n: '02', t: '内容创新 · 结构化萃取', d: '把景点、交通、预算、美食、避雷、穿搭拆成可组合的原创内容单元，越用越厚。', k: '内容壁垒' },
+            { n: '03', t: '模式创新 · 合规轻社交', d: '内容付费为核心、兴趣交流为增值；不做隐私交换，不做恶意撮合。', k: '信任感' },
+        ].map((item, idx) => (
+            <Box key={idx} style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                background: '#FFFDF8',
+                borderRadius: 20,
+                border: '1px solid #E7DCCE',
+                boxShadow: '0 4px 16px rgba(60,52,44,0.06)',
+                padding: '0 34px',
+                height: 158,
+                gap: 30,
+            }}>
+                <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 76, fontWeight: 900, color: idx === 0 ? '#E8B4A2' : '#C9D6B8', lineHeight: 1, width: 130 }}>
+                    {item.n}
+                </Text>
+                <Box style={{ flex: 1, gap: 8 }}>
+                    <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 23, fontWeight: 700, color: '#3C342C' }}>{item.t}</Text>
+                    <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 15, color: '#8F8376', lineHeight: 1.65 }}>{item.d}</Text>
+                </Box>
+                <Box style={{
+                    background: '#E4EDD8',
+                    borderRadius: 999,
+                    padding: '10px 24px',
+                    border: '1px solid #C9D6B8',
+                }}>
+                    <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 18, fontWeight: 900, color: '#6C7E58' }}>{item.k}</Text>
+                </Box>
+            </Box>
+        ))}
+    </Box>
+
+    {/* C 页脚 */}
+    <Box style={{ height: 60, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #E7DCCE', position: 'relative', zIndex: 1 }}>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>途个惊喜 · 随盒出发</Text>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>09 / 15</Text>
+    </Box>
+</Slide>

@@ -37,10 +37,13 @@ import com.tuge.domain.vo.CreatorVO;
 import com.tuge.domain.vo.LinkedContentVO;
 import com.tuge.domain.vo.SocialUserVO;
 import com.tuge.domain.vo.TopicVO;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -61,13 +64,21 @@ public class CommunityService {
     private final BlindBoxMapper boxMapper;
     private final TripMapper tripMapper;
     private final CheckinMapper checkinMapper;
+    private final NotificationService notificationService;
+    private final StringRedisTemplate redisTemplate;
+    private final ObjectMapper objectMapper;
+
+    /** 帖子详情基础数据（不含个人态）的 Redis 缓存 key 前缀 */
+    public static final String POST_DETAIL_KEY = "community:post:detail:";
 
     public CommunityService(CommunityPostMapper postMapper, PostImageMapper imageMapper,
                             PostCommentMapper commentMapper, PostLikeMapper likeMapper,
                             PostCollectMapper collectMapper, TopicMapper topicMapper,
                             UserTopicFollowMapper topicFollowMapper, UserFollowMapper followMapper,
                             AppUserMapper userMapper, BlindBoxMapper boxMapper,
-                            TripMapper tripMapper, CheckinMapper checkinMapper) {
+                            TripMapper tripMapper, CheckinMapper checkinMapper,
+                            NotificationService notificationService,
+                            StringRedisTemplate redisTemplate, ObjectMapper objectMapper) {
         this.postMapper = postMapper;
         this.imageMapper = imageMapper;
         this.commentMapper = commentMapper;
@@ -80,6 +91,9 @@ public class CommunityService {
         this.boxMapper = boxMapper;
         this.tripMapper = tripMapper;
         this.checkinMapper = checkinMapper;
+        this.notificationService = notificationService;
+        this.redisTemplate = redisTemplate;
+        this.objectMapper = objectMapper;
     }
 
     public PageResult<CommunityPostVO> listPosts(Long userId, String view, Long topicId,
@@ -119,7 +133,40 @@ public class CommunityService {
     public CommunityPostVO detail(Long userId, Long postId) {
         CommunityPost post = findPost(postId);
         if (!isPublic(post) && !Objects.equals(post.getUserId(), userId)) throw new BusinessException(404, "帖子不存在");
-        return toPost(post, userId, true);
+        CommunityPostVO vo = cachedDetail(post);
+        if (userId != null) applyViewerFlags(vo, userId);
+        return vo;
+    }
+
+    /** 详情基础数据（不含个人态）走 Redis 缓存：多图浏览场景一次进帖原本要打约 10 条 SQL */
+    private CommunityPostVO cachedDetail(CommunityPost post) {
+        String key = POST_DETAIL_KEY + post.getId();
+        try {
+            String json = redisTemplate.opsForValue().get(key);
+            if (json != null) return objectMapper.readValue(json, CommunityPostVO.class);
+        } catch (Exception ignored) { }
+        CommunityPostVO vo = toPost(post, null, true);
+        try {
+            redisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(vo), Duration.ofMinutes(10));
+        } catch (Exception ignored) { }
+        return vo;
+    }
+
+    /** 缓存中的基础 VO 不含登录用户视角字段，命中后按当前用户补齐点赞/收藏/关注标记 */
+    private void applyViewerFlags(CommunityPostVO vo, Long userId) {
+        vo.setLiked(likeMapper.selectCount(new LambdaQueryWrapper<PostLike>().eq(PostLike::getPostId, vo.getPostId()).eq(PostLike::getUserId, userId)) > 0);
+        vo.setCollected(collectMapper.selectCount(new LambdaQueryWrapper<PostCollect>().eq(PostCollect::getPostId, vo.getPostId()).eq(PostCollect::getUserId, userId)) > 0);
+        if (vo.getAuthor() != null && vo.getAuthor().getUserId() != null) {
+            vo.getAuthor().setFollowed(followMapper.selectCount(new LambdaQueryWrapper<UserFollow>().eq(UserFollow::getFollowerUserId, userId).eq(UserFollow::getFollowedUserId, vo.getAuthor().getUserId())) > 0);
+        }
+        if (vo.getTopic() != null && vo.getTopic().getTopicId() != null) {
+            vo.getTopic().setFollowed(topicFollowMapper.selectCount(new LambdaQueryWrapper<UserTopicFollow>().eq(UserTopicFollow::getUserId, userId).eq(UserTopicFollow::getTopicId, vo.getTopic().getTopicId())) > 0);
+        }
+    }
+
+    /** 供本服务与管理端在帖子内容/计数变化后失效详情缓存 */
+    public void evictPostDetailCache(Long postId) {
+        try { redisTemplate.delete(POST_DETAIL_KEY + postId); } catch (Exception ignored) { }
     }
 
     public CommunityPostVO adminView(Long postId) {
@@ -163,7 +210,7 @@ public class CommunityService {
     public CommunityPostVO delete(Long userId, Long postId) {
         CommunityPost post = findPost(postId);
         if (!Objects.equals(post.getUserId(), userId)) throw new BusinessException(403, "只能删除自己的帖子");
-        post.setStatus("deleted"); post.setVersion((post.getVersion() == null ? 0 : post.getVersion()) + 1); postMapper.updateById(post);
+        post.setStatus("deleted"); post.setVersion((post.getVersion() == null ? 0 : post.getVersion()) + 1); postMapper.updateById(post); evictPostDetailCache(postId);
         return toPost(post, userId, true);
     }
 
@@ -171,10 +218,10 @@ public class CommunityService {
     public CommunityPostVO setLike(Long userId, Long postId, boolean active) {
         requireUser(userId); CommunityPost post = findPublicPost(postId);
         PostLike existing = likeMapper.selectOne(new LambdaQueryWrapper<PostLike>().eq(PostLike::getPostId, postId).eq(PostLike::getUserId, userId));
-        if (active && existing == null) { PostLike like = new PostLike(); like.setPostId(postId); like.setUserId(userId); like.setCreatedAt(LocalDateTime.now()); try { likeMapper.insert(like); } catch (DuplicateKeyException ignored) {} }
+        if (active && existing == null) { PostLike like = new PostLike(); like.setPostId(postId); like.setUserId(userId); like.setCreatedAt(LocalDateTime.now()); try { likeMapper.insert(like); notificationService.notify(post.getUserId(), "like", userId, postId, null, "赞了你的帖子「" + post.getTitle() + "」"); } catch (DuplicateKeyException ignored) {} }
         if (!active && existing != null) likeMapper.delete(new LambdaQueryWrapper<PostLike>().eq(PostLike::getPostId, postId).eq(PostLike::getUserId, userId));
         int count = Math.toIntExact(likeMapper.selectCount(new LambdaQueryWrapper<PostLike>().eq(PostLike::getPostId, postId)));
-        post.setLikeCount(count); postMapper.updateById(post); return toPost(post, userId, false);
+        post.setLikeCount(count); postMapper.updateById(post); evictPostDetailCache(postId); return toPost(post, userId, false);
     }
 
     @Transactional
@@ -184,7 +231,7 @@ public class CommunityService {
         if (active && existing == null) { PostCollect item = new PostCollect(); item.setPostId(postId); item.setUserId(userId); item.setCreatedAt(LocalDateTime.now()); try { collectMapper.insert(item); } catch (DuplicateKeyException ignored) {} }
         if (!active && existing != null) collectMapper.delete(new LambdaQueryWrapper<PostCollect>().eq(PostCollect::getPostId, postId).eq(PostCollect::getUserId, userId));
         int count = Math.toIntExact(collectMapper.selectCount(new LambdaQueryWrapper<PostCollect>().eq(PostCollect::getPostId, postId)));
-        post.setCollectCount(count); postMapper.updateById(post); return toPost(post, userId, false);
+        post.setCollectCount(count); postMapper.updateById(post); evictPostDetailCache(postId); return toPost(post, userId, false);
     }
 
     @Transactional
@@ -192,7 +239,7 @@ public class CommunityService {
         requireUser(userId);
         CommunityPost post = findPublicPost(postId);
         postMapper.update(null, new LambdaUpdateWrapper<CommunityPost>().eq(CommunityPost::getId, postId).setSql("share_count = share_count + 1"));
-        post.setShareCount((post.getShareCount() == null ? 0 : post.getShareCount()) + 1); return toPost(post, userId, false);
+        post.setShareCount((post.getShareCount() == null ? 0 : post.getShareCount()) + 1); evictPostDetailCache(postId); return toPost(post, userId, false);
     }
 
     public PageResult<CommunityCommentVO> comments(Long userId, Long postId, long page, long pageSize) {
@@ -210,8 +257,9 @@ public class CommunityService {
             if (parent == null || !Objects.equals(parent.getPostId(), postId) || !"published".equals(parent.getStatus())) throw new BusinessException(409, "回复目标不可用");
         }
         PostComment comment = new PostComment(); comment.setPostId(postId); comment.setUserId(userId); comment.setParentId(request.parentCommentId()); comment.setReplyToUserId(request.replyToUserId()); comment.setContent(request.content().trim()); comment.setStatus("published"); comment.setVersion(0); commentMapper.insert(comment);
+        notificationService.notify(post.getUserId(), request.parentCommentId() == null ? "comment" : "reply", userId, postId, comment.getId(), (request.parentCommentId() == null ? "评论了你的帖子「" + post.getTitle() + "」：" : "回复了你的评论：") + comment.getContent());
         int count = Math.toIntExact(commentMapper.selectCount(new LambdaQueryWrapper<PostComment>().eq(PostComment::getPostId, postId).eq(PostComment::getStatus, "published")));
-        post.setCommentCount(count); postMapper.updateById(post); return toComment(comment);
+        post.setCommentCount(count); postMapper.updateById(post); evictPostDetailCache(postId); return toComment(comment);
     }
 
     @Transactional
@@ -219,7 +267,7 @@ public class CommunityService {
         PostComment comment = commentMapper.selectById(commentId); if (comment == null) throw new BusinessException(404, "评论不存在");
         if (!Objects.equals(comment.getUserId(), userId)) throw new BusinessException(403, "只能删除自己的评论");
         comment.setStatus("deleted"); commentMapper.updateById(comment);
-        CommunityPost post = findPost(comment.getPostId()); post.setCommentCount(Math.toIntExact(commentMapper.selectCount(new LambdaQueryWrapper<PostComment>().eq(PostComment::getPostId, post.getId()).eq(PostComment::getStatus, "published")))); postMapper.updateById(post);
+        CommunityPost post = findPost(comment.getPostId()); post.setCommentCount(Math.toIntExact(commentMapper.selectCount(new LambdaQueryWrapper<PostComment>().eq(PostComment::getPostId, post.getId()).eq(PostComment::getStatus, "published")))); postMapper.updateById(post); evictPostDetailCache(post.getId());
     }
 
     public PageResult<TopicVO> topics(Long userId, String keyword, Boolean followed, long page, long pageSize) {
@@ -244,7 +292,7 @@ public class CommunityService {
         requireUser(userId); if (Objects.equals(userId, targetId)) throw new BusinessException(400, "不能关注自己");
         AppUser target = userMapper.selectById(targetId); if (target == null || !"normal".equals(target.getStatus())) throw new BusinessException(404, "用户不存在");
         UserFollow existing = followMapper.selectOne(new LambdaQueryWrapper<UserFollow>().eq(UserFollow::getFollowerUserId, userId).eq(UserFollow::getFollowedUserId, targetId));
-        if (active && existing == null) { UserFollow f = new UserFollow(); f.setFollowerUserId(userId); f.setFollowedUserId(targetId); f.setCreatedAt(LocalDateTime.now()); try { followMapper.insert(f); } catch (DuplicateKeyException ignored) {} }
+        if (active && existing == null) { UserFollow f = new UserFollow(); f.setFollowerUserId(userId); f.setFollowedUserId(targetId); f.setCreatedAt(LocalDateTime.now()); try { followMapper.insert(f); notificationService.notify(targetId, "follow", userId, null, null, "关注了你"); } catch (DuplicateKeyException ignored) {} }
         if (!active && existing != null) followMapper.deleteById(existing.getId()); return socialUser(target, userId);
     }
 
@@ -298,4 +346,7 @@ public class CommunityService {
     private CommunityCommentVO toComment(PostComment comment) { CommunityCommentVO vo = new CommunityCommentVO(); vo.setCommentId(comment.getId()); vo.setPostId(comment.getPostId()); vo.setParentCommentId(comment.getParentId()); vo.setReplyToUserId(comment.getReplyToUserId()); vo.setContent(comment.getContent()); vo.setStatus(comment.getStatus()); vo.setCreatedAt(comment.getCreatedAt()); vo.setVersion(comment.getVersion()); vo.setAuthor(socialUser(userMapper.selectById(comment.getUserId()), null)); vo.setReplyCount(commentMapper.selectCount(new LambdaQueryWrapper<PostComment>().eq(PostComment::getParentId, comment.getId()).eq(PostComment::getStatus, "published")).intValue()); return vo; }
     private TopicVO toTopic(Topic topic, Long userId) { if (topic == null) return null; TopicVO vo = new TopicVO(); vo.setTopicId(topic.getId()); vo.setName(topic.getName()); vo.setCoverUrl(topic.getCoverUrl()); vo.setDescription(topic.getDescription()); vo.setPostCount(topic.getPostCount() == null ? 0 : topic.getPostCount()); vo.setFollowCount(topic.getFollowCount() == null ? 0 : topic.getFollowCount()); vo.setStatus(topic.getStatus()); vo.setFollowed(userId != null && topicFollowMapper.selectCount(new LambdaQueryWrapper<UserTopicFollow>().eq(UserTopicFollow::getUserId, userId).eq(UserTopicFollow::getTopicId, topic.getId())) > 0); return vo; }
     private SocialUserVO socialUser(AppUser user, Long currentUserId) { SocialUserVO vo = new SocialUserVO(); if (user == null) return vo; vo.setUserId(user.getId()); vo.setNickname(user.getNickname()); vo.setAvatarUrl(user.getAvatarUrl()); vo.setCity(user.getCity()); vo.setFollowerCount(followMapper.selectCount(new LambdaQueryWrapper<UserFollow>().eq(UserFollow::getFollowedUserId, user.getId()))); vo.setFollowed(currentUserId != null && followMapper.selectCount(new LambdaQueryWrapper<UserFollow>().eq(UserFollow::getFollowerUserId, currentUserId).eq(UserFollow::getFollowedUserId, user.getId())) > 0); return vo; }
+
+    /** 供用户主页作品流复用 */
+    public CommunityPostVO toPostForProfile(CommunityPost post, Long viewerId) { return toPost(post, viewerId, false); }
 }

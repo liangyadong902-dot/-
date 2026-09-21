@@ -12,3 +12,9 @@ target/
 .idea/
 .vscode/
 *.log
+
+# 工具与临时文件
+.trae/
+.tmp_*
+*.tsbuildinfo
+途个惊喜（图片版(1).pptx

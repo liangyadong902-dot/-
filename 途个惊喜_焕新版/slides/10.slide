@@ -1,0 +1,104 @@
+<Slide style={{ width: 1280, height: 720, background: '#F6F1E6', padding: '20px 64px', position: 'relative', overflow: 'hidden' }}>
+    <Box style={{ position: 'absolute', top: -80, right: -60, width: 300, height: 190, borderRadius: '50%', background: '#E4EDD8', opacity: 0.45 }} />
+    <Box style={{ position: 'absolute', bottom: -120, left: -80, width: 340, height: 210, borderRadius: '50%', background: '#EFE6D6', opacity: 0.5 }} />
+
+    {/* A 标题块 */}
+    <Box style={{ height: 100, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+        <Box style={{ gap: 4, paddingBottom: 6 }}>
+            <Text style={{ fontFamily: 'Caveat, cursive', fontSize: 17, fontWeight: 700, color: '#8EA47C', letterSpacing: 1 }}>09 · Competition</Text>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 34, fontWeight: 900, color: '#3C342C' }}>竞品差异</Text>
+            <Box style={{ width: 56, height: 6, borderRadius: 3, background: '#8EA47C', marginTop: 6 }} />
+        </Box>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 15, color: '#8F8376', width: 460, textAlign: 'right', lineHeight: 1.7, paddingBottom: 10 }}>
+            避开传统攻略红海，切入盲盒、兴趣匹配与合规轻社交的交叉空白。
+        </Text>
+    </Box>
+
+    {/* B 内容区 */}
+    <Box style={{ height: 520, gap: 18, position: 'relative', zIndex: 1 }}>
+        <Table
+            style={{ width: '100%', height: 396 }}
+            defaultTextStyle={{ fontSize: 15, textAlign: 'center', color: '#3C342C', fontFamily: 'Noto Sans SC, sans-serif' }}
+            defaultCellStyle={{
+                background: { color: '#FFFDF8' },
+                border: {
+                    left: { width: 1, color: '#E7DCCE' },
+                    right: { width: 1, color: '#E7DCCE' },
+                    top: { width: 1, color: '#E7DCCE' },
+                    bottom: { width: 1, color: '#E7DCCE' },
+                },
+            }}
+            cells={[
+                [
+                    { text: '对比维度', textStyle: { bold: true, color: '#FFFDF8', fontSize: 15 }, cellStyle: { background: { color: '#6C7E58' } } },
+                    { text: '传统攻略平台', textStyle: { bold: true, color: '#FFFDF8', fontSize: 15 }, cellStyle: { background: { color: '#6C7E58' } } },
+                    { text: '线下实体旅游盲盒', textStyle: { bold: true, color: '#FFFDF8', fontSize: 15 }, cellStyle: { background: { color: '#6C7E58' } } },
+                    { text: '旅行社交平台', textStyle: { bold: true, color: '#FFFDF8', fontSize: 15 }, cellStyle: { background: { color: '#6C7E58' } } },
+                    { text: '途个惊喜', textStyle: { bold: true, color: '#FFFDF8', fontSize: 16 }, cellStyle: { background: { color: '#8EA47C' } } },
+                ],
+                [
+                    { text: '产品属性', textStyle: { bold: true, color: '#6C7E58' }, cellStyle: { background: { color: '#F6F1E6' } } },
+                    '信息资讯工具',
+                    '线下套餐，重资产',
+                    '社交撮合',
+                    { text: '轻量化内容产品', textStyle: { bold: true, color: '#6C7E58' }, cellStyle: { background: { color: '#E4EDD8' } } },
+                ],
+                [
+                    { text: '玩法创意', textStyle: { bold: true, color: '#6C7E58' }, cellStyle: { background: { color: '#F6F1E6' } } },
+                    '被动搜索',
+                    '有惊喜但玩法固化',
+                    '无开箱体验',
+                    { text: '开盒 + 随机 + 收集', textStyle: { bold: true, color: '#6C7E58' }, cellStyle: { background: { color: '#E4EDD8' } } },
+                ],
+                [
+                    { text: '内容精准度', textStyle: { bold: true, color: '#6C7E58' }, cellStyle: { background: { color: '#F6F1E6' } } },
+                    '通用内容',
+                    '固定套餐',
+                    '兴趣标签弱',
+                    { text: '四大兴趣垂直匹配', textStyle: { bold: true, color: '#6C7E58' }, cellStyle: { background: { color: '#E4EDD8' } } },
+                ],
+                [
+                    { text: '安全边界', textStyle: { bold: true, color: '#6C7E58' }, cellStyle: { background: { color: '#F6F1E6' } } },
+                    '无体系化结伴',
+                    '无社交属性',
+                    '隐私与撮合风险',
+                    { text: '兴趣交流、隐私脱敏', textStyle: { bold: true, color: '#6C7E58' }, cellStyle: { background: { color: '#E4EDD8' } } },
+                ],
+                [
+                    { text: '可复制性', textStyle: { bold: true, color: '#6C7E58' }, cellStyle: { background: { color: '#F6F1E6' } } },
+                    '市场饱和',
+                    '成本与地域约束',
+                    '内容治理复杂',
+                    { text: '线上交付、全国扩展', textStyle: { bold: true, color: '#6C7E58' }, cellStyle: { background: { color: '#E4EDD8' } } },
+                ],
+            ]}
+        />
+
+        {/* 结论条 */}
+        <Box style={{
+            flex: 1,
+            borderRadius: 16,
+            background: 'linear-gradient(135deg, #8EA47C 0%, #6C7E58 100%)',
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: '0 26px',
+            gap: 18,
+            boxShadow: '0 10px 24px rgba(108,126,88,0.26)',
+        }}>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 17, fontWeight: 700, color: '#FFFDF8' }}>差异化结论</Text>
+            <Box style={{ width: 1, height: 26, background: 'rgba(255,253,248,0.4)' }} />
+            <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 15, color: '#FFFDF8', lineHeight: 1.6, flex: 1 }}>
+                我们拼的不是信息量——是更低的决策成本、更高的情绪价值，和更清晰的安全边界。
+            </Text>
+            <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 11, color: 'rgba(255,253,248,0.7)', width: 200, textAlign: 'right', lineHeight: 1.5 }}>
+                依据「产品详情 + 产品亮点 + 竞品分析」材料整理
+            </Text>
+        </Box>
+    </Box>
+
+    {/* C 页脚 */}
+    <Box style={{ height: 60, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #E7DCCE', position: 'relative', zIndex: 1 }}>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>途个惊喜 · 随盒出发</Text>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>10 / 15</Text>
+    </Box>
+</Slide>

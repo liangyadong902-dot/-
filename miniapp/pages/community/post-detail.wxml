@@ -7,11 +7,11 @@
         <view class="cd-close" bindtap="goBack">←</view>
       </view>
       <view class="cd-head-row">
-        <view class="cd-avatar">
+        <view class="cd-avatar" bindtap="openAuthorProfile">
           <image wx:if="{{post.author.avatarUrl}}" class="cd-avatar-img" src="{{post.author.avatarUrl}}" mode="aspectFill" />
           <block wx:else>{{authorMark}}</block>
         </view>
-        <view class="cd-author">
+        <view class="cd-author" bindtap="openAuthorProfile">
           <view class="cd-name">{{post.author.nickname || '途友'}}</view>
           <view class="cd-place">{{post.locationName || '旅途中'}}</view>
         </view>
@@ -21,7 +21,7 @@
     <scroll-view class="cd-scroll" scroll-y enhanced show-scrollbar="{{false}}">
       <view wx:if="{{post.imageUrls.length}}" class="cd-media-wrap">
         <swiper class="cd-media" circular="{{post.imageUrls.length > 1}}" bindchange="onMediaChange">
-          <swiper-item wx:for="{{post.imageUrls}}" wx:key="*this"><image class="cd-media-img" src="{{item}}" mode="aspectFill" /></swiper-item>
+          <swiper-item wx:for="{{post.imageUrls}}" wx:key="*this"><image class="cd-media-img" src="{{mediaWindow[index] ? item : ''}}" mode="aspectFill" /></swiper-item>
         </swiper>
         <view wx:if="{{post.imageUrls.length > 1}}" class="cd-media-dots">
           <view wx:for="{{post.imageUrls}}" wx:key="index" class="cd-media-dot {{mediaIndex === index ? 'on' : ''}}"></view>
@@ -103,7 +103,9 @@
         <text class="cd-reply-tag-text">回复 @{{replyName}}</text>
         <text class="cd-reply-tag-close" catchtap="cancelReply">×</text>
       </view>
+      <emoji-picker wx:if="{{emojiOpen}}" bind:select="onEmojiSelect" />
       <view class="cd-bar-row">
+        <view class="cd-emoji-btn {{emojiOpen ? 'on' : ''}}" catchtap="toggleEmoji">表情</view>
         <view class="cd-input-wrap">
           <input class="cd-input" value="{{input}}" placeholder="{{replyName ? '回复 @' + replyName : '说点旅途见闻…'}}" placeholder-class="cd-ph" maxlength="120" bindinput="inputChange" bindconfirm="sendComment" confirm-type="send" />
         </view>

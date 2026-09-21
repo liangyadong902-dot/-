@@ -1,0 +1,103 @@
+<Slide style={{ width: 1280, height: 720, background: '#F6F1E6', padding: '20px 64px', position: 'relative', overflow: 'hidden' }}>
+    <Box style={{ position: 'absolute', top: -80, right: -60, width: 300, height: 190, borderRadius: '50%', background: '#E4EDD8', opacity: 0.45 }} />
+    <Box style={{ position: 'absolute', bottom: -120, left: -80, width: 340, height: 210, borderRadius: '50%', background: '#EFE6D6', opacity: 0.5 }} />
+
+    {/* A 标题块 */}
+    <Box style={{ height: 100, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+        <Box style={{ gap: 4, paddingBottom: 6 }}>
+            <Text style={{ fontFamily: 'Caveat, cursive', fontSize: 17, fontWeight: 700, color: '#8EA47C', letterSpacing: 1 }}>13 · Roadmap</Text>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 34, fontWeight: 900, color: '#3C342C' }}>实施路线</Text>
+            <Box style={{ width: 56, height: 6, borderRadius: 3, background: '#8EA47C', marginTop: 6 }} />
+        </Box>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 15, color: '#8F8376', width: 460, textAlign: 'right', lineHeight: 1.7, paddingBottom: 10 }}>
+            先跑通闭环，再把留存和生态做厚——每个阶段都有可演示的交付物。
+        </Text>
+    </Box>
+
+    {/* B 内容区：蛇形时间轴 */}
+    <Box style={{ height: 520, position: 'relative', zIndex: 1, justifyContent: 'center', gap: 22 }}>
+        {/* 第一行：阶段 1-3 */}
+        <Box style={{ flexDirection: 'row', gap: 20 }}>
+            {[
+                { n: '1', t: '地基与承重墙', d: '三端骨架 / 数据库 / 接口契约', hot: false },
+                { n: '2', t: '内容域', d: '盲盒 / 线路 / 图鉴 / Banner', hot: true },
+                { n: '3', t: '交易域', d: '登录 / 支付 / 开盒 / 行程', hot: true },
+            ].map((item, idx) => (
+                <Box key={idx} style={{
+                    flex: 1,
+                    height: 168,
+                    background: item.hot ? '#FFFDF8' : '#F6F1E6',
+                    borderRadius: 18,
+                    border: item.hot ? '2px solid #8EA47C' : '1px solid #E7DCCE',
+                    boxShadow: item.hot ? '0 10px 24px rgba(108,126,88,0.16)' : 'none',
+                    padding: 20,
+                    gap: 8,
+                    position: 'relative',
+                }}>
+                    {item.hot && (
+                        <Box style={{ position: 'absolute', top: -13, right: 18, background: '#E8B4A2', borderRadius: 999, padding: '4px 14px' }}>
+                            <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 12, fontWeight: 700, color: '#3C342C' }}>当前重点</Text>
+                        </Box>
+                    )}
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                        <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 34, fontWeight: 900, color: item.hot ? '#8EA47C' : '#C9D6B8', lineHeight: 1 }}>{item.n}</Text>
+                        <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 19, fontWeight: 700, color: '#3C342C' }}>{item.t}</Text>
+                    </Box>
+                    <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 14, color: '#8F8376', lineHeight: 1.65 }}>{item.d}</Text>
+                </Box>
+            ))}
+        </Box>
+
+        {/* 蛇形连接 */}
+        <Box style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingRight: 40, height: 22 }}>
+            <FAIcon name="arrow-down" style={{ fill: '#C9D6B8', width: 18, height: 18 }} />
+        </Box>
+
+        {/* 第二行：阶段 4-6（右到左流向） */}
+        <Box style={{ flexDirection: 'row', gap: 20 }}>
+            {[
+                { n: '6', t: '商家合作与积分', d: '优惠券 / 积分商城' },
+                { n: '5', t: '社交增强', d: '社区 / 打卡 / 成就' },
+                { n: '4', t: '用户资产与 AI', d: '统计 / 人格 / 小途 / 日记' },
+            ].map((item, idx) => (
+                <Box key={idx} style={{
+                    flex: 1,
+                    height: 150,
+                    background: '#F6F1E6',
+                    borderRadius: 18,
+                    border: '1px solid #E7DCCE',
+                    padding: 20,
+                    gap: 8,
+                }}>
+                    <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                        <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 34, fontWeight: 900, color: '#C9D6B8', lineHeight: 1 }}>{item.n}</Text>
+                        <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 19, fontWeight: 700, color: '#3C342C' }}>{item.t}</Text>
+                    </Box>
+                    <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 14, color: '#8F8376', lineHeight: 1.65 }}>{item.d}</Text>
+                </Box>
+            ))}
+        </Box>
+
+        {/* 底部说明 */}
+        <Box style={{
+            height: 64,
+            borderRadius: 14,
+            background: '#E4EDD8',
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: '0 24px',
+            gap: 14,
+        }}>
+            <FAIcon name="flag" style={{ fill: '#6C7E58', width: 18, height: 18 }} />
+            <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 14, color: '#3C342C', lineHeight: 1.6 }}>
+                当前资源集中在阶段二（内容供给做实）与阶段三（把「支付 → 开盒 → 行程」跑成可演示闭环）。
+            </Text>
+        </Box>
+    </Box>
+
+    {/* C 页脚 */}
+    <Box style={{ height: 60, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #E7DCCE', position: 'relative', zIndex: 1 }}>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>途个惊喜 · 随盒出发</Text>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>14 / 15</Text>
+    </Box>
+</Slide>

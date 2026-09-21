@@ -83,6 +83,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
         String uploadRoot = "file:" + System.getProperty("java.io.tmpdir") + "/tuge-uploads/";
-        registry.addResourceHandler("/uploads/**").addResourceLocations(uploadRoot);
+        // 上传图片内容不可变（文件名即版本），长缓存让浏览器/管理端避免重复拉取大图
+        registry.addResourceHandler("/uploads/**").addResourceLocations(uploadRoot)
+                .setCacheControl(org.springframework.http.CacheControl.maxAge(java.time.Duration.ofDays(7)).cachePublic());
     }
 }

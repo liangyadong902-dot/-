@@ -1,0 +1,53 @@
+<Slide style={{ width: 1280, height: 720, background: '#F6F1E6', padding: 0, position: 'relative', overflow: 'hidden' }}>
+    {/* 手账云朵氛围 */}
+    <Box style={{ position: 'absolute', top: -70, left: -90, width: 400, height: 230, borderRadius: '50%', background: '#E4EDD8', opacity: 0.55 }} />
+    <Box style={{ position: 'absolute', top: -50, left: 230, width: 320, height: 180, borderRadius: '50%', background: '#EFE6D6', opacity: 0.6 }} />
+    <Box style={{ position: 'absolute', top: -30, left: 480, width: 240, height: 140, borderRadius: '50%', background: '#E4EDD8', opacity: 0.45 }} />
+    <Box style={{ position: 'absolute', bottom: -110, right: -70, width: 440, height: 270, borderRadius: '50%', background: '#E4EDD8', opacity: 0.5 }} />
+
+    <Box style={{ position: 'relative', zIndex: 1, flexDirection: 'row', alignItems: 'center', height: '100%', padding: '0 72px', gap: 56 }}>
+        {/* 左侧文字 */}
+        <Box style={{ width: 560, gap: 0 }}>
+            <Text style={{ fontFamily: 'Caveat, cursive', fontSize: 26, fontWeight: 700, color: '#8EA47C', marginBottom: 10 }}>
+                Good Journey!
+            </Text>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 84, fontWeight: 900, color: '#3C342C', lineHeight: 1.1, letterSpacing: 4 }}>
+                途个惊喜
+            </Text>
+            <Box style={{ width: 72, height: 8, borderRadius: 4, background: '#8EA47C', marginTop: 22, marginBottom: 22 }} />
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 26, fontWeight: 700, color: '#6C7E58', marginBottom: 18 }}>
+                随盒出发，途个好心情
+            </Text>
+            <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 16, color: '#8F8376', lineHeight: 1.8, marginBottom: 30 }}>
+                面向 Z 世代的惊喜旅游盲盒攻略平台——
+                <br />
+                把「想出发」变成一次轻松、有趣、能被记住的旅程。
+            </Text>
+            <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <Box style={{ background: '#6C7E58', borderRadius: 999, padding: '8px 20px' }}>
+                    <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 14, fontWeight: 600, color: '#FFFDF8' }}>
+                        创新创业项目介绍
+                    </Text>
+                </Box>
+                <Text style={{ fontFamily: 'Caveat, cursive', fontSize: 18, color: '#8F8376' }}>
+                    Open a New Route
+                </Text>
+            </Box>
+        </Box>
+
+        {/* 右侧插画 */}
+        <Box style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <Box style={{
+                width: 500,
+                height: 400,
+                borderRadius: 24,
+                overflow: 'hidden',
+                background: '#FFFDF8',
+                border: '1px solid #E7DCCE',
+                boxShadow: '0 18px 40px rgba(60,52,44,0.12)',
+            }}>
+                <Image src="assets/cover_dog_box.png" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </Box>
+        </Box>
+    </Box>
+</Slide>

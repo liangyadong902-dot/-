@@ -197,6 +197,12 @@
 .cd-reply-tag-text { color: var(--sage-deep); font-size: 21.15rpx; font-weight: 700; }
 .cd-reply-tag-close { color: var(--muted); font-size: 30.77rpx; line-height: 1; padding: 0 5.77rpx; }
 .cd-bar-row { display: flex; align-items: center; gap: 15.38rpx; }
+.cd-emoji-btn {
+  flex-shrink: 0; height: 69.23rpx; line-height: 69.23rpx; padding: 0 21rpx;
+  border-radius: 999rpx; border: 1.92rpx solid var(--line); background: var(--paper);
+  color: var(--muted); font-size: 21.15rpx; font-weight: 700;
+}
+.cd-emoji-btn.on { background: var(--sage); color: #fff; border-color: var(--sage); }
 /* 原生 input 的 flex:1 在部分基础库不生效，外包一层 view 撑满剩余宽度；flex 用长写法防个别环境不生效 */
 .cd-input-wrap {
   min-width: 0;

@@ -1,4 +1,11 @@
 .mine-menu-groups { margin-bottom: 26.92rpx; }
+.mine-quick { margin-bottom: 26.92rpx; }
+.quick-msg { display: flex; align-items: center; gap: 12rpx; }
+.msg-badge {
+  min-width: 32rpx; height: 32rpx; line-height: 32rpx; padding: 0 9rpx;
+  border-radius: 999rpx; background: #e5484d; color: #fff;
+  font-size: 18rpx; text-align: center;
+}
 .mine-section-label {
   padding: 15.38rpx 7.69rpx 13.46rpx;
   color: var(--muted);

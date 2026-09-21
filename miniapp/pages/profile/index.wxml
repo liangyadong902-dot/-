@@ -1,0 +1,40 @@
+<view class="profile-page">
+  <view class="profile-head">
+    <view class="profile-hero">
+      <view class="avatar-ring">
+        <image wx:if="{{profile.avatarUrl}}" src="{{profile.avatarUrl}}" mode="aspectFill" class="profile-avatar" />
+        <view wx:else class="avatar-fallback">{{profile.nickname[0]}}</view>
+      </view>
+      <view class="profile-copy">
+        <view class="profile-name">{{profile.nickname}}</view>
+        <view class="profile-meta">{{profile.city || '未填写城市'}}<text wx:if="{{profile.joinedText}}"> · {{profile.joinedText}} 加入</text></view>
+      </view>
+    </view>
+    <view class="profile-stats">
+      <view class="pstat"><text class="strong">{{profile.postCount}}</text><text class="span">作品</text></view>
+      <view class="pstat"><text class="strong">{{profile.followerCount}}</text><text class="span">粉丝</text></view>
+      <view class="pstat"><text class="strong">{{profile.followingCount}}</text><text class="span">关注</text></view>
+      <view class="pstat"><text class="strong">{{profile.likeReceivedCount}}</text><text class="span">获赞</text></view>
+    </view>
+    <view class="profile-actions" wx:if="{{!isSelf}}">
+      <view class="act-btn primary {{followed ? 'ghost' : ''}}" bindtap="toggleFollow">{{followed ? '已关注' : '+ 关注'}}</view>
+      <view class="act-btn" bindtap="goChat">发私信</view>
+    </view>
+    <view class="profile-selfhint" wx:else>这是你的主页，发布的作品会展示在这里</view>
+  </view>
+
+  <view class="works">
+    <view class="works-label">{{isSelf ? '我的作品' : '作品'}}</view>
+    <view wx:if="{{loading}}" class="empty-hint">加载中…</view>
+    <view wx:elif="{{error}}" class="empty-hint">{{error}}</view>
+    <view wx:elif="{{!works.length}}" class="empty-hint">还没有公开的作品</view>
+    <view wx:else class="works-grid">
+      <view class="work-card" wx:for="{{works}}" wx:key="id" data-id="{{item.id}}" bindtap="openWork">
+        <image wx:if="{{item.cover}}" src="{{item.cover}}" mode="aspectFill" class="work-cover" lazy-load="{{true}}" />
+        <view wx:else class="work-cover work-cover-empty">作品</view>
+        <view class="work-title">{{item.title}}</view>
+        <view class="work-meta">赞 {{item.likeCount}} · 评 {{item.commentCount}}</view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,111 @@
+<Slide style={{ width: 1280, height: 720, background: '#F6F1E6', padding: '20px 64px', position: 'relative', overflow: 'hidden' }}>
+    <Box style={{ position: 'absolute', top: -80, right: -60, width: 300, height: 190, borderRadius: '50%', background: '#E4EDD8', opacity: 0.45 }} />
+    <Box style={{ position: 'absolute', bottom: -120, left: -80, width: 340, height: 210, borderRadius: '50%', background: '#EFE6D6', opacity: 0.5 }} />
+
+    {/* A 标题块 */}
+    <Box style={{ height: 100, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+        <Box style={{ gap: 4, paddingBottom: 6 }}>
+            <Text style={{ fontFamily: 'Caveat, cursive', fontSize: 17, fontWeight: 700, color: '#8EA47C', letterSpacing: 1 }}>10 · Business Model</Text>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 34, fontWeight: 900, color: '#3C342C' }}>商业模式</Text>
+            <Box style={{ width: 56, height: 6, borderRadius: 3, background: '#8EA47C', marginTop: 6 }} />
+        </Box>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 15, color: '#8F8376', width: 460, textAlign: 'right', lineHeight: 1.7, paddingBottom: 10 }}>
+            先把一次出行做得值得，再让用户愿意回来。
+        </Text>
+    </Box>
+
+    {/* B 内容区 */}
+    <Box style={{ height: 520, flexDirection: 'row', gap: 28, position: 'relative', zIndex: 1 }}>
+        {/* 左：四类资产 + 转化链 */}
+        <Box style={{ width: '60%', gap: 16 }}>
+            <Box style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
+                {[
+                    { icon: 'gift', t: '收入引擎 · 盲盒销售', d: '单次开盒是收入起点，保底机制降低决策门槛。' },
+                    { icon: 'map', t: '内容资产 · 线路池', d: '线路、主题、城市持续积累，卖得越多池子越厚。' },
+                    { icon: 'user', t: '用户资产 · 兴趣画像', d: '偏好、徽章、日记，把行为沉淀成画像。' },
+                    { icon: 'chart-line', t: '运营资产 · 复购转化', d: '筛选、复购、转化，数据反过来指导选品。' },
+                ].map((item, idx) => (
+                    <Box key={idx} style={{
+                        width: '47.5%',
+                        height: 158,
+                        background: '#FFFDF8',
+                        borderRadius: 16,
+                        border: '1px solid #E7DCCE',
+                        boxShadow: '0 4px 16px rgba(60,52,44,0.06)',
+                        padding: 18,
+                        gap: 8,
+                    }}>
+                        <Box style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                            <Box style={{ width: 36, height: 36, borderRadius: 10, background: '#E4EDD8', alignItems: 'center', justifyContent: 'center' }}>
+                                <FAIcon name={item.icon} style={{ fill: '#6C7E58', width: 18, height: 18 }} />
+                            </Box>
+                            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 16, fontWeight: 700, color: '#3C342C' }}>{item.t}</Text>
+                        </Box>
+                        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376', lineHeight: 1.65 }}>{item.d}</Text>
+                    </Box>
+                ))}
+            </Box>
+
+            {/* 转化链 */}
+            <Box style={{
+                flex: 1,
+                background: '#E4EDD8',
+                borderRadius: 16,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 14,
+                padding: '0 20px',
+            }}>
+                <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 14, fontWeight: 700, color: '#6C7E58' }}>增长路径</Text>
+                {['单次开盒', '复购开盒', '内容转化'].map((step, idx) => (
+                    <Box key={idx} style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                        <Box style={{
+                            background: idx === 2 ? 'linear-gradient(135deg, #8EA47C 0%, #6C7E58 100%)' : '#FFFDF8',
+                            borderRadius: 999,
+                            padding: '10px 22px',
+                            border: idx === 2 ? 'none' : '1px solid #C9D6B8',
+                        }}>
+                            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 16, fontWeight: 700, color: idx === 2 ? '#FFFDF8' : '#3C342C' }}>{step}</Text>
+                        </Box>
+                        {idx < 2 && <FAIcon name="arrow-right" style={{ fill: '#6C7E58', width: 18, height: 18 }} />}
+                    </Box>
+                ))}
+            </Box>
+        </Box>
+
+        {/* 右：商业逻辑 */}
+        <Box style={{
+            flex: 1,
+            borderRadius: 20,
+            background: 'linear-gradient(160deg, #8EA47C 0%, #6C7E58 100%)',
+            padding: 30,
+            boxShadow: '0 12px 28px rgba(108,126,88,0.28)',
+        }}>
+            <Text style={{ fontFamily: 'Caveat, cursive', fontSize: 20, fontWeight: 700, color: 'rgba(255,253,248,0.85)', marginBottom: 16 }}>Business Logic</Text>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 22, fontWeight: 700, color: '#FFFDF8', lineHeight: 1.75 }}>
+                用户买到的是一次结构化的出行决策；平台沉淀的是内容资产与兴趣画像。
+            </Text>
+            <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 14, color: 'rgba(255,253,248,0.88)', lineHeight: 1.8, marginTop: 14 }}>
+                轻资产模式，让复制速度快于线下扩张——跑通一个城市，就能带着整套内容方法去下一个。
+            </Text>
+            <Box style={{ marginTop: 'auto' }}>
+                <Box style={{ height: 1, background: 'rgba(255,253,248,0.35)', marginBottom: 16 }} />
+                <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, fontWeight: 700, color: 'rgba(255,253,248,0.9)', marginBottom: 12 }}>成本结构</Text>
+                <Box style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                    {['内容研发', '技术与模型', '渠道获客', '线路结算与售后'].map((tag, idx) => (
+                        <Box key={idx} style={{ background: 'rgba(255,253,248,0.16)', borderRadius: 999, padding: '6px 14px' }}>
+                            <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#FFFDF8' }}>{tag}</Text>
+                        </Box>
+                    ))}
+                </Box>
+            </Box>
+        </Box>
+    </Box>
+
+    {/* C 页脚 */}
+    <Box style={{ height: 60, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #E7DCCE', position: 'relative', zIndex: 1 }}>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>途个惊喜 · 随盒出发</Text>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>11 / 15</Text>
+    </Box>
+</Slide>

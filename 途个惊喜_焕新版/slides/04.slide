@@ -1,0 +1,69 @@
+<Slide style={{ width: 1280, height: 720, background: '#F6F1E6', padding: '20px 64px', position: 'relative', overflow: 'hidden' }}>
+    <Box style={{ position: 'absolute', top: -80, right: -60, width: 300, height: 190, borderRadius: '50%', background: '#E4EDD8', opacity: 0.45 }} />
+    <Box style={{ position: 'absolute', bottom: -120, left: -80, width: 340, height: 210, borderRadius: '50%', background: '#EFE6D6', opacity: 0.5 }} />
+
+    {/* A 标题块 */}
+    <Box style={{ height: 100, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+        <Box style={{ gap: 4, paddingBottom: 6 }}>
+            <Text style={{ fontFamily: 'Caveat, cursive', fontSize: 17, fontWeight: 700, color: '#8EA47C', letterSpacing: 1 }}>03 · Users</Text>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 34, fontWeight: 900, color: '#3C342C' }}>目标用户</Text>
+            <Box style={{ width: 56, height: 6, borderRadius: 3, background: '#8EA47C', marginTop: 6 }} />
+        </Box>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 15, color: '#8F8376', width: 460, textAlign: 'right', lineHeight: 1.7, paddingBottom: 10 }}>
+            他们不缺旅行信息，缺的是一个能替自己迈出第一步的产品。
+        </Text>
+    </Box>
+
+    {/* B 内容区 */}
+    <Box style={{ height: 520, gap: 20, position: 'relative', zIndex: 1 }}>
+        <Box style={{ flexDirection: 'row', gap: 20, height: 428 }}>
+            {[
+                { c: '懒', e: 'Lazy Starter', t: '出行懒人', d: '想旅行，但不想花两个小时做攻略。', k: '要省心' },
+                { c: '奇', e: 'Curious Hunter', t: '潮流猎奇', d: '拒绝千篇一律，期待未知和开箱的仪式感。', k: '要新鲜' },
+                { c: '趣', e: 'Hobby Player', t: '垂直兴趣', d: '徒步、美食、治愈、拍照，各玩各的圈子。', k: '要匹配' },
+                { c: '伴', e: 'Light Social', t: '温和轻社交', d: '想认识同频的人，但拒绝隐私交换和随机撮合。', k: '要安全' },
+            ].map((item, idx) => (
+                <Box key={idx} style={{
+                    flex: 1,
+                    background: '#FFFDF8',
+                    borderRadius: 20,
+                    border: '1px solid #E7DCCE',
+                    boxShadow: '0 4px 16px rgba(60,52,44,0.06)',
+                    padding: '26px 22px',
+                    alignItems: 'center',
+                }}>
+                    <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 64, fontWeight: 900, color: '#8EA47C', lineHeight: 1.1 }}>{item.c}</Text>
+                    <Text style={{ fontFamily: 'Caveat, cursive', fontSize: 16, fontWeight: 700, color: '#C9D6B8', marginTop: 2, marginBottom: 14 }}>{item.e}</Text>
+                    <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 20, fontWeight: 700, color: '#3C342C', marginBottom: 10 }}>{item.t}</Text>
+                    <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 14, color: '#8F8376', lineHeight: 1.7, textAlign: 'center' }}>{item.d}</Text>
+                    <Box style={{ marginTop: 'auto', background: '#E4EDD8', borderRadius: 999, padding: '6px 18px' }}>
+                        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 14, fontWeight: 600, color: '#6C7E58' }}>{item.k}</Text>
+                    </Box>
+                </Box>
+            ))}
+        </Box>
+
+        {/* 共同特征条 */}
+        <Box style={{
+            height: 52,
+            borderRadius: 14,
+            background: '#E4EDD8',
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: '0 24px',
+            gap: 14,
+        }}>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 16, fontWeight: 700, color: '#6C7E58' }}>共同特征</Text>
+            <Box style={{ width: 3, height: 3, borderRadius: 2, background: '#8EA47C' }} />
+            <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 14, color: '#3C342C', lineHeight: 1.5 }}>
+                年轻 · 移动端 · 高频周末决策 · 重视情绪价值 · 愿意为「省心」付费
+            </Text>
+        </Box>
+    </Box>
+
+    {/* C 页脚 */}
+    <Box style={{ height: 60, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #E7DCCE', position: 'relative', zIndex: 1 }}>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>途个惊喜 · 随盒出发</Text>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>04 / 15</Text>
+    </Box>
+</Slide>

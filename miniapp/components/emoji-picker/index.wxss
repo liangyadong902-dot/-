@@ -1,0 +1,1 @@
+.emoji-panel { background:var(--paper, #fff); border-top:1rpx solid var(--line, #eee); padding:16rpx 20rpx 30rpx; }.emoji-grid { display:flex; flex-direction:column; gap:8rpx; }.emoji-row { display:flex; justify-content:space-between; }.emoji { width:80rpx; height:80rpx; line-height:80rpx; text-align:center; font-size:44rpx; }

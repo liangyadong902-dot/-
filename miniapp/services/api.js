@@ -55,6 +55,19 @@ module.exports = {
   listCreators: (params) => request.get('/community/creators', params, { silent: true }),
   listMyPosts: (params) => request.get('/me/posts', params, { silent: true }),
   listCollections: (params) => request.get('/me/collections', params, { silent: true }),
+  // 消息通知
+  listNotifications: (params) => request.get('/notifications', params, { silent: true }),
+  notificationUnread: () => request.get('/notifications/unread-count', undefined, { silent: true }),
+  markNotificationRead: (id) => request.put('/notifications/' + id + '/read', {}, { silent: true }),
+  markAllNotificationsRead: () => request.put('/notifications/read-all', {}, { silent: true }),
+  // 私信
+  listConversations: () => request.get('/dm/conversations', undefined, { silent: true }),
+  dmUnreadTotal: () => request.get('/dm/unread-total', undefined, { silent: true }),
+  listDmMessages: (peerUserId, params) => request.get('/dm/messages', { peerUserId, ...(params || {}) }, { silent: true }),
+  sendDmMessage: (toUserId, content) => request.post('/dm/messages', { toUserId, content }),
+  // 用户公开主页
+  getUserProfile: (id) => request.get('/users/' + id + '/profile', undefined, { silent: true }),
+  listUserPosts: (id, params) => request.get('/users/' + id + '/posts', params, { silent: true }),
   checkinEligibility: (tripId) => request.get('/trips/' + tripId + '/checkin-eligibility', undefined, { silent: true }),
   listCheckins: (params) => request.get('/checkins', params, { silent: true }),
   listMyCheckins: (params) => request.get('/me/checkins', params, { silent: true }),

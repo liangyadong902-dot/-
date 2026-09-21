@@ -2,6 +2,7 @@ package com.tuge.domain.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tuge.common.push.PushService;
 import com.tuge.common.result.PageResult;
 import com.tuge.domain.entity.AppUser;
 import com.tuge.domain.entity.Notification;
@@ -25,10 +26,12 @@ public class NotificationService {
 
     private final NotificationMapper notificationMapper;
     private final AppUserMapper userMapper;
+    private final PushService pushService;
 
-    public NotificationService(NotificationMapper notificationMapper, AppUserMapper userMapper) {
+    public NotificationService(NotificationMapper notificationMapper, AppUserMapper userMapper, PushService pushService) {
         this.notificationMapper = notificationMapper;
         this.userMapper = userMapper;
+        this.pushService = pushService;
     }
 
     /** 写一条通知；actor 与接收人相同时跳过，异常不阻断主流程 */
@@ -42,6 +45,14 @@ public class NotificationService {
             item.setContent(content == null ? null : (content.length() > 255 ? content.substring(0, 255) : content));
             item.setIsRead(0);
             notificationMapper.insert(item);
+            // WebSocket 实时推送给在线接收端
+            pushService.push(userId, Map.of(
+                    "channel", "notice",
+                    "noticeId", item.getId(),
+                    "type", type,
+                    "actorId", actorId == null ? 0 : actorId,
+                    "postId", postId == null ? 0 : postId,
+                    "content", item.getContent() == null ? "" : item.getContent()));
         } catch (Exception ignored) {
         }
     }

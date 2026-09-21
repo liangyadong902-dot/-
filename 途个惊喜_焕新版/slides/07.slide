@@ -1,0 +1,117 @@
+<Slide style={{ width: 1280, height: 720, background: '#F6F1E6', padding: '20px 64px', position: 'relative', overflow: 'hidden' }}>
+    <Box style={{ position: 'absolute', top: -80, right: -60, width: 300, height: 190, borderRadius: '50%', background: '#E4EDD8', opacity: 0.45 }} />
+    <Box style={{ position: 'absolute', bottom: -120, left: -80, width: 340, height: 210, borderRadius: '50%', background: '#EFE6D6', opacity: 0.5 }} />
+
+    {/* A 标题块 */}
+    <Box style={{ height: 100, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+        <Box style={{ gap: 4, paddingBottom: 6 }}>
+            <Text style={{ fontFamily: 'Caveat, cursive', fontSize: 17, fontWeight: 700, color: '#8EA47C', letterSpacing: 1 }}>06 · Product</Text>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 34, fontWeight: 900, color: '#3C342C' }}>产品结构</Text>
+            <Box style={{ width: 56, height: 6, borderRadius: 3, background: '#8EA47C', marginTop: 6 }} />
+        </Box>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 15, color: '#8F8376', width: 460, textAlign: 'right', lineHeight: 1.7, paddingBottom: 10 }}>
+            内容不是随机拼接，而是被结构化、分级、校验后才进入盲盒。
+        </Text>
+    </Box>
+
+    {/* B 内容区 */}
+    <Box style={{ height: 520, flexDirection: 'row', gap: 28, position: 'relative', zIndex: 1 }}>
+        {/* 左：内容流水线 */}
+        <Box style={{ width: '55%', background: '#FFFDF8', borderRadius: 20, border: '1px solid #E7DCCE', boxShadow: '0 4px 16px rgba(60,52,44,0.06)', padding: 26, gap: 22 }}>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 19, fontWeight: 700, color: '#3C342C' }}>一条内容，如何进入一个盲盒</Text>
+
+            {/* 流水线 */}
+            <Box style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                {['内容池', '盲盒标签', '情绪匹配', '路线解锁'].map((step, idx) => (
+                    <Box key={idx} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <Box style={{
+                            background: idx === 3 ? 'linear-gradient(135deg, #8EA47C 0%, #6C7E58 100%)' : '#E4EDD8',
+                            borderRadius: 14,
+                            padding: '14px 16px',
+                            minWidth: 96,
+                            alignItems: 'center',
+                        }}>
+                            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 16, fontWeight: 700, color: idx === 3 ? '#FFFDF8' : '#6C7E58' }}>{step}</Text>
+                        </Box>
+                        {idx < 3 && <FAIcon name="arrow-right" style={{ fill: '#C9D6B8', width: 16, height: 16 }} />}
+                    </Box>
+                ))}
+            </Box>
+
+            <Box style={{ height: 1, background: '#E7DCCE' }} />
+
+            {/* 四大主题盒 */}
+            <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 14, fontWeight: 600, color: '#6C7E58', letterSpacing: 2 }}>四大主题盲盒</Text>
+            <Box style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14 }}>
+                {[
+                    { icon: 'hiking', t: '户外徒步', d: '自然探索' },
+                    { icon: 'utensils', t: '美食逛吃', d: '城市烟火' },
+                    { icon: 'spa', t: '休闲治愈', d: '放空与恢复' },
+                    { icon: 'camera', t: '拍照打卡', d: '审美与分享' },
+                ].map((item, idx) => (
+                    <Box key={idx} style={{
+                        width: '47%',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 14,
+                        background: '#F6F1E6',
+                        borderRadius: 14,
+                        padding: '14px 16px',
+                    }}>
+                        <Box style={{ width: 44, height: 44, borderRadius: 12, background: '#E4EDD8', alignItems: 'center', justifyContent: 'center' }}>
+                            <FAIcon name={item.icon} style={{ fill: '#6C7E58', width: 22, height: 22 }} />
+                        </Box>
+                        <Box style={{ gap: 2 }}>
+                            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 16, fontWeight: 700, color: '#3C342C' }}>{item.t}</Text>
+                            <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 12, color: '#8F8376' }}>{item.d}</Text>
+                        </Box>
+                    </Box>
+                ))}
+            </Box>
+        </Box>
+
+        {/* 右：结构化字段 */}
+        <Box style={{ flex: 1, gap: 14 }}>
+            <Text style={{ fontFamily: 'Noto Serif SC, serif', fontSize: 19, fontWeight: 700, color: '#3C342C' }}>结构化攻略内容</Text>
+            <Box style={{ flex: 1, justifyContent: 'space-between' }}>
+                {[
+                    { f: '景点', q: '去哪儿' },
+                    { f: '交通', q: '怎么到' },
+                    { f: '预算', q: '花多少' },
+                    { f: '美食', q: '吃什么' },
+                    { f: '避雷', q: '少踩坑' },
+                    { f: '穿搭', q: '怎么拍' },
+                ].map((item, idx) => (
+                    <Box key={idx} style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 14,
+                        background: '#FFFDF8',
+                        borderRadius: 12,
+                        border: '1px solid #E7DCCE',
+                        padding: '0 16px',
+                        height: 52,
+                    }}>
+                        <Box style={{ background: '#E4EDD8', borderRadius: 999, padding: '4px 14px', width: 64, alignItems: 'center' }}>
+                            <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 14, fontWeight: 700, color: '#6C7E58' }}>{item.f}</Text>
+                        </Box>
+                        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 15, color: '#3C342C' }}>{item.q}</Text>
+                    </Box>
+                ))}
+            </Box>
+            <Box style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
+                {['轻量化', '可复制', '低决策'].map((tag, idx) => (
+                    <Box key={idx} style={{ background: 'linear-gradient(135deg, #8EA47C 0%, #6C7E58 100%)', borderRadius: 999, padding: '6px 18px' }}>
+                        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, fontWeight: 600, color: '#FFFDF8' }}>{tag}</Text>
+                    </Box>
+                ))}
+            </Box>
+        </Box>
+    </Box>
+
+    {/* C 页脚 */}
+    <Box style={{ height: 60, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #E7DCCE', position: 'relative', zIndex: 1 }}>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>途个惊喜 · 随盒出发</Text>
+        <Text style={{ fontFamily: 'Noto Sans SC, sans-serif', fontSize: 13, color: '#8F8376' }}>07 / 15</Text>
+    </Box>
+</Slide>

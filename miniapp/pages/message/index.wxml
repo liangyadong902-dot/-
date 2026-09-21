@@ -1,0 +1,44 @@
+<view class="msg-page">
+  <view class="msg-tabs">
+    <view class="msg-tab {{tab === 'notice' ? 'on' : ''}}" data-tab="notice" bindtap="switchTab">通知<text wx:if="{{noticeUnread > 0}}" class="tab-badge">{{noticeUnread > 99 ? '99+' : noticeUnread}}</text></view>
+    <view class="msg-tab {{tab === 'dm' ? 'on' : ''}}" data-tab="dm" bindtap="switchTab">私信<text wx:if="{{dmUnread > 0}}" class="tab-badge">{{dmUnread > 99 ? '99+' : dmUnread}}</text></view>
+  </view>
+
+  <block wx:if="{{tab === 'notice'}}">
+    <view class="notice-actions" wx:if="{{noticeUnread > 0}}"><view class="mark-all" bindtap="markAll">全部标为已读</view></view>
+    <view wx:if="{{loading}}" class="empty-hint">加载中…</view>
+    <view wx:elif="{{!notices.length}}" class="empty-hint">还没有通知，去社区互动一下吧</view>
+    <view wx:else class="notice-list">
+      <view class="notice-item {{item.read ? '' : 'unread'}}" wx:for="{{notices}}" wx:key="id" data-id="{{item.id}}" bindtap="openNotice">
+        <view class="n-avatar-wrap">
+          <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill" class="n-avatar" />
+          <view wx:else class="n-avatar n-avatar-fb">{{item.actor[0]}}</view>
+          <view class="n-type">{{item.label}}</view>
+        </view>
+        <view class="n-body">
+          <view class="n-line"><text class="n-actor">{{item.actor}}</text><text class="n-content">{{item.content}}</text></view>
+          <view class="n-time">{{item.time}}</view>
+        </view>
+        <view wx:if="{{!item.read}}" class="n-dot"></view>
+      </view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view wx:if="{{loading}}" class="empty-hint">加载中…</view>
+    <view wx:elif="{{!conversations.length}}" class="empty-hint">还没有私信，去别人主页打个招呼吧</view>
+    <view wx:else class="conv-list">
+      <view class="conv-item" wx:for="{{conversations}}" wx:key="id" data-id="{{item.id}}" bindtap="openConversation">
+        <view class="c-avatar-wrap">
+          <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill" class="c-avatar" />
+          <view wx:else class="c-avatar c-avatar-fb">{{item.nickname[0]}}</view>
+          <view wx:if="{{item.unread > 0}}" class="c-badge">{{item.unread > 99 ? '99+' : item.unread}}</view>
+        </view>
+        <view class="c-body">
+          <view class="c-row"><text class="c-name">{{item.nickname}}</text><text class="c-time">{{item.time}}</text></view>
+          <view class="c-last">{{item.lastMessage}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

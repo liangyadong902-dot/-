@@ -1,0 +1,21 @@
+.chat-page { height:100vh; display:flex; flex-direction:column; background:var(--cream); }
+.chat-scroll { flex:1; min-height:0; }
+.chat-list { padding:26rpx 28rpx 0; display:flex; flex-direction:column; gap:24rpx; }
+.msg-row { display:flex; align-items:flex-start; gap:14rpx; }
+.msg-row.mine { flex-direction:row-reverse; }
+.m-avatar { width:72rpx; height:72rpx; border-radius:50%; background:var(--paper); flex-shrink:0; }
+.m-avatar-fb { display:flex; align-items:center; justify-content:center; color:var(--sage-deep); font-weight:900; font-size:26rpx; border:1rpx solid var(--line); }
+.m-col { max-width:70%; display:flex; flex-direction:column; }
+.msg-row.mine .m-col { align-items:flex-end; }
+.m-bubble { background:var(--paper); border:1rpx solid var(--line); border-radius:4rpx 20rpx 20rpx 20rpx; padding:18rpx 22rpx; font-size:25rpx; line-height:1.5; word-break:break-all; }
+.msg-row.mine .m-bubble { background:var(--sage); color:#fff; border-color:var(--sage); border-radius:20rpx 4rpx 20rpx 20rpx; }
+.m-time { margin-top:8rpx; color:var(--muted); font-size:18rpx; }
+.chat-pad { height:30rpx; }
+.chat-footer { background:var(--paper); border-top:1rpx solid var(--line); }
+.chat-bar { display:flex; align-items:center; gap:14rpx; padding:16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom)); }
+.emoji-btn { flex-shrink:0; height:72rpx; line-height:72rpx; padding:0 22rpx; border-radius:999rpx; border:1rpx solid var(--line); color:var(--muted); font-size:23rpx; }
+.emoji-btn.on { background:var(--sage); color:#fff; border-color:var(--sage); }
+.chat-input { flex:1; min-width:0; height:72rpx; line-height:72rpx; padding:0 22rpx; border:1rpx solid var(--line); border-radius:999rpx; background:var(--cream); font-size:24rpx; }
+.send-btn { flex-shrink:0; height:72rpx; line-height:72rpx; padding:0 30rpx; border-radius:999rpx; background:var(--sage); color:#fff; font-size:24rpx; font-weight:800; }
+.send-btn.dim { opacity:.4; }
+.empty-hint { padding:160rpx 40rpx; text-align:center; color:var(--muted); font-size:22rpx; }
