@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 /**
  * 业务单号：前缀 + yyyyMMdd + 6 位日序（Redis INCR）
@@ -23,7 +24,12 @@ public class BizNoGenerator {
 
     public String generate(String prefix) {
         String date = LocalDate.now().format(DAY);
-        return prefix + date + String.format("%06d", getDailySequence(prefix, date));
+        try {
+            return prefix + date + String.format("%06d", getDailySequence(prefix, date));
+        } catch (RuntimeException ignored) {
+            // Redis 不可用时仍允许下单；UUID 后缀避免单机自增在重启后重复。
+            return prefix + date + UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+        }
     }
 
     private long getDailySequence(String prefix, String date) {

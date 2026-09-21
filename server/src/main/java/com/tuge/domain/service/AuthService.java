@@ -165,7 +165,7 @@ public class AuthService {
     }
 
     private boolean usableAvatar(String url) {
-        return url != null && url.startsWith("https://") && url.length() <= 512;
+        return url != null && url.length() <= 512 && (url.startsWith("https://") || url.startsWith("http://"));
     }
 
     private void validatePhone(String phone) {

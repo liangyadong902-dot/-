@@ -54,7 +54,7 @@ public class AiToolService {
     }
 
     public String getValueGuard() {
-        return "盲盒票面价值不低于售价 120%；未出行退款需在「我的 → 订单」提交申请，最终以订单状态和审核结果为准。";
+        return "盲盒随机解锁主题行程；未出行退款需在「我的 → 订单」提交申请，最终以订单状态和审核结果为准。";
     }
 
     public String userContext(Long userId) {
@@ -79,12 +79,12 @@ public class AiToolService {
 
     public String publicFacts() {
         String boxes = recommendBoxes(null, null).stream()
-                .map(box -> box.getName() + "，价格" + box.getPrice() + "元，保底" + box.getMinValue() + "元")
+                .map(box -> box.getName() + "，价格" + box.getPrice() + "元")
                 .reduce((left, right) -> left + "；" + right).orElse("暂无上架盲盒");
         String routes = searchRoutes(null, null).stream()
                 .map(route -> route.getName() + "，目的地" + route.getLocation())
                 .reduce((left, right) -> left + "；" + right).orElse("暂无启用线路");
-        return "当前上架盲盒：" + boxes + "。当前启用线路：" + routes + "。价值保障：" + getValueGuard();
+        return "当前上架盲盒：" + boxes + "。当前启用线路：" + routes + "。退换规则：" + getValueGuard();
     }
 
     private static String safe(String value) { return value == null || value.isBlank() ? "暂无" : value; }

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tuge.common.exception.BusinessException;
 import com.tuge.domain.entity.Trip;
 import com.tuge.domain.mapper.TripMapper;
+import com.tuge.domain.mapper.TravelRouteMapper;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,7 @@ class TripServiceIsolationTest {
     void setUp() {
         TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""), Trip.class);
         tripMapper = mock(TripMapper.class);
-        service = new TripService(tripMapper, new ObjectMapper());
+        service = new TripService(tripMapper, mock(TravelRouteMapper.class), new ObjectMapper());
     }
 
     @Test

@@ -7,8 +7,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tuge.common.exception.BusinessException;
 import com.tuge.common.result.PageResult;
+import com.tuge.domain.entity.BlindBox;
 import com.tuge.domain.entity.Trip;
+import com.tuge.domain.entity.TravelRoute;
+import com.tuge.domain.mapper.BlindBoxMapper;
 import com.tuge.domain.mapper.TripMapper;
+import com.tuge.domain.mapper.TravelRouteMapper;
 import com.tuge.domain.vo.TripVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,10 +26,14 @@ import java.util.Map;
 @Service
 public class TripService {
     private final TripMapper tripMapper;
+    private final TravelRouteMapper routeMapper;
+    private final BlindBoxMapper boxMapper;
     private final ObjectMapper objectMapper;
 
-    public TripService(TripMapper tripMapper, ObjectMapper objectMapper) {
+    public TripService(TripMapper tripMapper, TravelRouteMapper routeMapper, BlindBoxMapper boxMapper, ObjectMapper objectMapper) {
         this.tripMapper = tripMapper;
+        this.routeMapper = routeMapper;
+        this.boxMapper = boxMapper;
         this.objectMapper = objectMapper;
     }
 
@@ -43,10 +51,18 @@ public class TripService {
         return toVO(find(userId, id));
     }
 
+    @Transactional
     public Map<String, Object> guide(Long userId, Long id) {
         Trip trip = find(userId, id);
         Map<String, Object> guide = readGuide(trip.getGuideSnapshotJson());
-        if (guide.isEmpty()) guide = defaultGuide(trip);
+        if (guide.isEmpty()) {
+            TravelRoute route = routeMapper.selectById(trip.getRouteId());
+            guide = route == null ? Map.of() : readGuide(route.getGuideJson());
+            if (guide.isEmpty()) throw new BusinessException(409, "该线路尚未配置出行攻略");
+            trip.setGuideSnapshotJson(route.getGuideJson());
+            trip.setGuideVersion(route.getGuideVersion() == null ? 1 : route.getGuideVersion());
+            tripMapper.updateById(trip);
+        }
         Map<String, Object> result = new LinkedHashMap<>(guide);
         result.put("tripId", trip.getId());
         result.put("routeName", trip.getRouteName());
@@ -83,6 +99,9 @@ public class TripService {
         vo.setOrderId(trip.getOrderId());
         vo.setBoxId(trip.getBoxId());
         vo.setBoxName(trip.getBoxName());
+        // 行程卡封面直接随行程下发，避免小程序端依赖「当前上架盲盒目录」反查导致部分图片不显示
+        BlindBox box = trip.getBoxId() == null ? null : boxMapper.selectById(trip.getBoxId());
+        vo.setBoxCoverUrl(box == null ? null : box.getCoverUrl());
         vo.setBoxCategory(trip.getBoxCategory());
         vo.setPriceCent(trip.getPriceCent());
         vo.setRouteName(trip.getRouteName());
@@ -116,43 +135,6 @@ public class TripService {
         } catch (JsonProcessingException e) {
             return Map.of();
         }
-    }
-
-    private Map<String, Object> defaultGuide(Trip trip) {
-        int days = "cross".equals(trip.getBoxCategory()) ? 3 : "province".equals(trip.getBoxCategory()) ? 2 : 1;
-        String duration = days == 1 ? "一日轻旅行" : days + "天" + (days - 1) + "夜";
-        List<String> includes = parseInclude(trip.getIncludeJson());
-        Map<String, Object> guide = new LinkedHashMap<>();
-        guide.put("overview", trip.getHighlight());
-        guide.put("durationText", duration);
-        guide.put("schedules", List.of(
-                Map.of("dayNo", 1, "time", "08:30", "title", "集合出发", "description", "核验订单并确认返程安排。"),
-                Map.of("dayNo", 1, "time", "10:30", "title", trip.getRouteName(), "description", trip.getHighlight()),
-                Map.of("dayNo", days, "time", "17:00", "title", "集合返程", "description", "清点随身物品并按约定地点返程。")
-        ));
-        guide.put("spots", List.of(Map.of(
-                "spotId", "route-" + trip.getRouteId(),
-                "name", trip.getLocation(),
-                "coverUrl", "",
-                "highlights", trip.getHighlight(),
-                "notice", "开放时间与现场安排以出发前通知为准。",
-                "durationMinutes", days * 240
-        )));
-        guide.put("transport", List.of(Map.of("title", "集合与接驳", "description", "出发前一天在行程页确认集合点和车辆信息。")));
-        guide.put("dining", List.of(Map.of("title", "餐饮安排", "description", includes.stream().anyMatch(v -> v.contains("餐")) ? "订单已包含页面标明的餐饮权益。" : "餐饮以自理为主，建议预留机动预算。")));
-        guide.put("lodging", days > 1 ? List.of(Map.of("title", "住宿安排", "description", "入住信息在出发前通知中确认。")) : List.of());
-        guide.put("budgetItems", List.of(
-                Map.of("name", "盲盒订单", "amount", trip.getPriceCent() == null ? 0 : trip.getPriceCent() / 100.0, "required", true),
-                Map.of("name", "个人机动消费", "amount", days * 100, "required", false)
-        ));
-        guide.put("checklist", includes.isEmpty() ? List.of("身份证件", "充电宝", "舒适步行鞋", "轻便雨具") : includes);
-        guide.put("planB", "如遇天气或景区临时调整，以安全为先切换室内点位，并保留返程时间。 ");
-        guide.put("safetyTips", List.of("提前确认天气和集合时间", "不进入未开放区域", "保管好证件与订单信息"));
-        guide.put("faqs", List.of(
-                Map.of("question", "集合信息在哪里查看？", "answer", "出发前一天在行程详情和订单通知中查看。"),
-                Map.of("question", "临时天气变化怎么办？", "answer", "按 Plan B 调整，涉及权益变化时以订单通知为准。")
-        ));
-        return guide;
     }
 
     private int safePage(long page) { return (int) Math.max(1, page); }

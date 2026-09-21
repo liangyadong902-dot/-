@@ -1,5 +1,5 @@
 module.exports = {
-  BASE_URL: 'http://127.0.0.1:8080/api/v1',
+  BASE_URL: 'http://172.20.10.2:8080/api/v1',
   COLORS: {
     primary: '#FF6B35',
     secondary: '#1A1A2E',
@@ -17,5 +17,6 @@ module.exports = {
     province: '省内游',
     cross: '跨省游',
     theme: '主题专线',
+    guide: '纯攻略',
   },
 }

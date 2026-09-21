@@ -366,10 +366,22 @@ CREATE TABLE `trip` (
 -- ═══════════════════════════════════════════════════════
 -- 3.10 聊天记录
 -- ═══════════════════════════════════════════════════════
+CREATE TABLE `ai_conversation` (
+  `id`            VARCHAR(64)     NOT NULL COMMENT '服务端生成的会话标识',
+  `user_id`       BIGINT UNSIGNED NOT NULL,
+  `title`         VARCHAR(64)     NOT NULL DEFAULT '新对话',
+  `last_message`  VARCHAR(255)    NOT NULL DEFAULT '',
+  `message_count` INT UNSIGNED    NOT NULL DEFAULT 0,
+  `created_at`    DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at`    DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `idx_user_updated` (`user_id`, `updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='AI 持久化会话';
+
 CREATE TABLE `chat_message` (
   `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id`         BIGINT UNSIGNED NOT NULL,
-  `conversation_id` VARCHAR(64)     NOT NULL COMMENT '登录用户 user:{id}；游客 guest:{sessionId} 不落库',
+  `conversation_id` VARCHAR(64)     NOT NULL COMMENT '关联 ai_conversation.id；游客 guest:{sessionId} 不落库',
   `sender`          VARCHAR(8)      NOT NULL COMMENT 'user / ai / system',
   `content`         TEXT            NOT NULL,
   `via_quick`       TINYINT         NOT NULL DEFAULT 0 COMMENT '是否点了快捷问题',
@@ -775,6 +787,21 @@ CREATE TABLE `post_image` (
   KEY `idx_post_sort` (`post_id`, `sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='帖子图片';
 
+-- 上传接口 IP 记录：排查图片跨端不显示（谁从哪个 IP 上传、返回了什么地址）
+CREATE TABLE `upload_log` (
+  `id`          BIGINT       NOT NULL AUTO_INCREMENT,
+  `user_id`     BIGINT       DEFAULT NULL COMMENT '上传者用户ID（JWT 解析，游客为空）',
+  `client_ip`   VARCHAR(64)  DEFAULT NULL COMMENT '客户端IP（X-Forwarded-For 优先）',
+  `host_header` VARCHAR(255) DEFAULT NULL COMMENT '客户端请求 Host 头（判断客户端以为的后端地址）',
+  `file_name`   VARCHAR(255) DEFAULT NULL COMMENT '落盘文件名',
+  `stored_url`  VARCHAR(500) DEFAULT NULL COMMENT '返回给客户端的地址 /uploads/xx',
+  `size_bytes`  BIGINT       DEFAULT NULL COMMENT '文件大小(字节)',
+  `mime_type`   VARCHAR(64)  DEFAULT NULL,
+  `created_at`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='上传接口 IP 记录';
+
 
 -- ═══════════════════════════════════════════════════════
 -- N+6 帖子评论、点赞和收藏
@@ -995,3 +1022,56 @@ CREATE TABLE `point_log` (
   KEY `idx_user` (`user_id`, `created_at`),
   KEY `idx_type` (`type`, `created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='积分变动记录';
+
+
+-- ═══════════════════════════════════════════════════════
+-- 消息通知（2026-09）
+-- ═══════════════════════════════════════════════════════
+CREATE TABLE `notification` (
+  `id`          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id`     BIGINT UNSIGNED NOT NULL COMMENT '接收人',
+  `type`        VARCHAR(16)     NOT NULL COMMENT 'like / comment / reply / follow / system',
+  `actor_id`    BIGINT UNSIGNED DEFAULT NULL COMMENT '触发者用户 ID',
+  `post_id`     BIGINT UNSIGNED DEFAULT NULL COMMENT '关联帖子',
+  `comment_id`  BIGINT UNSIGNED DEFAULT NULL COMMENT '关联评论',
+  `content`     VARCHAR(255)    DEFAULT NULL COMMENT '摘要文本',
+  `is_read`     TINYINT         NOT NULL DEFAULT 0,
+  `created_at`  DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `idx_user_read` (`user_id`, `is_read`, `id`),
+  KEY `idx_actor` (`actor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='站内消息通知';
+
+-- ═══════════════════════════════════════════════════════
+-- 私信会话
+-- ═══════════════════════════════════════════════════════
+CREATE TABLE `dm_conversation` (
+  `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_low_id`     BIGINT UNSIGNED NOT NULL COMMENT '会话双方中较小的用户 ID',
+  `user_high_id`    BIGINT UNSIGNED NOT NULL COMMENT '会话双方中较大的用户 ID',
+  `last_message`    VARCHAR(500)    DEFAULT NULL COMMENT '最近一条消息摘要',
+  `last_sender_id`  BIGINT UNSIGNED DEFAULT NULL,
+  `last_message_at` DATETIME(3)     DEFAULT NULL,
+  `low_unread`      INT UNSIGNED    NOT NULL DEFAULT 0 COMMENT 'user_low_id 未读数',
+  `high_unread`     INT UNSIGNED    NOT NULL DEFAULT 0 COMMENT 'user_high_id 未读数',
+  `created_at`      DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at`      DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_pair` (`user_low_id`, `user_high_id`),
+  KEY `idx_low_time` (`user_low_id`, `last_message_at`),
+  KEY `idx_high_time` (`user_high_id`, `last_message_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='私信会话';
+
+-- ═══════════════════════════════════════════════════════
+-- 私信消息
+-- ═══════════════════════════════════════════════════════
+CREATE TABLE `dm_message` (
+  `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `conversation_id` BIGINT UNSIGNED NOT NULL,
+  `sender_id`       BIGINT UNSIGNED NOT NULL,
+  `content`         VARCHAR(500)    NOT NULL,
+  `is_read`         TINYINT         NOT NULL DEFAULT 0,
+  `created_at`      DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `idx_conv` (`conversation_id`, `id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='私信消息';

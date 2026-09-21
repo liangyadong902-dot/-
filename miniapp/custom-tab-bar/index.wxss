@@ -13,15 +13,15 @@
   position: relative;
   left: 0;
   width: 100%;
-  height: calc(138.46rpx + constant(safe-area-inset-bottom));
-  height: calc(138.46rpx + env(safe-area-inset-bottom));
+  /* 原型底栏总高为 72px（390px 画布），安全区只占内部留白，不能再叠加到总高。 */
+  height: 138.46rpx;
   background: var(--paper, #FFFDF8);
   border-radius: 46.15rpx 46.15rpx 0 0;
   display: flex;
   justify-content: space-around;
   align-items: flex-start;
   padding: 15.38rpx 11.54rpx calc(38.46rpx + constant(safe-area-inset-bottom));
-  padding: 15.38rpx 11.54rpx calc(38.46rpx + env(safe-area-inset-bottom));
+  padding: 15.38rpx 11.54rpx max(38.46rpx, env(safe-area-inset-bottom));
   box-shadow: 0 -15.38rpx 46.15rpx rgba(60, 52, 44, 0.06);
   box-sizing: border-box;
 }

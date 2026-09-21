@@ -2,7 +2,7 @@
   <view wx:if="{{loading}}" class="gd-state">正在整理攻略…</view>
   <view wx:elif="{{error}}" class="gd-state">{{error}}</view>
   <block wx:else>
-    <view class="guide-hero">
+    <view class="guide-hero {{img ? '' : 'guide-hero-empty'}}">
       <image wx:if="{{img}}" class="guide-hero-img" src="{{img}}" mode="aspectFill" />
       <view class="guide-hero-shade" />
       <view class="detail-back" bindtap="goBack">←</view>
@@ -11,7 +11,9 @@
         <view class="guide-title">{{title}}</view>
         <view class="guide-place"><text class="guide-place-pin">◎</text><text>{{place}}</text></view>
         <scroll-view class="guide-meta" scroll-x>
-          <view wx:for="{{metas}}" wx:key="*this" class="guide-meta-chip">{{item}}</view>
+          <view class="guide-meta-list">
+            <view wx:for="{{metas}}" wx:key="*this" class="guide-meta-chip">{{item}}</view>
+          </view>
         </scroll-view>
       </view>
     </view>
@@ -31,12 +33,12 @@
       <view class="guide-weather">
         <text class="guide-weather-icon">☁</text>
         <view class="guide-weather-copy">
-          <view class="guide-weather-title">出发前提醒</view>
-          <view class="guide-weather-text">{{weather}}</view>
+          <view class="guide-weather-title">{{previewOnly ? '开盒前提示' : '出发前提醒'}}</view>
+          <view class="guide-weather-text">{{weather || (previewOnly ? '目的地、天气和集合信息会在支付开盒后写入你的专属行程。' : '暂无出发提醒，请留意订单通知。')}}</view>
         </view>
       </view>
 
-      <view class="guide-facts">
+      <view wx:if="{{facts.length}}" class="guide-facts">
         <view
           wx:for="{{facts}}"
           wx:key="label"
@@ -46,6 +48,7 @@
           <text class="guide-fact-value">{{item.value}}</text>
         </view>
       </view>
+      <view wx:elif="{{previewOnly}}" class="guide-unlock-card"><text class="guide-unlock-mark">?</text><view><view class="guide-unlock-title">完整路线卡尚未揭晓</view><view class="guide-unlock-copy">付款后会生成包含时间、交通、预算和出发清单的专属攻略。</view></view></view>
 
       <view class="guide-section" id="guideRoute">
         <view class="guide-section-head">
@@ -53,13 +56,30 @@
           <text class="guide-section-sub">{{routeLabel}}</text>
         </view>
         <view class="guide-summary">{{summary}}</view>
-        <view class="guide-timeline">
-          <view wx:for="{{schedule}}" wx:key="time" class="guide-stop">
-            <text class="guide-stop-time">{{item.time}}</text>
-            <view class="guide-stop-title">{{item.title}}</view>
-            <view class="guide-stop-desc">{{item.desc}}</view>
+        <view wx:if="{{scheduleDays.length}}" class="guide-timeline">
+          <block wx:for="{{scheduleDays}}" wx:for-item="day" wx:key="dayNo">
+            <view wx:if="{{multiDay}}" class="guide-day-head">DAY {{day.dayNo}}</view>
+            <view wx:for="{{day.stops}}" wx:key="index" class="guide-stop">
+              <text class="guide-stop-time">{{item.time}}</text>
+              <view class="guide-stop-title">{{item.title}}</view>
+              <view class="guide-stop-desc">{{item.desc}}</view>
+              <view wx:if="{{item.addr}}" class="guide-stop-extra"><text class="guide-extra-tag">地点</text>{{item.addr}}</view>
+              <view wx:if="{{item.tip}}" class="guide-stop-extra guide-extra-tip"><text class="guide-extra-tag">贴士</text>{{item.tip}}</view>
+            </view>
+          </block>
+        </view>
+        <view wx:elif="{{previewOnly}}" class="guide-empty">目的地和具体时刻将在开盒后揭晓。</view>
+        <view wx:if="{{spots.length}}" class="guide-subhead">沿途景点详解</view>
+        <view wx:if="{{spots.length}}" class="guide-spots">
+          <view wx:for="{{spots}}" wx:key="name" class="guide-spot">
+            <image wx:if="{{item.cover}}" class="guide-spot-img" src="{{item.cover}}" mode="aspectFill" />
+            <view class="guide-spot-top"><text>{{item.name}}</text><text>{{item.duration}}</text></view>
+            <view wx:if="{{item.highlights}}" class="guide-row-desc">{{item.highlights}}</view>
+            <view wx:if="{{item.addr}}" class="guide-stop-extra"><text class="guide-extra-tag">地点</text>{{item.addr}}</view>
+            <view wx:if="{{item.notice}}" class="guide-spot-notice">{{item.notice}}</view>
           </view>
         </view>
+        <view wx:if="{{!spots.length && previewOnly}}" class="guide-empty">沿途景点会随路线卡一起揭晓。</view>
       </view>
 
       <view class="guide-section" id="guideTransit">
@@ -70,6 +90,14 @@
         <view wx:for="{{transitRows}}" wx:key="title" class="guide-transit-row">
           <view class="guide-row-title">{{item.title}}</view>
           <view class="guide-row-desc">{{item.desc}}</view>
+        </view>
+        <view wx:if="{{diningRows.length || lodgingRows.length}}" class="guide-subhead">餐食与住宿</view>
+        <view wx:for="{{diningRows}}" wx:key="title" class="guide-transit-row guide-service-row">
+          <view class="guide-row-title">{{item.title}}</view><view class="guide-row-desc">{{item.desc}}</view>
+          <view wx:if="{{item.addr}}" class="guide-stop-extra"><text class="guide-extra-tag">位置</text>{{item.addr}}</view>
+        </view>
+        <view wx:for="{{lodgingRows}}" wx:key="title" class="guide-transit-row guide-service-row">
+          <view class="guide-row-title">{{item.title}}</view><view class="guide-row-desc">{{item.desc}}</view>
         </view>
       </view>
 
@@ -125,10 +153,19 @@
           <text class="guide-tip-no">{{item.no}}</text>
           <view class="guide-row-desc">{{item.text}}</view>
         </view>
+        <view wx:if="{{rules.length}}" class="guide-subhead">预约与变更规则</view>
+        <view wx:for="{{rules}}" wx:key="title" class="guide-rule">
+          <view class="guide-row-title">{{item.title}}</view><view class="guide-row-desc">{{item.desc}}</view>
+        </view>
         <view class="guide-emergency">
           <text class="guide-emergency-title">应急信息</text>
           <text class="guide-emergency-line">订单服务：在“我的订单”中联系客服</text>
           <text class="guide-emergency-line">紧急求助：报警 110 · 急救 120</text>
+        </view>
+        <view class="guide-subhead faq-head">常见问题</view>
+        <view wx:for="{{faqs}}" wx:key="no" class="guide-faq">
+          <view class="guide-faq-q"><text>Q{{item.no}}</text><view>{{item.question}}</view></view>
+          <view class="guide-faq-a">{{item.answer}}</view>
         </view>
       </view>
     </view>

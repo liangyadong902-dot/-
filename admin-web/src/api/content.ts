@@ -56,6 +56,9 @@ export interface ApiAdminRoute {
   category: Category
   destination: string
   scene?: string
+  imageUrl?: string | null
+  guide?: Record<string, unknown> | null
+  guideVersion?: number | null
   value: number
   cost?: number | null
   badgeId: number
@@ -132,6 +135,15 @@ export function getAdminBoxPool(id: string | number) {
 
 export function listAdminRoutes(params?: Record<string, unknown>) {
   return request.get<PageResult<ApiAdminRoute>>('/api/v1/admin/routes', { params })
+}
+
+export function uploadAdminImage(file: File) {
+  const form = new FormData()
+  form.append('file', file)
+  return request.post<{ uploadId: string; url: string; size: number; mimeType: string }>(
+    '/api/v1/upload/image',
+    form,
+  )
 }
 
 export function createAdminRoute(data: unknown) {

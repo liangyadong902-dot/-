@@ -1,7 +1,7 @@
 const api = require('../../services/api')
 
 const moodLabels = { happy: '开心', emo: '有点 emo', bored: '无聊', curious: '想探索' }
-const categoryLabels = { nearby: '周边游', province: '省内游', cross: '跨省游', theme: '主题专线' }
+const categoryLabels = { nearby: '周边游', province: '省内游', cross: '跨省游', theme: '主题专线', guide: '纯攻略' }
 
 Page({
   data: {
@@ -15,7 +15,10 @@ Page({
   },
   onLoad() { this.load() },
   onPullDownRefresh() { this.load().finally(() => wx.stopPullDownRefresh()) },
-  goBack() { wx.navigateBack() },
+  goBack() {
+    if (getCurrentPages().length > 1) wx.navigateBack()
+    else wx.switchTab({ url: '/pages/mine/index' })
+  },
   async load() {
     if (!wx.getStorageSync('token')) {
       this.setData({ loading: false, error: '请先登录后查看资产' })

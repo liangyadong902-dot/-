@@ -56,7 +56,7 @@
 }
 .community-chip.active { background: var(--sage); color: #fff; }
 
-.community-feed { columns: 2; column-gap: 19.23rpx; padding: 0 26.92rpx 192.31rpx; }
+.community-feed { columns: 2; column-gap: 19.23rpx; padding: 0 26.92rpx 138.46rpx; }
 .community-card {
   break-inside: avoid;
   margin-bottom: 19.23rpx;
@@ -104,8 +104,11 @@
   font-size: 19.23rpx;
   font-weight: 800;
   flex-shrink: 0;
+  overflow: hidden;
 }
 .community-avatar.lg { width: 76.92rpx; height: 76.92rpx; font-size: 26.92rpx; }
+/* 真实头像：有 avatarUrl 时铺满圆形容器，没有则回退显示昵称首字 */
+.avatar-img { width: 100%; height: 100%; display: block; }
 .author-name { color: var(--muted); font-size: 19.23rpx; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .community-like { display: flex; align-items: center; gap: 7.69rpx; color: var(--muted); font-size: 19.23rpx; font-weight: 600; }
 .community-like .like-icon { font-size: 23.08rpx; line-height: 1; }
@@ -115,7 +118,7 @@
 .empty-title { font-family: "Noto Serif SC", "Songti SC", serif; font-size: 34.62rpx; font-weight: 900; margin-bottom: 15.38rpx; }
 .empty-text { color: var(--muted); font-size: 23.08rpx; line-height: 1.7; margin-bottom: 30.77rpx; }
 
-.community-board { padding: 0 26.92rpx 192.31rpx; }
+.community-board { padding: 0 26.92rpx 138.46rpx; }
 .community-list { display: grid; gap: 19.23rpx; }
 .community-row {
   width: 100%;

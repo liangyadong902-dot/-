@@ -10,8 +10,8 @@ function pageH() {
   }
 }
 
-Page(makePage(1, {
-  data: Object.assign({ tabIndex: 1, draft: '', pageH: pageH(), chatH: 200 }, store.snapshot()),
+Page(makePage(3, {
+  data: Object.assign({ tabIndex: 3, draft: '', pageH: pageH(), chatH: 200 }, store.snapshot()),
   onLoad() {
     store.hydrateAi()
   },

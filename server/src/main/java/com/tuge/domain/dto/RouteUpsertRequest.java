@@ -8,6 +8,7 @@ public record RouteUpsertRequest(
         String category,
         String destination,
         String scene,
+        String imageUrl,
         Double value,
         Double cost,
         Long badgeId,

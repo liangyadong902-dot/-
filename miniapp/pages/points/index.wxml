@@ -1,0 +1,16 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="hint">加载中...</view>
+  <view wx:elif="{{error}}" class="hint" bindtap="retry">{{error}}</view>
+  <view wx:else class="card">
+    <view class="balance">{{overview.balance}}</view>
+    <view class="label">当前积分</view>
+    <view class="row">累计获得 {{overview.totalEarned}} · 累计消耗 {{overview.totalSpent}}</view>
+    <view class="row">连续签到 {{overview.consecutiveSigninDays}} 天</view>
+    <button class="btn" disabled="{{signing}}" bindtap="signin">{{signing?'签到中...':'每日签到'}}</button>
+  </view>
+  <view class="links">
+    <view class="link" bindtap="openHistory">积分明细</view>
+    <view class="link" bindtap="openMall">积分商城</view>
+    <view class="link" bindtap="openCoupons">我的卡包</view>
+  </view>
+</view>

@@ -13,6 +13,12 @@
     "pages/checkin/rankings",
     "pages/achievements/index",
     "pages/achievements/detail",
+    "pages/coupon/index",
+    "pages/coupon/detail",
+    "pages/points/index",
+    "pages/points/history",
+    "pages/points/mall",
+    "pages/prize/coupon",
     "pages/market/index",
     "pages/product/detail",
     "pages/orders/index",
@@ -30,7 +36,7 @@
     "pages/login/login"
   ],
   "window": {
-    "navigationStyle": "custom",
+    "navigationStyle": "default",
     "navigationBarBackgroundColor": "#E3EDD6",
     "navigationBarTitleText": "途个惊喜",
     "navigationBarTextStyle": "black",
@@ -51,10 +57,10 @@
         "selectedIconPath": "assets/tabs/home-active.png"
       },
       {
-        "pagePath": "pages/ai/index",
-        "text": "AI搭子",
-        "iconPath": "assets/tabs/ai.png",
-        "selectedIconPath": "assets/tabs/ai-active.png"
+        "pagePath": "pages/market/index",
+        "text": "商品",
+        "iconPath": "assets/tabs/trips.png",
+        "selectedIconPath": "assets/icons/gift.png"
       },
       {
         "pagePath": "pages/community/index",
@@ -63,10 +69,10 @@
         "selectedIconPath": "assets/tabs/community-active.png"
       },
       {
-        "pagePath": "pages/trips/index",
-        "text": "行程",
-        "iconPath": "assets/tabs/trips.png",
-        "selectedIconPath": "assets/tabs/trips-active.png"
+        "pagePath": "pages/ai/index",
+        "text": "AI搭子",
+        "iconPath": "assets/tabs/ai.png",
+        "selectedIconPath": "assets/tabs/ai-active.png"
       },
       {
         "pagePath": "pages/mine/index",
@@ -76,6 +82,12 @@
       }
     ]
   },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于打卡时定位你所在的景点位置"
+    }
+  },
+  "requiredPrivateInfos": ["chooseLocation"],
   "usingComponents": {
     "tuge-overlay": "/components/tuge-overlay/index"
   },

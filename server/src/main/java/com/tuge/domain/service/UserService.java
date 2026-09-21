@@ -42,7 +42,7 @@ public class UserService {
         }
         if (request != null) {
             if (request.nickname() != null && !request.nickname().isBlank()) user.setNickname(request.nickname().trim());
-            if (request.avatarUrl() != null && request.avatarUrl().startsWith("https://")) user.setAvatarUrl(request.avatarUrl().trim());
+            if (request.avatarUrl() != null && (request.avatarUrl().startsWith("https://") || request.avatarUrl().startsWith("http://"))) user.setAvatarUrl(request.avatarUrl().trim());
             if (request.gender() != null) user.setGender(request.gender());
             if (request.city() != null) user.setCity(request.city().trim());
         }

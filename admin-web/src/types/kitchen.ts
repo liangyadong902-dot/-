@@ -1,4 +1,4 @@
-export type Category = 'nearby' | 'province' | 'cross' | 'theme'
+export type Category = 'nearby' | 'province' | 'cross' | 'theme' | 'guide'
 export type Mood = 'happy' | 'emo' | 'bored' | 'curious'
 export type ShelfStatus = 'on' | 'off'
 export type OrderStatus = 'pending_pay' | 'paid' | 'opened' | 'cancelled' | 'refunded'
@@ -35,6 +35,28 @@ export interface BlindBox {
   opens: number
 }
 
+export interface RouteGuide {
+  overview: string
+  durationText: string
+  paceText: string
+  walkText: string
+  transitText: string
+  season: string
+  weather: string
+  facts: { label: string; value: string }[]
+  schedules: { dayNo: number; time: string; title: string; description: string; addr?: string; tip?: string }[]
+  spots: { name: string; coverUrl?: string; highlights?: string; notice?: string; durationMinutes?: number; addr?: string }[]
+  transport: { title: string; description: string }[]
+  dining: { title: string; description: string; addr?: string }[]
+  lodging: { title: string; description: string }[]
+  budgetItems: { name: string; amount: number; required?: boolean }[]
+  checklist: string[]
+  planB: string
+  safetyTips: string[]
+  faqs: { question: string; answer: string }[]
+  rules: { title: string; description: string }[]
+}
+
 export interface TravelRoute {
   id: string
   badgeId?: number
@@ -51,6 +73,8 @@ export interface TravelRoute {
   status: ShelfStatus
   img: string
   draws: number
+  guide?: RouteGuide
+  guideVersion?: number
 }
 
 export interface BadgeItem {

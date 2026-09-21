@@ -38,19 +38,18 @@
 
   <view class="special-block">
     <view class="special-photo" bindtap="openCurrentSpecial">
-      <image class="special-img" src="{{special.img}}" mode="aspectFill" />
+      <!-- 原型始终展示今日特选；接口尚未返回时使用本地封面保持首屏完整 -->
+      <image class="special-img" src="{{special.img || '/assets/covers/box2.jpg'}}" mode="aspectFill" />
       <view class="v-label">FRESH JOURNEY</view>
-      <view class="photo-tag">途个
-惊喜</view>
-      <view class="fresh-orb">今日
-新鲜出发</view>
+      <view class="photo-tag"><text>途个</text><text>惊喜</text></view>
+      <view class="fresh-orb"><text>今日</text><text>新鲜出发</text></view>
     </view>
     <view class="special-copy">
       <view class="eyebrow">TODAY'S SPECIAL</view>
-      <view class="h2">{{specialName}}</view>
-      <view class="p">{{specialDesc}}</view>
+      <view class="h2">{{specialName || '隐世古村\n慢生活盒'}}</view>
+      <view class="p">{{specialDesc || '非遗体验 · 古镇慢游\n随机解锁主题线路'}}</view>
       <view class="link-cta" bindtap="openCurrentSpecial">
-        <text>立即开启</text>
+        <text>查看详情</text>
         <image class="cta-arrow" src="/assets/icons/arrow.png" mode="aspectFit" />
       </view>
       <image class="doodle-arrow" src="/assets/icons/doodle-arrow.png" mode="aspectFit" />
@@ -66,8 +65,15 @@
   <view class="search-row">
     <view class="search-box">
       <image class="search-ico" src="/assets/icons/search.png" mode="aspectFit" />
-      <input placeholder="今天想去哪里放空呢？" placeholder-class="ph" />
-      <view class="btn-search">搜索</view>
+      <input
+        value="{{searchKeyword}}"
+        placeholder="今天想去哪里放空呢？"
+        placeholder-class="ph"
+        confirm-type="search"
+        bindinput="onSearchInput"
+        bindconfirm="submitSearch"
+      />
+      <view class="btn-search" bindtap="submitSearch">搜索</view>
     </view>
     <view class="gift-btn" bindtap="goBadges">
       <image class="gift-ico" src="/assets/icons/gift.png" mode="aspectFit" />
@@ -118,6 +124,55 @@
     </view>
   </view>
 
+  <!-- 心情开箱：选心情 → 推送可能喜欢的盲盒 → 一键开箱 -->
+  <view class="mood-unbox">
+    <view class="mood-unbox-head">
+      <view class="mood-unbox-title">
+        <image class="sec-leaf" src="/assets/icons/leaf.png" mode="aspectFit" />
+        <text>此刻的心情是？</text>
+      </view>
+      <text class="mood-unbox-en">MOOD UNBOX</text>
+    </view>
+    <view class="mood-unbox-chips">
+      <view
+        wx:for="{{moodPickOptions}}"
+        wx:key="key"
+        class="mood-unbox-chip {{moodPick === item.key ? 'on' : ''}}"
+        data-mood="{{item.key}}"
+        bindtap="pickMood"
+      >
+        <text class="mood-unbox-emoji">{{item.emoji}}</text>
+        <text>{{item.label}}</text>
+      </view>
+    </view>
+    <view wx:if="{{!moodPick}}" class="mood-unbox-hint">
+      <text>选个心情，小途为你推送一盒可能喜欢的盲盒</text>
+    </view>
+    <view wx:elif="{{moodPickLoading}}" class="mood-unbox-hint">
+      <text>正在为你挑选盲盒…</text>
+    </view>
+    <view wx:elif="{{moodPickEmpty}}" class="mood-unbox-hint">
+      <text>这个心情暂时没有匹配的盲盒，换个心情试试</text>
+    </view>
+    <view wx:else class="mood-unbox-card">
+      <!-- 只展示数据库真实封面；无图时显示中性占位，不用假图兜底 -->
+      <image wx:if="{{moodPickBox.img}}" class="mood-unbox-img" src="{{moodPickBox.img}}" mode="aspectFill" />
+      <view wx:else class="mood-unbox-img mood-unbox-img-blank"><text>封面暂缺</text></view>
+      <view class="mood-unbox-info">
+        <view class="mood-unbox-line">{{moodPickLine}}</view>
+        <view class="mood-unbox-name">{{moodPickBox.name}}</view>
+        <view class="mood-unbox-desc">{{moodPickBox.desc}}</view>
+        <view class="mood-unbox-meta">
+          <text class="mood-unbox-price">¥{{moodPickBox.price}}</text>
+        </view>
+        <view class="mood-unbox-actions">
+          <view class="mood-unbox-open" bindtap="openMoodPick">开箱</view>
+          <view class="mood-unbox-rotate" bindtap="rotateMoodPick">换一个 ›</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
   <swiper
     wx:if="{{banners.length}}"
     class="member-banner-swiper"
@@ -139,35 +194,41 @@
       </view>
     </swiper-item>
   </swiper>
-  <view wx:else class="member-banner empty">
+  <!-- 活动接口为空时仍保留原型中的会员权益卡，避免首屏出现空白断层 -->
+  <view wx:else class="member-banner empty" bindtap="openCurrentSpecial">
     <view class="copy">
       <view class="kicker">MEMBER BENEFITS</view>
-      <view class="h3">{{contentError || '暂无运营活动'}}</view>
+      <view class="h3">开盒解锁主题行程</view>
+      <view class="ink-pill">立即开启</view>
     </view>
+    <image class="photo" src="/assets/covers/box1.jpg" mode="aspectFill" />
   </view>
 
   <view class="section-pad">
     <view class="section-header">
       <view class="section-title">
         <image class="sec-leaf" src="/assets/icons/leaf.png" mode="aspectFit" />
-        <text>人气推荐</text>
+        <text>{{searchActive ? '搜索结果' : '人气推荐'}}</text>
         <image class="sec-heart" src="/assets/icons/heart.png" mode="aspectFit" />
       </view>
-      <text class="view-more" bindtap="filterCategoryAll">查看更多 ›</text>
+      <text wx:if="{{searchActive}}" class="view-more" bindtap="clearSearch">清除搜索 ›</text>
+      <text wx:else class="view-more" bindtap="filterCategoryAll">查看更多 ›</text>
     </view>
-    <view wx:if="{{!contentLoaded}}" class="empty-hint">正在读取盲盒...</view>
-    <view wx:elif="{{productsEmpty}}" class="empty-hint">{{contentError || '暂无匹配盲盒，换个心情看看'}}</view>
+    <view wx:if="{{searching}}" class="empty-hint">正在搜索…</view>
+    <view wx:elif="{{!contentLoaded}}" class="empty-hint">正在读取盲盒...</view>
+    <view wx:elif="{{productsEmpty}}" class="empty-hint">{{contentError || (searchActive ? '没找到相关盲盒，换个关键词试试' : '暂无匹配盲盒，换个心情看看')}}</view>
     <view wx:else class="product-grid">
-      <view class="product-card" wx:for="{{products}}" wx:key="id">
+      <view class="product-card" wx:for="{{products}}" wx:key="id" data-id="{{item.id}}" bindtap="openProduct">
         <view class="prod-img-wrap">
           <image src="{{item.img}}" mode="aspectFill" />
           <view class="top-badge">{{item.rank}}</view>
         </view>
         <view class="prod-info">
           <view class="prod-name">{{item.name}}</view>
+          <view class="prod-desc">{{item.desc}}</view>
           <view class="prod-bottom">
             <view class="prod-price"><text class="yen">¥</text>{{item.price}}</view>
-            <view class="btn-add" data-id="{{item.id}}" bindtap="openUnbox">+</view>
+            <view class="btn-add" data-id="{{item.id}}" catchtap="openUnbox">+</view>
           </view>
         </view>
       </view>

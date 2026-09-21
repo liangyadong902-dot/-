@@ -57,8 +57,17 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/v1/ai/config",
                         "/api/v1/ai/chat",
                         "/api/v1/ai/chat/stream",
+                        "/api/v1/community/posts",
+                        "/api/v1/community/posts/*",
+                        "/api/v1/community/posts/*/comments",
+                        "/api/v1/community/topics",
+                        "/api/v1/community/creators",
+                        "/api/v1/checkins/rankings",
+                        "/api/v1/achievements",
+                        "/api/v1/achievements/*",
                         "/api/v1/pay/notify/alipay",
-                        "/api/v1/pay/**"
+                        "/api/v1/pay/**",
+                        "/api/v1/upload/**"
                 );
     }
     @Override

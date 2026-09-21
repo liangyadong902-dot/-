@@ -30,6 +30,10 @@ public class AuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(@NonNull HttpServletRequest request,
                              @NonNull HttpServletResponse response,
                              @NonNull Object handler) {
+        // 放行 CORS 预检请求（预检不携带业务请求头，会被误判为未登录）
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
         String token = resolveToken(request);
         if (token == null || !jwtTokenUtil.validateToken(token)) {
             throw new UnauthenticatedException();

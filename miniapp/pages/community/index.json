@@ -1,1 +1,9 @@
-{ "navigationBarTitleText": "旅途社区", "enablePullDownRefresh": true }
+{
+  "navigationStyle": "custom",
+  "disableScroll": false,
+  "navigationBarTitleText": "旅途社区",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "tuge-overlay": "/components/tuge-overlay/index"
+  }
+}

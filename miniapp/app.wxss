@@ -30,6 +30,22 @@
       padding: 0;
       -webkit-tap-highlight-color: transparent;
     }
+
+    /* 二级页统一使用原型纸张语言，原生导航栏下不再重复伪造状态栏留白。 */
+    .page-shell > .head,
+    .achievement-head,
+    .checkin-head,
+    .create-head,
+    .collections-head,
+    .rank-head,
+    .ranking-head {
+      padding-top: 42rpx !important;
+    }
+
+    /* 简洁型二级页原来为自定义导航预留了 100rpx；原生返回栏下只保留内容呼吸区。 */
+    page > .page {
+      padding-top: 34rpx !important;
+    }
     
     
 
@@ -84,11 +100,10 @@
       position: relative;
       animation: fadeIn 0.28s ease;
     }
-    /* 自定义 tabBar 浮在页面上，用占位撑开与原型 92px 底边距一致的空隙 */
+    /* 自定义 tabBar 浮在页面上，占位高度与原型 72px 底栏一致。 */
     .tab-safe {
       width: 100%;
-      height: calc(176.92rpx + constant(safe-area-inset-bottom));
-      height: calc(176.92rpx + env(safe-area-inset-bottom));
+      height: 138.46rpx;
       flex-shrink: 0;
       pointer-events: none;
     }
@@ -1159,9 +1174,19 @@
     }
     button.wx-login { display: block; }
     button.wx-login::after { border: none; }
-    .profile-avatar-button {
-      width: 123.08rpx; height: 123.08rpx; padding: 0; margin: 0 auto 15.38rpx;
-      border-radius: 50%; border: 2.69rpx solid var(--ink); overflow: hidden; background: var(--sage-mist);
+    /* 提高优先级：避免全局 button 重置与基础库默认按钮样式把头像按钮撑成椭圆。 */
+    button.profile-avatar-button {
+      display: block;
+      width: 123.08rpx;
+      height: 123.08rpx;
+      padding: 0;
+      margin: 0 auto 15.38rpx;
+      border-radius: 50%;
+      border: 2.69rpx solid var(--ink);
+      overflow: hidden;
+      background: var(--sage-mist);
+      line-height: normal;
+      flex: none;
     }
     .profile-avatar-button::after { border: none; }
     .profile-avatar-image { width: 100%; height: 100%; display: block; }
@@ -1202,13 +1227,12 @@
     }
     .bottom-tabbar {
       position: relative; bottom: 0; left: 0; width: 100%;
-      height: calc(138.46rpx + constant(safe-area-inset-bottom));
-      height: calc(138.46rpx + env(safe-area-inset-bottom));
+      height: 138.46rpx;
       background: var(--paper);
       border-radius: 46.15rpx 46.15rpx 0 0;
       display: flex; justify-content: space-around; align-items: flex-start;
       padding: 15.38rpx 11.54rpx calc(38.46rpx + constant(safe-area-inset-bottom));
-      padding: 15.38rpx 11.54rpx calc(38.46rpx + env(safe-area-inset-bottom));
+      padding: 15.38rpx 11.54rpx max(38.46rpx, env(safe-area-inset-bottom));
       box-shadow: 0 -15.38rpx 46.15rpx rgba(60,52,44,0.06);
       z-index: 30;
       box-sizing: border-box;
@@ -1226,6 +1250,38 @@
       width: 226.92rpx; height: 7.69rpx; background: var(--ink); border-radius: 3.85rpx;
       opacity: 0.5; z-index: 40;
     }
+
+    /* 原型中的二级页面共用云朵顶栏；覆盖订单、购物车、支付记录和退款页的旧扁平头部。 */
+    .page-shell {
+      min-height: 100vh;
+      background: var(--cream);
+      color: var(--ink);
+    }
+    .page-shell .head {
+      position: relative;
+      overflow: hidden;
+      padding: 100rpx 34.62rpx 50rpx;
+      background:
+        radial-gradient(80.77rpx 53.85rpx at 6% 0%, #f7faf3 0 62%, transparent 63%),
+        radial-gradient(96.15rpx 61.54rpx at 22% -4%, #eef5e5 0 64%, transparent 65%),
+        radial-gradient(107.69rpx 65.38rpx at 48% -6%, #f8fbf5 0 60%, transparent 61%),
+        radial-gradient(88.46rpx 57.69rpx at 74% -2%, #eaf2df 0 64%, transparent 65%),
+        linear-gradient(180deg, #E3EDD6 0%, #E8F0DC 100%);
+    }
+    .page-shell .head::after {
+      content: '';
+      position: absolute;
+      left: -30rpx;
+      right: -30rpx;
+      bottom: -20rpx;
+      height: 56rpx;
+      background: radial-gradient(70rpx 34rpx at 4% 100%, var(--cream) 0 62%, transparent 63%), radial-gradient(62rpx 30rpx at 18% 100%, var(--cream) 0 62%, transparent 63%), radial-gradient(78rpx 38rpx at 34% 100%, var(--cream) 0 62%, transparent 63%), radial-gradient(64rpx 28rpx at 51% 100%, var(--cream) 0 62%, transparent 63%), radial-gradient(80rpx 36rpx at 68% 100%, var(--cream) 0 62%, transparent 63%), radial-gradient(70rpx 32rpx at 84% 100%, var(--cream) 0 62%, transparent 63%), radial-gradient(64rpx 30rpx at 100% 100%, var(--cream) 0 62%, transparent 63%);
+      pointer-events: none;
+    }
+    .page-shell .head .kicker,
+    .page-shell .head .title,
+    .page-shell .head .desc { position: relative; z-index: 1; }
+    .page-shell .head .title { font-family: "Noto Serif SC", "Songti SC", serif; letter-spacing: .04em; }
 
     .modal-overlay {
       position: fixed; top: 0; right: 0; bottom: 0; left: 0;
@@ -1275,6 +1331,19 @@
       50% { transform: scale(0.96); opacity: 0.75; }
     }
     .pulse-box { animation: pulseBox 1s ease-in-out infinite; }
+    .mock-pay-mark {
+      width: 53.85rpx;
+      height: 53.85rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border-radius: 15.38rpx;
+      background: var(--sage);
+      color: #fff;
+      font-size: 23.08rpx;
+      font-weight: 900;
+    }
 
     /* 开盒：纸盒摇动、盒盖弹开、路线卡揭晓（原型 390px → 750rpx） */
     .unbox-drawing { padding: 26.92rpx 0 15.38rpx; text-align: center; overflow: hidden; }
@@ -1344,7 +1413,11 @@
       padding: 0;
       margin: 0;
       border: none;
-      line-height: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.2;
       font-size: inherit;
       color: inherit;
       font-family: inherit;
@@ -1354,6 +1427,21 @@
       min-width: 0;
     }
     button::after { border: none; }
+
+    /* 原生 button 与 view 按钮统一居中，避免不同基础库的默认行高造成文字偏上。 */
+    .btn-block,
+    .btn-sage,
+    .btn-line,
+    button.sage,
+    button.ghost,
+    button.btn,
+    button.submit {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.2;
+    }
     image { display: block; }
     .special-copy .h2 { white-space: pre-line; }
     .special-copy .p { white-space: pre-line; }
@@ -1413,6 +1501,7 @@
     .login-lead { font-size: 23.08rpx; color: var(--muted); margin-bottom: 26.92rpx; line-height: 1.6; }
     .login-demo { font-size: 21.15rpx; color: var(--muted); text-align: center; margin-top: 23.08rpx; }
     .mb10 { margin-bottom: 19.23rpx; }
+    .mb16 { margin-bottom: 30.77rpx; }
     .mb8 { margin-bottom: 15.38rpx; }
     .mt8 { margin-top: 15.38rpx; }
     .mt14 { margin-top: 26.92rpx; }

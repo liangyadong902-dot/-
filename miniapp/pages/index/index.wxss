@@ -31,9 +31,74 @@
 }
 
 .page-home .special-photo {
+  position: relative;
   width: auto;
   min-width: 0;
   height: 269.23rpx;
+  border-radius: 61.54rpx 46.15rpx 76.92rpx 38.46rpx;
+  overflow: hidden;
+  box-shadow: 0 23.08rpx 53.85rpx rgba(60, 52, 44, 0.10);
+}
+
+/* 「今日新鲜出发」圆形角标：对齐原型 fresh-orb，文字两行居中不折行溢出 */
+.page-home .fresh-orb {
+  position: absolute;
+  left: 15.38rpx;
+  bottom: 15.38rpx;
+  width: 96.15rpx;
+  height: 96.15rpx;
+  border-radius: 50%;
+  background: var(--sage);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 15.38rpx;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  box-shadow: 0 7.69rpx 23.08rpx rgba(108, 126, 88, 0.38);
+  z-index: 2;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.page-home .fresh-orb text { display: block; white-space: nowrap; }
+
+/* 竖排英文装饰字，对齐原型 v-label */
+.page-home .v-label {
+  position: absolute;
+  left: 15.38rpx;
+  top: 19.23rpx;
+  writing-mode: vertical-rl;
+  letter-spacing: 0.12em;
+  font-size: 13.46rpx;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1.92rpx 7.69rpx rgba(0, 0, 0, 0.28);
+  z-index: 2;
+}
+
+/* 「途个惊喜」手写小签，对齐原型 photo-tag */
+.page-home .photo-tag {
+  position: absolute;
+  right: 19.23rpx;
+  top: 44%;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 15.38rpx;
+  font-weight: 700;
+  line-height: 1.25;
+  padding: 11.54rpx 13.46rpx;
+  border-radius: 5.77rpx;
+  box-shadow: 0 3.85rpx 15.38rpx rgba(60, 52, 44, 0.12);
+  text-align: center;
+  transform: rotate(6deg);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .page-home .special-img {
@@ -107,6 +172,196 @@
   flex: none;
 }
 
+/* ===== 心情开箱：选心情 → 推送盲盒 → 一键开箱 ===== */
+.page-home .mood-unbox {
+  margin: 7.69rpx 34.62rpx 19.23rpx;
+  background: var(--paper);
+  border-radius: 30.77rpx;
+  padding: 23.08rpx 26.92rpx;
+  box-shadow: 0 7.69rpx 23.08rpx rgba(60, 52, 44, 0.04);
+  position: relative;
+  z-index: 1;
+}
+
+.page-home .mood-unbox-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 17.31rpx;
+}
+
+.page-home .mood-unbox-title {
+  display: flex;
+  align-items: center;
+  gap: 9.62rpx;
+  font-size: 28.85rpx;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.page-home .mood-unbox-title .sec-leaf {
+  width: 28.85rpx;
+  height: 28.85rpx;
+}
+
+.page-home .mood-unbox-en {
+  font-size: 15.38rpx;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  color: #5A6B4C;
+}
+
+.page-home .mood-unbox-chips {
+  display: flex;
+  gap: 13.46rpx;
+  margin-bottom: 17.31rpx;
+}
+
+.page-home .mood-unbox-chip {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5.77rpx;
+  padding: 13.46rpx 0 11.54rpx;
+  border-radius: 19.23rpx;
+  background: var(--cream-2);
+  font-size: 19.23rpx;
+  color: var(--muted);
+  font-weight: 500;
+  border: 2rpx solid transparent;
+}
+
+.page-home .mood-unbox-chip.on {
+  background: var(--sage-mist);
+  color: var(--sage-deep);
+  font-weight: 700;
+  border-color: var(--sage-soft);
+}
+
+.page-home .mood-unbox-emoji {
+  font-size: 34.62rpx;
+  line-height: 1;
+}
+
+.page-home .mood-unbox-hint {
+  text-align: center;
+  font-size: 21.15rpx;
+  color: var(--muted);
+  padding: 23.08rpx 0;
+  background: var(--cream);
+  border-radius: 19.23rpx;
+}
+
+.page-home .mood-unbox-card {
+  display: flex;
+  gap: 19.23rpx;
+  align-items: stretch;
+}
+
+.page-home .mood-unbox-img {
+  width: 173.08rpx;
+  height: 219.23rpx;
+  border-radius: 19.23rpx;
+  flex-shrink: 0;
+  background: var(--cream-2);
+}
+
+/* 无真实封面时的中性占位，避免展示假图 */
+.page-home .mood-unbox-img-blank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-home .mood-unbox-img-blank text {
+  font-size: 19.23rpx;
+  color: var(--muted);
+}
+
+.page-home .mood-unbox-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-home .mood-unbox-line {
+  font-size: 19.23rpx;
+  color: var(--sage-deep);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.page-home .mood-unbox-name {
+  font-size: 25rpx;
+  font-weight: 800;
+  color: var(--ink);
+  margin-top: 7.69rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.page-home .mood-unbox-desc {
+  font-size: 19.23rpx;
+  color: var(--muted);
+  margin-top: 5.77rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.page-home .mood-unbox-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 11.54rpx;
+  margin-top: 9.62rpx;
+}
+
+.page-home .mood-unbox-price {
+  font-size: 26.92rpx;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.page-home .mood-unbox-guarantee {
+  font-size: 17.31rpx;
+  color: var(--sage-deep);
+  font-weight: 500;
+}
+
+.page-home .mood-unbox-actions {
+  display: flex;
+  align-items: center;
+  gap: 15.38rpx;
+  margin-top: auto;
+  padding-top: 11.54rpx;
+}
+
+.page-home .mood-unbox-open {
+  background: var(--ink);
+  color: #fff;
+  font-size: 21.15rpx;
+  font-weight: 700;
+  padding: 13.46rpx 36.54rpx;
+  border-radius: 1921.15rpx;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-home .mood-unbox-rotate {
+  font-size: 19.23rpx;
+  color: var(--muted);
+  font-weight: 500;
+}
+
 .page-home .cat-icon image {
   width: 84.62rpx;
   height: 84.62rpx;
@@ -117,11 +372,51 @@
   align-items: stretch;
 }
 
+/* 活动轮播需要容纳标题与按钮；图片限制在右侧，避免覆盖左侧文案。 */
+.page-home .member-banner,
+.page-home .member-banner-inner {
+  height: 156rpx;
+  min-height: 156rpx;
+}
+
+.page-home .member-banner-swiper {
+  height: 180rpx;
+  overflow: hidden;
+}
+
+.page-home .member-banner .copy,
+.page-home .member-banner-inner .copy {
+  width: 62%;
+  flex: 0 0 62%;
+  padding: 18rpx 16rpx 18rpx 26rpx;
+  z-index: 2;
+}
+
+.page-home .member-banner .h3,
+.page-home .member-banner-inner .h3 {
+  margin: 7rpx 0 12rpx;
+  font-size: 25rpx;
+}
+
 .page-home .member-banner .photo,
 .page-home .member-banner-inner .photo {
-  width: 238.46rpx;
+  width: 43%;
   height: 100%;
   display: block;
+  z-index: 0;
+}
+
+.page-home .member-banner-inner::after,
+.page-home .member-banner::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  left: 54%;
+  width: 18%;
+  pointer-events: none;
+  background: linear-gradient(90deg, #D2E0C3, rgba(210,224,195,0));
 }
 
 .page-home .sec-leaf {

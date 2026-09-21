@@ -4,6 +4,7 @@
 
 /* —— hero —— */
 .guide-hero { position: relative; height: 538.46rpx; overflow: hidden; background: var(--cream-2); color: #fff; }
+.guide-hero-empty { background: linear-gradient(145deg, #9aaf88, #657753); }
 .guide-hero-img { width: 100%; height: 100%; display: block; }
 .guide-hero-shade { position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: linear-gradient(180deg, rgba(28, 24, 20, 0.1) 8%, rgba(28, 24, 20, 0.76) 100%); }
 .detail-back {
@@ -27,7 +28,8 @@
 .guide-title { margin: 9.62rpx 0 15.38rpx; font-family: "Noto Serif SC", "Songti SC", serif; font-size: 46.15rpx; font-weight: 900; line-height: 1.3; }
 .guide-place { display: flex; align-items: center; gap: 9.62rpx; font-size: 21.15rpx; opacity: 0.92; }
 .guide-place-pin { font-size: 23.08rpx; line-height: 1; }
-.guide-meta { display: flex; gap: 11.54rpx; margin-top: 21.15rpx; white-space: nowrap; width: 100%; }
+.guide-meta { margin-top: 21.15rpx; white-space: nowrap; width: 100%; }
+.guide-meta-list { display: inline-flex; align-items: center; gap: 11.54rpx; min-width: 100%; }
 .guide-meta-chip {
   flex-shrink: 0;
   padding: 7.69rpx 15.38rpx;
@@ -86,6 +88,11 @@
 .guide-weather-icon { flex-shrink: 0; color: var(--sage-deep); font-size: 42.31rpx; line-height: 1; }
 .guide-weather-title { font-size: 23.08rpx; font-weight: 700; margin-bottom: 5.77rpx; }
 .guide-weather-text { color: var(--muted); font-size: 19.23rpx; line-height: 1.6; }
+.guide-unlock-card { display: flex; align-items: center; gap: 19rpx; margin: -18rpx 0 42rpx; padding: 24rpx; border: 2rpx dashed var(--sage); border-radius: 19rpx; background: var(--paper); }
+.guide-unlock-mark { width: 48rpx; height: 48rpx; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 50%; background: var(--sage-mist); color: var(--sage-deep); font-size: 29rpx; font-weight: 900; }
+.guide-unlock-title { color: var(--ink); font-size: 22rpx; font-weight: 800; }
+.guide-unlock-copy, .guide-empty { margin-top: 6rpx; color: var(--muted); font-size: 19rpx; line-height: 1.6; }
+.guide-empty { padding: 22rpx; border-radius: 14rpx; background: var(--sage-mist); }
 
 .guide-facts {
   display: grid;
@@ -133,12 +140,26 @@
 .guide-stop-time { display: block; color: var(--sage-deep); font-size: 19.23rpx; font-weight: 800; margin-bottom: 5.77rpx; }
 .guide-stop-title { font-size: 25rpx; font-weight: 700; margin-bottom: 7.69rpx; }
 .guide-stop-desc { color: var(--muted); font-size: 21.15rpx; line-height: 1.65; }
+.guide-subhead { margin: 34.62rpx 0 13.46rpx; font-size: 23.08rpx; font-weight: 800; }
+.guide-spots { border-top: 1.92rpx solid var(--line); }
+.guide-spot { padding: 21.15rpx 0; border-bottom: 1.92rpx solid var(--line); }
+.guide-spot:last-child { border-bottom: 0; }
+.guide-spot-top { display: flex; justify-content: space-between; gap: 19.23rpx; font-size: 23.08rpx; font-weight: 700; }
+.guide-spot-top text:last-child { flex-shrink: 0; color: var(--sage-deep); font-size: 17.31rpx; }
+.guide-spot-img { display: block; width: 100%; height: 288.46rpx; border-radius: 15.38rpx; background: var(--cream-2, #F2EAD9); margin-bottom: 13.46rpx; }
+.guide-spot-notice { margin-top: 7.69rpx; padding: 9.62rpx 13.46rpx; background: var(--sage-mist, #EEF0E4); border-radius: 11.54rpx; color: var(--sage-deep, #5A6B4D); font-size: 17.31rpx; line-height: 1.6; }
+.guide-day-head { margin: 28.85rpx 0 15.38rpx; display: flex; align-items: center; gap: 13.46rpx; color: var(--sage-deep, #5A6B4D); font-size: 21.15rpx; font-weight: 800; letter-spacing: 1.54rpx; }
+.guide-day-head::after { content: ""; flex: 1; height: 1.92rpx; background: var(--line, #E7DCCE); }
+.guide-stop-extra { display: flex; align-items: flex-start; gap: 9.62rpx; margin-top: 7.69rpx; font-size: 19.23rpx; line-height: 1.55; color: var(--muted, #8A8175); }
+.guide-extra-tag { flex-shrink: 0; padding: 1.92rpx 9.62rpx; border-radius: 999rpx; background: var(--sage-mist, #EEF0E4); color: var(--sage-deep, #5A6B4D); font-size: 15.38rpx; font-weight: 700; }
+.guide-extra-tip { color: var(--sage-deep, #5A6B4D); }
 
 /* 交通 / 费用 / 提示行 */
 .guide-transit-row, .guide-cost-row, .guide-tip { border-bottom: 1.92rpx solid var(--line); padding: 21.15rpx 0; }
 .guide-transit-row:last-child, .guide-cost-row:last-child, .guide-tip:last-child { border-bottom: 0; }
 .guide-row-title { display: block; font-size: 23.08rpx; font-weight: 700; }
 .guide-row-desc { color: var(--muted); font-size: 19.23rpx; line-height: 1.65; margin-top: 5.77rpx; }
+.guide-service-row { padding-left: 21.15rpx; border-left: 3.85rpx solid var(--sage-soft); }
 .guide-cost-row { display: flex; justify-content: space-between; gap: 23.08rpx; font-size: 21.15rpx; }
 .guide-cost-label { color: var(--muted); }
 .guide-cost-value { font-weight: 700; }
@@ -190,6 +211,13 @@
   line-height: 1.8;
 }
 .guide-emergency-title { display: block; font-weight: 800; margin-bottom: 5.77rpx; }
+.guide-rule { padding: 19.23rpx 21.15rpx; margin-bottom: 11.54rpx; border-radius: 15.38rpx; background: var(--paper); border: 1.92rpx solid var(--line); }
+.faq-head { margin-top: 34.62rpx; }
+.guide-faq { padding: 23.08rpx 0; border-bottom: 1.92rpx solid var(--line); }
+.guide-faq:last-child { border-bottom: 0; }
+.guide-faq-q { display: flex; align-items: flex-start; gap: 13.46rpx; font-size: 21.15rpx; font-weight: 800; line-height: 1.5; }
+.guide-faq-q > text { color: var(--sage-deep); font-size: 17.31rpx; line-height: 1.9; }
+.guide-faq-a { margin: 9.62rpx 0 0 55.77rpx; color: var(--muted); font-size: 19.23rpx; line-height: 1.65; }
 
 /* 底部双按钮 —— 对照原型 .guide-actions（与商品页 actions-bar 共用样式） */
 .guide-actions {

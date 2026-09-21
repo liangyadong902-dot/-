@@ -576,6 +576,14 @@
 
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .form-grid .span2 { grid-column: span 2; }
+    .guide-editor { grid-column: span 2; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); padding: 10px 12px; }
+    .guide-editor summary { cursor: pointer; font-size: 13px; font-weight: 800; color: var(--sage-deep); padding: 4px 0; user-select: none; }
+    .guide-editor summary small { color: var(--muted); font-weight: 600; margin-left: 6px; }
+    .guide-editor[open] summary { border-bottom: 1px dashed var(--line); margin-bottom: 10px; padding-bottom: 8px; }
+    .guide-editor .field { margin: 0 0 10px; }
+    .guide-editor .field:last-child { margin-bottom: 2px; }
+    .guide-row-card { border: 1px dashed var(--line); border-radius: 10px; padding: 10px; margin-bottom: 8px; background: var(--cream-2); }
+    .guide-row-card input, .guide-row-card textarea { width: 100%; box-sizing: border-box; }
     .moods { display: flex; gap: 8px; flex-wrap: wrap; }
     .check {
       display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;

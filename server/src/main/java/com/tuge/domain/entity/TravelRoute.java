@@ -21,6 +21,7 @@ public class TravelRoute {
     private String category;
     private String location;
     private String scene;
+    private String imageUrl;
     private Integer valueCent;
     private Integer costCent;
     private Long badgeId;

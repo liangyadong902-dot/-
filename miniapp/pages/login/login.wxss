@@ -1,6 +1,19 @@
-.login-btn {
-  margin-top: 48rpx;
-  background: var(--color-primary);
-  color: #fff;
-  border-radius: var(--radius-full);
-}
+.login-page { min-height: 100vh; padding: 48rpx 34rpx 70rpx; background: linear-gradient(180deg, var(--sage-mist) 0, var(--cream) 42%); }
+.login-hero { text-align: center; }
+.login-mascot { width: 146rpx; height: 146rpx; }
+.login-kicker { margin-top: 10rpx; color: var(--sage-deep); font-size: 18rpx; font-weight: 700; letter-spacing: .16em; }
+.login-title { margin-top: 12rpx; font-family: "Noto Serif SC", serif; font-size: 44rpx; font-weight: 900; }
+.login-sub { margin: 12rpx auto 0; max-width: 560rpx; color: var(--muted); font-size: 21rpx; line-height: 1.6; }
+.login-card { margin-top: 34rpx; padding: 32rpx; border: 1rpx solid var(--line); border-radius: 28rpx; background: var(--paper); box-shadow: 0 12rpx 34rpx rgba(60,52,44,.06); }
+.field-label { margin: 22rpx 0 12rpx; color: var(--sage-deep); font-size: 21rpx; font-weight: 800; }
+.field-label:first-child { margin-top: 0; }
+.login-input { width: 100%; height: 82rpx; padding: 0 24rpx; border: 1rpx solid var(--line); border-radius: 18rpx; background: #FBF7EF; font-size: 24rpx; }
+.code-row { display: flex; gap: 14rpx; }
+.code-input { flex: 1; min-width: 0; }
+.code-btn { width: 210rpx; height: 82rpx; margin: 0; padding: 0; border: 1rpx solid var(--sage); border-radius: 18rpx; background: var(--paper); color: var(--sage-deep); font-size: 21rpx; line-height: 82rpx; }
+.login-btn, .wx-login { width: 100%; height: 84rpx; margin: 30rpx 0 0; border-radius: 999rpx; font-size: 25rpx; font-weight: 800; line-height: 84rpx; }
+.login-btn { border: 1rpx solid var(--sage); background: var(--sage); color: #fff; }
+.wx-login { margin-top: 0; border: 1rpx solid var(--ink); background: var(--paper); color: var(--ink); }
+.login-divider { display: flex; align-items: center; gap: 18rpx; margin: 24rpx 0; color: var(--muted); font-size: 19rpx; }
+.login-divider::before, .login-divider::after { content: ""; height: 1rpx; flex: 1; background: var(--line); }
+.login-note { margin-top: 22rpx; color: var(--muted); text-align: center; font-size: 18rpx; }

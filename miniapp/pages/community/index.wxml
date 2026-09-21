@@ -34,7 +34,10 @@
     <view wx:else class="community-list">
       <view wx:for="{{creators}}" wx:key="userId" class="community-row">
         <view class="community-row-rank">{{index + 1}}</view>
-        <view class="community-avatar lg">{{item.mark}}</view>
+        <view class="community-avatar lg">
+          <image wx:if="{{item.avatar}}" class="avatar-img" src="{{item.avatar}}" mode="aspectFill" />
+          <block wx:else>{{item.mark}}</block>
+        </view>
         <view class="community-row-copy"><view class="row-title">{{item.nickname}}</view><view class="row-sub">{{item.bio}}</view></view>
         <view class="community-follow {{item.followed ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleFollow">{{item.followed ? '已关注' : '关注'}}</view>
       </view>
@@ -74,7 +77,10 @@
           <view class="community-card-title">{{item.title}}</view>
           <view class="community-card-foot">
             <view class="community-author">
-              <view class="community-avatar">{{item.authorMark}}</view>
+              <view class="community-avatar">
+                <image wx:if="{{item.authorAvatar}}" class="avatar-img" src="{{item.authorAvatar}}" mode="aspectFill" />
+                <block wx:else>{{item.authorMark}}</block>
+              </view>
               <view class="author-name">{{item.author.nickname || '途友'}}</view>
             </view>
             <view class="community-like {{item.liked ? 'active' : ''}}" data-index="{{index}}" catchtap="toggleLike">

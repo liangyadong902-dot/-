@@ -13,6 +13,12 @@
         @click="kitchen.filters.boxCat = c.value"
       >{{ c.label }}</button>
       <span style="width:8px" />
+      <input
+        v-model.trim="kitchen.filters.boxKeyword"
+        class="chip"
+        style="max-width:180px;"
+        placeholder="搜索盲盒名称 / 简介"
+      />
       <button
         v-for="s in states"
         :key="s.value"
@@ -37,7 +43,7 @@
             <span style="color:var(--muted);font-size:11px;font-weight:600;">保底 {{ b.guarantee }}</span>
           </div>
           <div style="display:flex;gap:6px;align-items:center;">
-            <button class="btn-add" type="button" @click="kitchen.editBox(b.id)">+</button>
+            <button class="linkish" type="button" @click="kitchen.editBox(b.id)">编辑</button>
             <button class="linkish" type="button" @click="kitchen.showPool(b.id)">线路池</button>
           </div>
         </div>

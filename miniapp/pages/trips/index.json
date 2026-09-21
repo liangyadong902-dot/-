@@ -1,5 +1,6 @@
 {
-  "navigationStyle": "custom",
+  "navigationStyle": "default",
+  "navigationBarTitleText": "我的行程",
   "disableScroll": false,
   "usingComponents": {
     "tuge-overlay": "/components/tuge-overlay/index"

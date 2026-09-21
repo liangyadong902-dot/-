@@ -12,10 +12,9 @@
       </view>
       <view class="soft-panel mb16">
         <view class="row-between"><text>开盒售价</text><text class="strong">{{mBoxPrice}}</text></view>
-        <view class="row-between"><text>承诺保底</text><text class="strong" style="color:var(--sage-deep);">{{mBoxGuarantee}}</text></view>
       </view>
-      <view class="btn-block btn-sage" bindtap="goCheckout">确认下单，去支付宝付款</view>
-      <view class="muted-center mt">开启即代表同意价值保底与退换规则</view>
+      <view class="btn-block btn-sage" bindtap="goCheckout">确认下单，进入模拟支付</view>
+      <view class="muted-center mt">开启即代表同意退换规则</view>
     </view>
     <view wx:elif="{{unboxStep === 'pay'}}">
       <view class="soft-panel mb12">
@@ -25,7 +24,7 @@
       <view class="muted-center">待支付剩余</view>
       <view class="pay-clock">{{payClock}}</view>
       <view class="pay-alipay">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="3" fill="#1677FF"/><path d="M7 13.5c1.8 1.6 4.2 2.2 6.2 1.4 1.4-.6 2-1.8 1.6-3-.4-1.2-1.7-1.5-3.1-.8" stroke="#fff" stroke-width="1.6" fill="none"/></svg>
+        <view class="mock-pay-mark">M</view>
         <view>
           <text class="b">支付宝沙箱收银台</text>
           <text class="small">{{payMock ? '本地开发替身：不会产生真实支付' : '请在外部浏览器打开支付链接，或使用二维码完成沙箱付款'}}</text>
@@ -34,7 +33,7 @@
         <text wx:if="{{payUrl && !payQrCode}}" class="small">支付链接已生成，请复制到外部浏览器打开</text>
         </view>
       </view>
-      <view class="btn-block btn-sage" bindtap="confirmSandboxPay">{{payMock ? '模拟开发支付' : (payUrl ? '我已完成付款，查询结果' : '生成支付宝支付链接')}}</view>
+      <view class="btn-block btn-sage" bindtap="confirmSandboxPay">模拟支付并开盒</view>
       <view class="btn-block btn-line" bindtap="cancelCurrentOrder">取消订单</view>
       <view class="btn-block btn-line" bindtap="closeModal">稍后再付</view>
     </view>

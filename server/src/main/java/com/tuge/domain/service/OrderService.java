@@ -189,7 +189,7 @@ public class OrderService {
         if ("value_guard".equals(request.kind())
                 && trip.getValueCent() >= order.getPriceCent() * 12 / 10) {
             // 抽奖已保证保底（≥ 售价 1.2 倍），value_guard 仅作兜底
-            throw new BusinessException(409, "票面价值已达标，不符合保底兜底条件");
+            throw new BusinessException(409, "行程票面价值已达标，不符合该退换类型");
         }
         RefundOrder existing = refundMapper.selectOne(new LambdaQueryWrapper<RefundOrder>()
                 .eq(RefundOrder::getOrderId, order.getId())
@@ -334,7 +334,7 @@ public class OrderService {
                 .eq(TravelRoute::getStatus, "on")
                 .ge(TravelRoute::getValueCent, order.getMinValueCent()));
         if (candidates.isEmpty()) {
-            createAutoRefund(order, "池中无线路满足保底");
+            createAutoRefund(order, "线路库存不足，已自动退款");
             return;
         }
         Collections.shuffle(candidates);

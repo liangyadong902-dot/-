@@ -83,7 +83,7 @@
                     <image class="rec-thumb" src="{{box.img}}" mode="aspectFill" />
                     <view class="rec-info">
                       <view class="rec-name">{{box.name}}</view>
-                      <view class="rec-meta">¥{{box.price}} · 保底 ¥{{box.guarantee}}</view>
+                      <view class="rec-meta">¥{{box.price}}</view>
                       <view class="rec-cta" data-id="{{box.id}}" bindtap="openUnbox">立即开启 →</view>
                     </view>
                   </view>

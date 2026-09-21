@@ -4,13 +4,26 @@
   <block wx:elif="{{box}}">
     <view class="pd-hero">
       <swiper class="pd-hero-swiper" indicator-dots="{{box.hasMultipleImages}}" circular="{{box.hasMultipleImages}}">
-        <swiper-item wx:for="{{box.gallery}}" wx:key="*this"><image class="pd-hero-img" src="{{item}}" mode="aspectFill" /></swiper-item>
+        <swiper-item wx:for="{{box.gallery}}" wx:key="*this">
+          <image wx:if="{{item}}" class="pd-hero-img" src="{{item}}" mode="aspectFill" />
+          <view wx:else class="pd-hero-placeholder"><text>途个惊喜</text><text class="pd-hero-placeholder-sub">TRAVEL BLIND BOX</text></view>
+        </swiper-item>
       </swiper>
       <view class="pd-hero-fade"></view>
       <view class="pd-back" bindtap="goBack">←</view>
-      <view class="pd-rank">精选</view>
+      <view class="pd-rank">{{box.rankTag || box.tag || '旅行盲盒'}}</view>
     </view>
     <view class="pd-body">
+      <view class="pd-unbox-head">
+        <view class="pd-unbox-kicker">OPEN YOUR SURPRISE</view>
+        <view class="pd-unbox-title">先选一份心情，目的地交给盲盒</view>
+        <view class="pd-unbox-copy">支付后随机解锁真实线路，开盒前只保留主题、节奏和价值线索。</view>
+        <view class="pd-unbox-tags">
+          <text wx:if="{{box.tag}}" class="pd-tag pd-tag-accent">{{box.tag}}</text>
+          <text wx:if="{{box.rankTag}}" class="pd-tag">{{box.rankTag}}</text>
+          <text wx:for="{{box.moods}}" wx:key="*this" class="pd-tag">{{item}}</text>
+        </view>
+      </view>
       <view class="pd-title">{{box.name}}</view>
       <view class="pd-desc">{{box.description || box.intro}}</view>
       <view class="pd-price-row">
@@ -18,6 +31,14 @@
         <view class="pd-seal">
           <view class="pd-seal-strong">≥ ¥{{box.minValue}}</view>
           <view class="pd-seal-span">票面价值 {{box.ratePercent}}% 起</view>
+        </view>
+      </view>
+      <view class="pd-section">
+        <view class="pd-section-title">盒内线索</view>
+        <view class="pd-clue-card">
+          <view class="pd-clue-row"><text class="pd-clue-label">目的地</text><text class="pd-clue-value pd-clue-hidden">开盒后揭晓</text></view>
+          <view class="pd-clue-row"><text class="pd-clue-label">主题场景</text><text class="pd-clue-value">{{box.sceneText || '真实线路 · 随机解锁'}}</text></view>
+          <view class="pd-clue-row"><text class="pd-clue-label">攻略预览</text><text class="pd-clue-value">{{box.guidePreviewText || '行程、交通、费用和清单已准备好'}}</text></view>
         </view>
       </view>
       <view class="pd-section">
@@ -31,7 +52,12 @@
       </view>
       <view class="pd-section pd-section-last">
         <view class="pd-section-title">开盒说明</view>
-        <view class="pd-note">付款后随机解锁对应主题线路，票面价值不低于页面标注的保底金额。未出行且符合保障规则时，可在“我的订单”中申请退换。</view>
+        <view class="pd-note">付款后随机解锁对应主题线路。未出行且符合退换规则时，可在“我的订单”中申请退换。</view>
+        <view class="pd-steps">
+          <view class="pd-step"><text class="pd-step-no">01</text><text class="pd-step-title">选心情</text><text class="pd-step-copy">挑一只今天想打开的盒子</text></view>
+          <view class="pd-step"><text class="pd-step-no">02</text><text class="pd-step-title">开盒</text><text class="pd-step-copy">付款后看到目的地与路线卡</text></view>
+          <view class="pd-step"><text class="pd-step-no">03</text><text class="pd-step-title">上路</text><text class="pd-step-copy">照着完整攻略，把惊喜走成故事</text></view>
+        </view>
         <view class="pd-guide-entry" bindtap="openGuide">
           <view class="pd-guide-icon">册</view>
           <view class="pd-guide-copy">
@@ -46,7 +72,7 @@
     </view>
     <view class="pd-actions-bar">
       <button class="btn-block btn-line {{saved ? 'pd-saved' : ''}}" bindtap="toggleSave">{{saved ? '已收藏' : '收藏盲盒'}}</button>
-      <button class="btn-block btn-sage" disabled="{{box.status !== 'on'}}" bindtap="buy">{{box.status === 'on' ? '立即开盒' : '商品已下架'}}</button>
+      <button class="btn-block btn-sage" disabled="{{box.status !== 'on'}}" bindtap="buy">{{box.status === 'on' ? '立即开盒 · ¥' + box.price : '商品已下架'}}</button>
     </view>
   </block>
 </view>

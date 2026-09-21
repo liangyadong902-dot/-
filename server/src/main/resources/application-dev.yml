@@ -9,6 +9,11 @@ spring:
     password: ${MYSQL_PASSWORD:1234}
   data:
     redis:
-      host: ${REDIS_HOST:123.57.181.126}
+      # 默认指向本机：本地未启动 Redis 时连接会被立即拒绝（毫秒级），
+      # AiMemoryService / BizNoGenerator 已做降级，不会阻塞业务请求。
+      # 指向远程不可达地址会让每次 Redis 操作挂起约 10s（连接超时），AI 对话累计阻塞 30~50s。
+      host: ${REDIS_HOST:127.0.0.1}
       port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:123456}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2s
+      connect-timeout: 1s

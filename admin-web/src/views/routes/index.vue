@@ -3,6 +3,14 @@
     <PageHead title="线路池" sub="同分类下须有线路票面 ≥ 盲盒保底，否则开盒失败">
       <button class="btn-sage" type="button" @click="kitchen.editRoute(null)">新建线路</button>
     </PageHead>
+    <div class="toolbar">
+      <input
+        v-model.trim="kitchen.filters.routeKeyword"
+        class="chip"
+        style="max-width:220px;"
+        placeholder="搜索线路名称 / 目的地"
+      />
+    </div>
     <div class="sheet">
       <table>
         <thead>
@@ -11,7 +19,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="r in kitchen.routes" :key="r.id">
+          <tr v-for="r in kitchen.filteredRoutes" :key="r.id">
             <td>
               <div class="who">
                 <img class="thumb" :src="r.img" alt="" />
@@ -32,7 +40,7 @@
               <button class="linkish" type="button" @click="confirmAction('确定删除这条线路吗？') && kitchen.deleteRoute(r.id)">删除</button>
             </td>
           </tr>
-          <tr v-if="!kitchen.routes.length">
+          <tr v-if="!kitchen.filteredRoutes.length">
             <td colspan="8"><div class="empty">{{ kitchen.catalogError || '暂无线路数据' }}</div></td>
           </tr>
         </tbody>

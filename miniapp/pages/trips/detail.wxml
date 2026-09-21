@@ -1,1 +1,145 @@
-<view class="page-shell"><view class="head"><text class="kicker">TRIP SNAPSHOT</text><text class="title">{{trip ? trip.routeName : '行程详情'}}</text><text class="desc">{{trip ? trip.location : ''}}</text></view><view wx:if="{{loading}}" class="state">正在打开行程…</view><view wx:elif="{{error}}" class="state">{{error}}</view><view wx:else class="content"><view class="hero-card"><view class="badge">{{trip.badgeName || '旅程徽章'}}</view><text class="mood">{{trip.moodText || '把今天交给风景'}}</text><text class="highlight">{{trip.highlight || '一条刚刚好的路线，等你慢慢走完。'}}</text><view class="metrics"><view><text>购入</text><strong>¥{{trip.priceText}}</strong></view><view><text>票面</text><strong>¥{{trip.valueText}}</strong></view><view><text>状态</text><strong>{{trip.validityText}}</strong></view></view></view><view class="section"><view class="section-title">随盒包含</view><view class="chips"><text wx:for="{{trip.includeList}}" wx:key="*this" class="chip">{{item}}</text></view></view><view wx:if="{{trip.diaryText}}" class="section diary"><view class="section-title">AI 日记</view><text>{{trip.diaryText}}</text></view><view class="actions"><button class="sage" bindtap="openGuide">查看完整攻略</button><button wx:if="{{trip.validity === 'valid'}}" class="ghost" bindtap="openCheckin">去打卡</button></view><button class="diary-btn" bindtap="diary">{{diaryLoading ? '正在生成…' : (trip.diaryText ? '重新读取日记' : '生成 AI 日记')}}</button></view></view>
+<view class="trip-page">
+  <view wx:if="{{loading}}" class="state">正在打开行程…</view>
+  <view wx:elif="{{error}}" class="state">{{error}}</view>
+  <block wx:else>
+    <view class="trip-hero {{trip.cover ? '' : 'trip-hero-empty'}}">
+      <image wx:if="{{trip.cover}}" class="trip-cover" src="{{trip.cover}}" mode="aspectFill" />
+      <view class="trip-cover-shade"></view>
+      <view class="trip-hero-copy">
+        <text class="trip-kicker">TRIP SNAPSHOT · 已解锁</text>
+        <text class="trip-title">{{trip.routeName}}</text>
+        <text class="trip-place">◎ {{trip.location}}</text>
+      </view>
+    </view>
+
+    <view class="trip-body">
+      <scroll-view class="trip-pills" scroll-x enhanced show-scrollbar="{{false}}">
+        <text class="trip-pill">{{trip.dateText}}</text>
+        <text class="trip-pill">{{trip.durationText}}</text>
+        <text wx:if="{{trip.paceText}}" class="trip-pill">{{trip.paceText}}</text>
+        <text wx:if="{{trip.walkText}}" class="trip-pill">步行 {{trip.walkText}}</text>
+        <text wx:if="{{trip.transitText}}" class="trip-pill">{{trip.transitText}}</text>
+        <text wx:if="{{trip.seasonText}}" class="trip-pill">{{trip.seasonText}}</text>
+      </scroll-view>
+
+      <view class="blindbox-ticket">
+        <view class="blindbox-stamp">已开盒</view>
+        <view class="blindbox-ticket-copy">
+          <view class="blindbox-ticket-title">{{trip.boxName || '旅行盲盒'}} · 惊喜已揭晓</view>
+          <view class="blindbox-ticket-sub">路线编号 #{{trip.id}}<text wx:if="{{trip.guideVersion}}"> · 攻略 v{{trip.guideVersion}}</text></view>
+        </view>
+        <view wx:if="{{trip.badgeName}}" class="blindbox-badge">{{trip.badgeName}}</view>
+      </view>
+
+      <view class="value-card">
+        <view class="value-item"><text>票面价值</text><text class="value-amount">¥{{trip.valueText}}</text></view>
+        <view class="value-divider"></view>
+        <view class="value-item"><text>购入价</text><text class="value-amount">¥{{trip.priceText}}</text></view>
+        <text class="value-status">{{trip.validityText}}</text>
+      </view>
+
+      <view wx:if="{{trip.facts.length}}" class="trip-facts">
+        <view wx:for="{{trip.facts}}" wx:key="label" class="trip-fact"><text class="trip-fact-label">{{item.label}}</text><text class="trip-fact-value">{{item.value}}</text></view>
+      </view>
+
+      <view class="trip-section highlight-section">
+        <view class="section-eyebrow">ROUTE HIGHLIGHT</view>
+        <view class="section-title">线路亮点</view>
+        <view wx:if="{{trip.moodText}}" class="highlight-quote">“{{trip.moodText}}”</view>
+        <view wx:if="{{trip.highlight}}" class="section-copy">{{trip.highlight}}</view>
+        <view wx:if="{{!trip.moodText && !trip.highlight}}" class="empty-detail">线路亮点将在开盒攻略中更新</view>
+      </view>
+
+      <view class="trip-section">
+        <view class="section-head"><text class="section-title">详细分时路线</text><text class="section-note">{{trip.durationText}}</text></view>
+        <view class="trip-detail-route">
+          <view class="trip-timeline">
+            <view wx:for="{{trip.schedules}}" wx:key="time" class="trip-stop">
+              <text class="trip-stop-time">{{item.time}}</text>
+              <view class="trip-stop-title">{{item.title}}</view>
+              <view class="trip-stop-desc">{{item.desc}}</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="trip-section">
+        <view class="section-head"><text class="section-title">沿途景点看点</text><text class="section-note">慢慢走</text></view>
+        <view wx:if="{{trip.spots.length}}" class="trip-attractions">
+          <view wx:for="{{trip.spots}}" wx:key="name" class="trip-attraction">
+            <view class="attraction-top"><text>{{item.name}}</text><text class="attraction-duration">{{item.duration}}</text></view>
+            <view class="trip-stop-desc">{{item.desc}}</view>
+          </view>
+        </view>
+        <view wx:else class="empty-detail">景点安排将在出发前通知中更新</view>
+      </view>
+
+      <view wx:if="{{trip.transportRows.length || trip.diningRows.length || trip.lodgingRows.length}}" class="trip-section logistics-section">
+        <view class="section-head"><text class="section-title">交通与途中服务</text><text class="section-note">按订单权益执行</text></view>
+        <view wx:for="{{trip.transportRows}}" wx:key="title" class="detail-row detail-row-transit">
+          <view class="detail-row-icon">↗</view>
+          <view class="detail-row-copy"><view class="detail-row-title">{{item.title}}</view><view class="detail-row-desc">{{item.desc}}</view></view>
+        </view>
+        <view wx:for="{{trip.diningRows}}" wx:key="title" class="detail-row detail-row-service">
+          <view class="detail-row-icon">⌁</view>
+          <view class="detail-row-copy"><view class="detail-row-title">{{item.title}}</view><view class="detail-row-desc">{{item.desc}}</view></view>
+        </view>
+        <view wx:for="{{trip.lodgingRows}}" wx:key="title" class="detail-row detail-row-service">
+          <view class="detail-row-icon">⌂</view>
+          <view class="detail-row-copy"><view class="detail-row-title">{{item.title}}</view><view class="detail-row-desc">{{item.desc}}</view></view>
+        </view>
+      </view>
+
+      <button class="guide-entry" bindtap="openGuide">
+        <view class="guide-entry-icon">⌖</view>
+        <view class="guide-entry-copy"><text>查看完整出行攻略</text><text class="guide-entry-sub">{{trip.guideHint}}</text></view>
+        <text class="guide-entry-chev">›</text>
+      </button>
+
+      <view wx:if="{{trip.costs.length}}" class="trip-section cost-section">
+        <view class="section-head"><text class="section-title">费用明细</text><text class="section-note">出发前心里有数</text></view>
+        <view class="cost-card">
+          <view wx:for="{{trip.costs}}" wx:key="label" class="cost-row">
+            <view><text class="cost-label">{{item.label}}</text><text wx:if="{{item.note}}" class="cost-note">{{item.note}}</text></view>
+            <text class="cost-value">{{item.value}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{trip.includes.length}}" class="trip-section include-section">
+        <view class="section-head"><text class="section-title">服务包含</text><text class="section-note">以订单为准</text></view>
+        <view class="include-list">
+          <view wx:for="{{trip.includes}}" wx:key="*this" class="include-item"><text class="include-mark">✓</text><text>{{item}}</text></view>
+        </view>
+      </view>
+
+      <view wx:if="{{trip.checklist.length}}" class="trip-section prepare-section">
+        <view class="section-head"><text class="section-title">出发前清单</text><text class="section-note">完整攻略可勾选</text></view>
+        <view class="prepare-list">
+          <view wx:for="{{trip.checklist}}" wx:key="*this" class="prepare-chip"><text class="prepare-check">✓</text><text>{{item}}</text></view>
+        </view>
+      </view>
+
+      <view wx:if="{{trip.weatherText || trip.planB.length}}" class="trip-section backup-section">
+        <view class="section-head"><text class="section-title">天气与备选</text><text class="section-note">Plan B</text></view>
+        <view wx:if="{{trip.weatherText}}" class="weather-card"><text class="weather-icon">☁</text><text>{{trip.weatherText}}</text></view>
+        <view wx:for="{{trip.planB}}" wx:key="label" class="planb-row"><text class="planb-label">{{item.label}}</text><text class="planb-text">{{item.text}}</text></view>
+      </view>
+
+      <view wx:if="{{trip.safetyTips.length || trip.rules.length || trip.faqs.length}}" class="trip-section know-section">
+        <view class="section-head"><text class="section-title">出行须知</text><text class="section-note">出发前必读</text></view>
+        <view wx:for="{{trip.safetyTips}}" wx:key="*this" class="tip-row"><text class="tip-no">{{index + 1}}</text><text>{{item}}</text></view>
+        <view wx:for="{{trip.rules}}" wx:key="title" class="rule-row"><text class="rule-title">{{item.title}}</text><text class="rule-desc">{{item.desc}}</text></view>
+        <view wx:for="{{trip.faqs}}" wx:key="question" class="faq-row"><text class="faq-q">Q · {{item.question}}</text><text class="faq-a">{{item.answer}}</text></view>
+      </view>
+
+      <view class="trip-section diary-section">
+        <view class="section-head"><text class="section-title">AI 旅行日记</text><text class="section-note">留住今天</text></view>
+        <view wx:if="{{trip.diaryText}}" class="diary-card"><text>{{trip.diaryText}}</text><text class="diary-by">—— AI 生成</text></view>
+        <button class="diary-btn" bindtap="diary" loading="{{diaryLoading}}" disabled="{{diaryLoading}}">{{diaryLoading ? '正在生成…' : (trip.diaryText ? '重新生成旅行日记' : '一键生成旅行日记')}}</button>
+      </view>
+
+      <button wx:if="{{trip.validity === 'valid'}}" class="checkin-btn" bindtap="openCheckin">去打卡记录这次旅行</button>
+    </view>
+  </block>
+</view>

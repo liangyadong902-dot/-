@@ -130,9 +130,11 @@ function mapRoute(row: ApiAdminRoute): TravelRoute {
     highlights: row.highlight,
     includes: row.includes.join('、'),
     status: row.status,
-    img: '',
+    img: row.imageUrl || '',
     draws: row.drawCount,
     badgeId: row.badgeId,
+    guide: (row.guide as TravelRoute['guide']) || undefined,
+    guideVersion: row.guideVersion ?? undefined,
   }
 }
 
@@ -161,7 +163,7 @@ export const useKitchenStore = defineStore('kitchen', () => {
     timeout: 0,
     levels: [],
   })
-  const filters = reactive({ boxCat: 'all', boxSt: 'all', orderSt: 'all' })
+  const filters = reactive({ boxCat: 'all', boxSt: 'all', orderSt: 'all', boxKeyword: '', routeKeyword: '' })
   const drawer = ref<DrawerState>(null)
   const poolRoutes = ref<ApiRoutePool['routes']>([])
   const poolOk = ref(false)
@@ -188,13 +190,24 @@ export const useKitchenStore = defineStore('kitchen', () => {
   const specialBox = computed(() => boxes[1] || boxes[0] || EMPTY_BOX)
   const topBoxes = computed(() => boxes.slice(0, 3))
 
-  const filteredBoxes = computed(() =>
-    boxes.filter((b) => {
+  const filteredBoxes = computed(() => {
+    const kw = filters.boxKeyword.trim().toLowerCase()
+    return boxes.filter((b) => {
       const cat = filters.boxCat === 'all' || b.category === filters.boxCat
       const st = filters.boxSt === 'all' || b.status === filters.boxSt
-      return cat && st
-    }),
-  )
+      const key = !kw || b.name.toLowerCase().includes(kw) || b.desc.toLowerCase().includes(kw)
+      return cat && st && key
+    })
+  })
+
+  const filteredRoutes = computed(() => {
+    const kw = filters.routeKeyword.trim().toLowerCase()
+    if (!kw) return routes
+    return routes.filter((r) =>
+      r.name.toLowerCase().includes(kw)
+      || r.dest.toLowerCase().includes(kw)
+      || (r.moodText || '').toLowerCase().includes(kw))
+  })
 
   const filteredOrders = computed(() =>
     mergedOrders.value.filter((o) => filters.orderSt === 'all' || o.st === filters.orderSt),
@@ -387,6 +400,7 @@ export const useKitchenStore = defineStore('kitchen', () => {
       category: next.category,
       destination: next.dest,
       scene: next.scene || '',
+      imageUrl: next.img || '',
       value: next.value,
       cost: next.cost ?? null,
       badgeId: next.badgeId || badges.find((badge) => badge.name === next.badge)?.id,
@@ -394,6 +408,8 @@ export const useKitchenStore = defineStore('kitchen', () => {
       includes: next.includes.split(/[、,，]/).map((item) => item.trim()).filter(Boolean),
       moodText: next.moodText,
       status: next.status,
+      guide: next.guide || {},
+      guideVersion: next.guideVersion ?? null,
     }
     try {
       if (!payload.badgeId) {
@@ -549,6 +565,7 @@ export const useKitchenStore = defineStore('kitchen', () => {
     specialBox,
     topBoxes,
     filteredBoxes,
+    filteredRoutes,
     filteredOrders,
     loadCatalog,
     loadTransactions,

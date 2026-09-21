@@ -122,6 +122,7 @@ page {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  transition: flex-basis 0.28s cubic-bezier(.22,1,.36,1), width 0.28s cubic-bezier(.22,1,.36,1), padding 0.28s ease;
 }
 
 .page-ai .ai-body.hist-collapsed .ai-history {
@@ -184,6 +185,7 @@ page {
   width: 19.23rpx;
   height: 19.23rpx;
   display: block;
+  transition: transform 0.28s cubic-bezier(.22,1,.36,1);
 }
 
 .page-ai .ai-body.hist-collapsed .ai-hist-chevron {
@@ -194,8 +196,12 @@ page {
   flex: 1;
   height: 0;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
 }
+
+.page-ai .ai-hist-panel::-webkit-scrollbar { display: none; }
 
 .page-ai .ai-body.hist-collapsed .ai-hist-panel {
   opacity: 0;
@@ -577,8 +583,14 @@ page {
   flex-direction: row;
   gap: 15.38rpx;
   padding-bottom: 15.38rpx;
-  overflow: hidden;
+  /* Keep the prototype's horizontally scrollable prompt rail.  Hiding
+     overflow clipped the third prompt on narrow phones. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
 }
+
+.page-ai .ai-quick::-webkit-scrollbar { display: none; }
 
 .page-ai .ai-quick .mood-chip {
   flex-shrink: 0;

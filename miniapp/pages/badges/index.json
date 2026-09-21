@@ -1,5 +1,6 @@
 {
-  "navigationStyle": "custom",
+  "navigationStyle": "default",
+  "navigationBarTitleText": "旅行图鉴",
   "disableScroll": false,
   "usingComponents": {
     "tuge-overlay": "/components/tuge-overlay/index"

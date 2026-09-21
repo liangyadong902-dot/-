@@ -30,12 +30,13 @@ public class DeepSeekClient {
     public ModelReply chat(List<Map<String, String>> messages) {
         if (!properties.modelAvailable()) throw new IllegalStateException("AI model is disabled");
         RuntimeException last = null;
-        for (int attempt = 0; attempt < 2; attempt++) {
-            try {
-                return execute(messages);
-            } catch (Exception e) {
-                last = new IllegalStateException("AI provider request failed", e);
-            }
+        // The miniapp has a finite request window. Retrying a slow provider call
+        // doubles the wait and makes a normal fallback look like a delivery error.
+        // One bounded attempt lets AiChatService return its local reply promptly.
+        try {
+            return execute(messages);
+        } catch (Exception e) {
+            last = new IllegalStateException("AI provider request failed", e);
         }
         throw last == null ? new IllegalStateException("AI provider request failed") : last;
     }

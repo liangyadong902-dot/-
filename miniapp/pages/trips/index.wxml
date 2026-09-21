@@ -24,15 +24,26 @@
     </view>
     <view wx:else>
       <view class="ticket-card" wx:for="{{trips}}" wx:key="id" data-id="{{item.id}}" bindtap="openTrip">
-        <image src="{{item.img}}" mode="aspectFill" style="width:176.92rpx;height:176.92rpx;" />
-        <view class="ticket-body">
-          <view class="ticket-meta">{{item.boxName}} · {{item.date}}</view>
-          <view class="ticket-name">{{item.name}}</view>
-          <view class="ticket-dest">{{item.dest}}</view>
-          <view class="ticket-foot">
-            <view class="ticket-price">购入 ¥{{item.price}} · 票面 ¥{{item.val}}</view>
-            <text class="ticket-tag">已解锁</text>
+        <view class="ticket-main">
+          <image src="{{item.img}}" mode="aspectFill" />
+          <view class="ticket-body">
+            <view class="ticket-meta">{{item.boxName}} · {{item.date}}</view>
+            <view class="ticket-name">{{item.name}}</view>
+            <view class="ticket-dest">◎ {{item.dest}}</view>
+            <view class="ticket-foot">
+              <view class="ticket-price">购入 ¥{{item.price}} · 票面 ¥{{item.val}}</view>
+              <text class="ticket-tag">已解锁</text>
+            </view>
           </view>
+        </view>
+        <view class="ticket-route-preview">
+          <view class="ticket-route-node first"><view class="route-dot"></view><text class="route-name">集合出发</text><text class="route-time">行程起点</text></view>
+          <view class="ticket-route-node"><view class="route-dot"></view><text class="route-name">{{item.name}}</text><text class="route-time">主题体验</text></view>
+          <view class="ticket-route-node"><view class="route-dot"></view><text class="route-name">集合返程</text><text class="route-time">安心归来</text></view>
+        </view>
+        <view class="ticket-actions">
+          <button class="route-btn" data-id="{{item.id}}" catchtap="openTrip">路线详情</button>
+          <button class="guide-btn" data-id="{{item.id}}" catchtap="openGuide">出行攻略</button>
         </view>
       </view>
     </view>

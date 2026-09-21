@@ -1,0 +1,9 @@
+.mine-menu-groups { margin-bottom: 26.92rpx; }
+.mine-section-label {
+  padding: 15.38rpx 7.69rpx 13.46rpx;
+  color: var(--muted);
+  font-size: 19.23rpx;
+  font-weight: 700;
+}
+.mine-section-label:first-child { padding-top: 0; }
+.mine-menu-group .menu-list { margin-bottom: 7.69rpx; }

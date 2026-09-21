@@ -1,0 +1,13 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="hint">加载中...</view>
+  <view wx:elif="{{error}}" class="hint" bindtap="retry">{{error}}</view>
+  <view wx:elif="{{item}}" class="card">
+    <view class="name">{{item.name}}</view>
+    <view class="row">券号 {{item.couponNo}}</view>
+    <view class="row">核销码 {{item.verifyCode}}</view>
+    <view class="row">有效期 {{item.validUntil}}</view>
+    <view class="row">说明 {{item.usageGuide}}</view>
+    <button wx:if="{{item.status==='unused' && !used}}" class="btn" disabled="{{using}}" bindtap="use">{{using?'使用中...':'立即使用'}}</button>
+    <view wx:if="{{used}}" class="ok">已核销成功</view>
+  </view>
+</view>

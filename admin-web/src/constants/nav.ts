@@ -6,6 +6,7 @@ export const CAT: Record<Category, string> = {
   province: '省内游',
   cross: '跨省游',
   theme: '主题专线',
+  guide: '纯攻略',
 }
 
 export const MOOD: Record<Mood, string> = {

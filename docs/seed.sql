@@ -83,6 +83,12 @@ SET `guide_version` = 1,
     `guide_json` = JSON_OBJECT(
       'overview', `highlight`,
       'durationText', CASE WHEN `category` = 'cross' THEN '3天2夜' WHEN `category` = 'province' THEN '2天1夜' ELSE '一日轻旅行' END,
+      'paceText', CASE WHEN `category` = 'cross' THEN '松弛探索' WHEN `category` = 'province' THEN '舒展深度' WHEN `category` = 'theme' THEN '边走边尝' ELSE '轻松慢游' END,
+      'walkText', CASE WHEN `category` = 'cross' THEN '8–12 千步/天' WHEN `category` = 'province' THEN '约 1.2 万步/天' WHEN `category` = 'theme' THEN '8–10 千步' ELSE '6–9 千步' END,
+      'transitText', CASE WHEN `category` = 'cross' THEN '大交通自理' WHEN `category` = 'province' THEN '大巴往返' WHEN `category` = 'theme' THEN '城市公共交通' ELSE '集合接驳' END,
+      'season', CASE WHEN `category` = 'cross' THEN '按目的地' WHEN `category` = 'province' THEN '春秋优先' WHEN `category` = 'theme' THEN '全年可行' ELSE '四季可行' END,
+      'weather', CASE WHEN `category` = 'cross' THEN '同时查看出发地与目的地天气，关注温差和紫外线。' WHEN `category` = 'province' THEN '山区温差明显，请准备薄外套和雨具。' WHEN `category` = 'theme' THEN '城市步行线注意防晒补水，雨天优先室内点位。' ELSE '出发前一天确认降雨和集合时间，雨后路面较滑。' END,
+      'facts', JSON_ARRAY(JSON_OBJECT('label','适合人群','value',CASE WHEN `category` = 'cross' THEN '成人独行或结伴' WHEN `category` = 'province' THEN '朋友、伴侣、轻户外' WHEN `category` = 'theme' THEN '朋友、亲子、美食爱好者' ELSE '独行、朋友、轻家庭' END), JSON_OBJECT('label','步行强度','value',CASE WHEN `category` = 'cross' THEN '每日约 8–12 千步' WHEN `category` = 'province' THEN '每日约 1.2 万步' WHEN `category` = 'theme' THEN '约 8–10 千步' ELSE '约 6–9 千步' END), JSON_OBJECT('label','集合时间','value','通常 08:00–09:00'), JSON_OBJECT('label','返程时间','value',CASE WHEN `category` = 'province' THEN 'D2 18:00 左右' WHEN `category` = 'cross' THEN '返程日预留换乘' ELSE '预计 17:30 前' END)),
       'schedules', JSON_ARRAY(
         JSON_OBJECT('dayNo', 1, 'time', '08:30', 'title', '集合出发', 'description', '核验订单并确认返程安排。'),
         JSON_OBJECT('dayNo', 1, 'time', '10:30', 'title', `name`, 'description', `highlight`),
@@ -118,7 +124,24 @@ INSERT INTO `blind_box`
   (5, '跨省限定冒险盲盒', 'cross',    '跨省游',   'NEW',  '大山大河，说走就走',
       59900, 75000, 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80', 50, 'on'),
   (6, '老城寻味美食专线', 'theme',    '主题专线', 'HOT',  '街角早茶，烟火气',
-      11900, 15000, 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', 40, 'on');
+      11900, 15000, 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', 40, 'on'),
+  -- 普通盲盒低价档位：0.1 ~ 10 元全档覆盖（min_value_cent 需低于对应线路池最低票面）
+  (20, '一毛钱周边惊喜盒', 'nearby',   '超值盲盒', NULL, '一毛钱开出一处周边好去处',
+      10,    10000, 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80', 30, 'on'),
+  (21, '五毛钱主题尝鲜盒', 'theme',    '超值盲盒', NULL, '五毛钱解锁一个主题玩法',
+      50,    12000, 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', 31, 'on'),
+  (22, '一元周边微旅行盒', 'nearby',   '超值盲盒', NULL, '一块钱来一场说走就走的微旅行',
+      100,   10000, 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80', 32, 'on'),
+  (23, '二元省内踏青盒',   'province', '超值盲盒', NULL, '两块钱抽一条省内踏青线路',
+      200,   30000, 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80', 33, 'on'),
+  (24, '三元主题奇遇盒',   'theme',    '超值盲盒', NULL, '三块钱遇见一份主题奇遇',
+      300,   12000, 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', 34, 'on'),
+  (25, '五元跨省启程盒',   'cross',    '超值盲盒', NULL, '五块钱开启跨省冒险第一站',
+      500,   70000, 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80', 35, 'on'),
+  (26, '八元省内山水盒',   'province', '超值盲盒', NULL, '八块钱抽一段省内山水行程',
+      800,   30000, 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80', 36, 'on'),
+  (27, '十元跨省畅行盒',   'cross',    '超值盲盒', NULL, '十块钱解锁一次跨省畅行',
+      1000,  70000, 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80', 37, 'on');
 
 UPDATE `blind_box`
 SET `description` = CONCAT(`intro`, '。目的地在支付完成并开盒后揭晓，订单保留商品售价、保底价值与分类快照。'),

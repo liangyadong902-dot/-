@@ -6,6 +6,11 @@ spring:
     name: tuge-server
   config:
     import: optional:file:./application-local.yml
+  servlet:
+    multipart:
+      # 图片发布页允许单张图片最大 10MB；同时提高请求总大小以支持一次发布多张图片。
+      max-file-size: 10MB
+      max-request-size: 100MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://123.57.181.126:3306/tuge?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
@@ -41,7 +46,8 @@ jwt:
   expiration: 604800000  # 7 天（毫秒）
 
 pay:
-  mock-enabled: ${PAY_MOCK_ENABLED:false}
+  # 本项目演示环境默认使用模拟支付；部署真实支付时显式设置 PAY_MOCK_ENABLED=false。
+  mock-enabled: ${PAY_MOCK_ENABLED:true}
   timeout-minutes: ${PAY_TIMEOUT_MINUTES:15}
 
 alipay:

@@ -71,6 +71,7 @@ const CATEGORIES = [
   { key: 'province', label: '省内游', english: 'PROVINCE' },
   { key: 'cross', label: '跨省游', english: 'CROSS' },
   { key: 'theme', label: '主题盒', english: 'THEME' },
+  { key: 'guide', label: '纯攻略', english: 'GUIDE' },
 ]
 
 const ORDER_TABS = [

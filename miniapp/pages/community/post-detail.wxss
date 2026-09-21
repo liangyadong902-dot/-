@@ -5,12 +5,17 @@
 
 .cd-head {
   flex-shrink: 0;
-  min-height: 188.46rpx;
-  padding: 100rpx 26.92rpx 19.23rpx;
+  padding: 0 26.92rpx 8rpx;
+  background: var(--cream);
+}
+/* 自定义导航行：返回键靠左，右侧留给小程序胶囊 */
+.cd-nav-row { display: flex; align-items: center; }
+/* 作者信息行：位于胶囊下方，不再与胶囊重叠 */
+.cd-head-row {
   display: flex;
   align-items: center;
   gap: 17.31rpx;
-  background: var(--cream);
+  padding: 6rpx 0 10rpx;
 }
 .cd-avatar {
   width: 69.23rpx;
@@ -24,7 +29,10 @@
   color: var(--sage-deep);
   font-size: 25rpx;
   font-weight: 800;
+  overflow: hidden;
 }
+/* 真实头像：有 avatarUrl 时铺满圆形容器，没有则回退显示昵称首字 */
+.cd-avatar-img { width: 100%; height: 100%; display: block; }
 .cd-avatar.sm { width: 50rpx; height: 50rpx; font-size: 19.23rpx; }
 .cd-author { min-width: 0; flex: 1; }
 .cd-name { font-size: 25rpx; font-weight: 700; }
@@ -45,22 +53,41 @@
 }
 .cd-follow.active { border-color: transparent; background: var(--sage-mist); color: var(--muted); }
 .cd-close {
-  width: 84.62rpx;
-  height: 84.62rpx;
+  width: 64rpx;
+  height: 64rpx;
   flex-shrink: 0;
   border-radius: 50%;
   background: var(--paper);
   color: var(--ink);
-  font-size: 40rpx;
+  font-size: 34rpx;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.cd-media { width: 100%; height: 646.55rpx; flex-shrink: 0; background: var(--cream-2); }
+.cd-media-wrap { width: 100%; height: 646.55rpx; flex-shrink: 0; position: relative; background: var(--cream-2); }
+.cd-media { width: 100%; height: 100%; }
 .cd-media-img { width: 100%; height: 100%; display: block; }
+/* 小红书风格的图片轮播圆点指示器 */
+.cd-media-dots {
+  position: absolute; left: 0; right: 0; bottom: 19.23rpx;
+  display: flex; justify-content: center; align-items: center;
+  flex-wrap: nowrap;
+}
+.cd-media-dot {
+  width: 11.54rpx; height: 11.54rpx; border-radius: 11.54rpx;
+  margin: 0 5.77rpx; background: rgba(255, 255, 255, 0.5);
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+.cd-media-dot.on {
+  width: 26.92rpx;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.2);
+}
 
-.cd-body { flex: 1; min-height: 0; padding: 30.77rpx 30.77rpx 0; }
+/* 图片与正文放在同一个滚动容器里：上滑时图片跟随滚出屏幕，作者栏与底部评论栏保持固定 */
+.cd-scroll { flex: 1; min-height: 0; }
+.cd-body { padding: 30.77rpx 30.77rpx 0; }
 .cd-body-pad { height: 46.15rpx; }
 .cd-title { font-family: "Noto Serif SC", "Songti SC", serif; font-size: 36.54rpx; font-weight: 900; line-height: 1.45; }
 .cd-text { margin-top: 19.23rpx; font-size: 25rpx; line-height: 1.85; white-space: pre-wrap; }
@@ -92,24 +119,95 @@
 .cd-comment-empty { color: var(--muted); padding: 40rpx 0; font-size: 21rpx; }
 .cd-comment { display: flex; gap: 17.31rpx; padding: 21.15rpx 0; }
 .cd-comment-copy { flex: 1; min-width: 0; }
-.cd-comment-name { font-size: 21.15rpx; font-weight: 700; }
+.cd-comment-name { font-size: 21.15rpx; font-weight: 700; display: flex; align-items: center; gap: 8rpx; }
 .cd-comment-text { margin-top: 5.77rpx; font-size: 23.08rpx; line-height: 1.6; }
 .cd-comment-meta { margin-top: 7.69rpx; color: var(--muted); font-size: 17.31rpx; }
 .cd-reply { color: var(--sage-deep); }
 
-.cd-bar {
+/* 小红书式「作者」徽标 */
+.cd-author-badge {
+  display: inline-block;
+  padding: 1.92rpx 8rpx;
+  border-radius: 5.77rpx;
+  background: #C86657;
+  color: #fff;
+  font-size: 15.38rpx;
+  font-weight: 700;
+  line-height: 1.5;
   flex-shrink: 0;
+}
+
+/* 小红书式楼中楼：子回复收在浅底色块里，缩进展示 */
+.cd-sub {
+  margin-top: 11.54rpx;
+  padding: 15.38rpx 19.23rpx;
+  border-radius: 11.54rpx;
+  background: var(--cream-2);
+}
+.cd-sub-item { display: flex; align-items: flex-start; gap: 11.54rpx; padding: 7.69rpx 0; }
+.cd-sub-avatar {
+  flex-shrink: 0;
+  width: 38.46rpx;
+  height: 38.46rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--sage);
+  color: #fff;
+  font-size: 19.23rpx;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 15.38rpx;
+  justify-content: center;
+}
+.cd-sub-avatar-img { width: 100%; height: 100%; }
+.cd-sub-main { flex: 1; min-width: 0; }
+.cd-sub-text { font-size: 21.15rpx; line-height: 1.65; word-break: break-all; }
+.cd-sub-name { font-weight: 700; }
+.cd-sub-replyto { color: var(--sage-deep); font-weight: 700; }
+.cd-sub-content { color: var(--ink); }
+.cd-sub-meta { margin-top: 3.85rpx; color: var(--muted); font-size: 17.31rpx; }
+.cd-sub-toggle {
+  margin-top: 7.69rpx;
+  display: flex;
+  align-items: center;
+  gap: 5.77rpx;
+  color: var(--muted);
+  font-size: 19.23rpx;
+  font-weight: 700;
+}
+.cd-sub-arrow { font-size: 23.08rpx; transition: transform 0.2s ease; }
+.cd-sub-arrow.up { transform: rotate(90deg); }
+
+.cd-bar {
+  flex-shrink: 0;
   padding: 17.31rpx 23.08rpx calc(21.15rpx + env(safe-area-inset-bottom));
   background: var(--paper);
   border-top: 1.92rpx solid var(--line);
 }
-.cd-input {
+/* 底部输入栏：回复目标提示条 + 原输入行（列布局） */
+.cd-reply-tag {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 13.46rpx;
+  padding: 9.62rpx 19.23rpx;
+  border-radius: 9.62rpx;
+  background: var(--sage-mist);
+}
+.cd-reply-tag-text { color: var(--sage-deep); font-size: 21.15rpx; font-weight: 700; }
+.cd-reply-tag-close { color: var(--muted); font-size: 30.77rpx; line-height: 1; padding: 0 5.77rpx; }
+.cd-bar-row { display: flex; align-items: center; gap: 15.38rpx; }
+/* 原生 input 的 flex:1 在部分基础库不生效，外包一层 view 撑满剩余宽度；flex 用长写法防个别环境不生效 */
+.cd-input-wrap {
   min-width: 0;
-  flex: 1;
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 0%;
   height: 84.62rpx;
+}
+.cd-input {
+  width: 100%;
+  height: 100%;
   border-radius: 999rpx;
   padding: 0 25rpx;
   background: var(--cream-2);
@@ -132,5 +230,22 @@
   line-height: 1;
 }
 .cd-action-icon { font-size: 38.46rpx; line-height: 1; }
+/* 分享是原生 button：用元素+类选择器压过基础库默认按钮样式（同头像按钮修法），避免被撑宽推到最右 */
+button.cd-action.share {
+  display: flex;
+  width: 84.62rpx;
+  height: 84.62rpx;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  flex-shrink: 0;
+  line-height: 1;
+}
+/* 重置 button 默认样式：去掉 ::after 描边，分享箭头与 ♡/☆ 对齐 */
+.cd-action.share { font-size: inherit; }
+.cd-action.share::after { border: none; }
+.cd-action.share .cd-action-icon { font-size: 34rpx; transform: translateY(2rpx); }
 .cd-action.active { color: #C86657; }
 .cd-action.collect.active { color: #B5813B; }

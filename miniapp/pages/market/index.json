@@ -1,1 +1,8 @@
-{ "navigationBarTitleText": "商品广场" }
+{
+  "navigationStyle": "custom",
+  "disableScroll": false,
+  "navigationBarTitleText": "商品广场",
+  "usingComponents": {
+    "tuge-overlay": "/components/tuge-overlay/index"
+  }
+}

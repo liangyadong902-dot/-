@@ -1,5 +1,6 @@
 const data = require('./tuge-data')
 const markdown = require('./markdown')
+const { resolveMedia } = require('./request')
 const {
   AI_GREET,
   DEMO_SMS,
@@ -18,7 +19,16 @@ const TABS = [
   { key: 'mine', path: '/pages/mine/index', text: '我的' },
 ]
 
+// 心情开箱：选心情 → 推送匹配盲盒 → 一键开箱（复用 GET /boxes?mood 与 POST /mood-logs）
+const MOOD_PICKS = [
+  { key: 'happy', emoji: '😄', label: '开心', line: '心情正好，趁兴出发' },
+  { key: 'emo', emoji: '😮‍💨', label: 'emo', line: '有点丧？交给山野治愈' },
+  { key: 'bored', emoji: '🥱', label: '无聊', line: '无聊预警，来点新鲜感' },
+  { key: 'curious', emoji: '🌫️', label: '迷茫', line: '有些迷茫？让旅途给答案' },
+]
+
 let boxes = []
+let searchResults = []
 let badgeCatalog = []
 let badgeTotal = 0
 let banners = []
@@ -26,6 +36,10 @@ let personalityQuestions = []
 let aiConfig = { greet: AI_GREET, quickQuestions: [] }
 let contentLoaded = false
 let contentError = ''
+let moodPool = []
+let moodPick = ''
+let moodPickIndex = 0
+let moodPickLoading = false
 
 const listeners = []
 let payTimer = null
@@ -47,7 +61,7 @@ const ui = {
   refund: false,
   unboxStep: 'confirm',
   drawAnimating: false,
-  drawStatusText: '正在验证价值保底',
+  drawStatusText: '正在验证订单信息',
   toast: '',
   toastShow: false,
   loginErr: '',
@@ -59,6 +73,8 @@ const ui = {
   payQrCode: '',
   payMock: false,
   searchKeyword: '',
+  searchActive: false,
+  searching: false,
   chatAnchor: 'chat-end',
   testResult: false,
   diaryLoading: false,
@@ -78,7 +94,8 @@ let avatarSrc = ''
 let avatarErrorTried = false
 
 function isHttpsAvatar(url) {
-  return typeof url === 'string' && /^https:\/\//.test(url)
+  // 社区头像需要在服务器间共享：接受 http(s) 绝对地址（本地环境为 http）
+  return typeof url === 'string' && /^https?:\/\//.test(url)
 }
 
 function isDefaultWechatAvatar(url) {
@@ -296,6 +313,10 @@ function loadState() {
   if (!state.user) state.user = { phone: '', nickname: '', channel: '', wxName: '' }
   if (!Array.isArray(state.orders)) state.orders = []
   if (!Array.isArray(state.refunds)) state.refunds = []
+  if (!MOODS.some((item) => item.key === state.mood)) state.mood = 'all'
+  if (state.category !== 'all' && !CATEGORIES.some((item) => item.key === state.category)) {
+    state.category = 'nearby'
+  }
   state.loggedIn = !!wx.getStorageSync('token')
   if (!state.loggedIn) {
     state.orders = []
@@ -452,8 +473,7 @@ function specialPager() {
 
 function specialDescText(item) {
   if (!item) return ''
-  const ratio = Math.round(item.guarantee / item.price * 100)
-  return item.desc + '\n票面保底 ' + ratio + '%'
+  return item.desc
 }
 
 function orderStatusLabel(o) {
@@ -492,36 +512,19 @@ function pendingPayCount() {
 function mineMenu() {
   const pending = pendingPayCount()
   const logged = isLoggedIn()
-  const rows = [
-    {
-      key: 'orders',
-      action: 'orders',
-      b: '我的订单',
-      small: logged ? (pending ? pending + ' 笔待支付 ›' : '全部 / 待支付 / 退款 ›') : '登录后查看 ›',
-    },
-  ]
-  if (logged) {
-    rows.push({ key: 'stats', action: 'stats', b: '资产详情', small: '目的地 / 消费 / 日记 ›' })
-    rows.push({ key: 'edit', action: 'edit', b: '编辑资料', small: '昵称 / 头像 ›' })
-    rows.push({ key: 'trips', action: 'trips', b: '我的行程', small: '已开盒线路与攻略 ›' })
-    rows.push({ key: 'checkins', action: 'checkins', b: '我的打卡', small: '照片 / 海报 / 点赞 ›' })
-    rows.push({ key: 'collections', action: 'collections', b: '收藏帖子', small: '保存的社区灵感 ›' })
-    rows.push({ key: 'achievements', action: 'achievements', b: '行为成就', small: '查看解锁进度 ›' })
-  } else {
-    rows.push({ key: 'login', action: 'login', b: '登录 / 注册', small: '手机验证码或微信 ›' })
-  }
-  rows.push({
-    key: 'badges',
-    action: 'badges',
-    b: '徽章图鉴',
-    small: logged && stats
-      ? stats.badgeUnlocked + ' / ' + stats.badgeTotal + ' ›'
-      : '登录后同步 ›',
-  })
-  if (logged) {
-    rows.push({ key: 'logout', action: 'logout', b: '退出登录', small: '重新登录后从后端恢复 ›' })
-  }
-  return rows
+  return [
+    { key: 'trips', group: 'journey', action: 'trips', b: '我的行程', small: logged ? ((stats ? stats.tripCount : 0) + ' 次出行 ›') : '登录后查看 ›' },
+    { key: 'orders', group: 'journey', action: 'orders', b: '我的订单', small: logged ? (pending ? pending + ' 笔待支付 ›' : '查看全部 ›') : '登录后查看 ›' },
+    { key: 'collections', group: 'content', action: 'collections', b: '我的收藏', small: '旅途笔记 ›' },
+    { key: 'badges', group: 'content', action: 'badges', b: '旅行图鉴', small: logged && stats ? stats.badgeUnlocked + ' / ' + stats.badgeTotal + ' ›' : '登录后同步 ›' },
+  ].concat(logged
+    ? [
+      { key: 'edit', group: 'account', action: 'edit', b: '编辑资料', small: '昵称 / 城市 / 头像 ›' },
+      { key: 'stats', group: 'account', action: 'stats', b: '资产详情', small: '消费 / 公益 / 日记 ›' },
+      { key: 'achievements', group: 'account', action: 'achievements', b: '行为成就', small: '查看解锁进度 ›' },
+      { key: 'logout', group: 'account', action: 'logout', b: '退出登录', small: '重新登录后从后端恢复 ›' },
+    ]
+    : [{ key: 'login', group: 'account', action: 'login', b: '登录 / 注册', small: '手机验证码或微信 ›' }])
 }
 
 function currentTrip() {
@@ -529,7 +532,7 @@ function currentTrip() {
 }
 
 function snapshot() {
-  const item = specialItem()
+  const item = specialItem() || null
   const list = validTrips()
   const logged = isLoggedIn()
   const u = state.user || {}
@@ -541,6 +544,7 @@ function snapshot() {
   const testResult = state.personality
     ? state.personality
     : { mark: '', name: '', desc: '', recommend: '' }
+  const mineRows = mineMenu()
   return {
     moods: MOODS,
     categories: CATEGORIES,
@@ -548,15 +552,35 @@ function snapshot() {
     refundReasons: REFUND_REASONS,
     mood: state.mood,
     category: state.category,
-    products: products(),
-    productsEmpty: !products().length,
+    moodPickOptions: MOOD_PICKS,
+    moodPick,
+    moodPickLine: (moodPickItem() || {}).line || '',
+    moodPickLoading,
+    moodPickEmpty: !!moodPick && !moodPickLoading && !moodPool.length,
+    moodPickBox: (function () {
+      const b = moodPickBox()
+      if (!b) return null
+      return {
+        id: b.id,
+        name: b.name,
+        desc: b.desc,
+        price: b.price,
+        guarantee: b.guarantee,
+        ratio: b.price ? Math.round(b.guarantee / b.price * 100) : 100,
+        img: b.img,
+      }
+    })(),
+    products: ui.searchActive ? searchResults : products(),
+    productsEmpty: !(ui.searchActive ? searchResults : products()).length,
     contentLoaded,
     contentError,
+    searchActive: ui.searchActive,
+    searching: ui.searching,
+    searchKeyword: ui.searchKeyword,
     special: item,
     specialName: splitTitle(item && item.name),
     specialDesc: specialDescText(item),
     specialPager: specialPager(),
-    searchKeyword: ui.searchKeyword,
     loggedIn: logged,
     mineNick: logged ? (u.nickname || '旅行探险家') : '未登录',
     mineAvatar: logged ? resolvedAvatar() : '',
@@ -570,7 +594,10 @@ function snapshot() {
     statSaved: logged && stats ? ('¥' + stats.savedTotal) : '¥—',
     statLevel: logged && stats ? ('Lv.' + stats.levelNo) : '—',
     statWelfare: logged && stats ? (stats.welfareKm + ' km') : '—',
-    mineMenu: mineMenu(),
+    mineMenu: mineRows,
+    mineJourneyMenu: mineRows.filter((row) => row.group === 'journey'),
+    mineContentMenu: mineRows.filter((row) => row.group === 'content'),
+    mineAccountMenu: mineRows.filter((row) => row.group === 'account'),
     trips: list,
     tripsEmpty: !list.length,
     tripCountDisplay: logged && stats ? (stats.tripCount + ' 次出行') : (logged ? '—' : '登录后查看'),
@@ -695,6 +722,10 @@ function switchNav(tabKey) {
     wx.navigateTo({ url: '/pages/badges/index' })
     return
   }
+  if (tabKey === 'trips') {
+    wx.navigateTo({ url: '/pages/trips/index' })
+    return
+  }
   const tab = TABS.find((t) => t.key === tabKey)
   if (!tab) return
   wx.switchTab({ url: tab.path })
@@ -711,12 +742,14 @@ function openCurrentSpecial() {
 }
 
 function filterCategory(cat) {
+  exitSearch()
   state.category = cat
   emit()
   hydrateRemote({ category: cat === 'all' ? undefined : cat, mood: state.mood === 'all' ? undefined : state.mood })
 }
 
 function filterMood(mood) {
+  exitSearch()
   state.mood = mood
   emit()
   if (mood && mood !== 'all') {
@@ -728,6 +761,58 @@ function filterMood(mood) {
   } else {
     hydrateRemote({ category: state.category === 'all' ? undefined : state.category })
   }
+}
+
+function moodPickItem() {
+  return MOOD_PICKS.find((item) => item.key === moodPick) || null
+}
+
+function moodPickBox() {
+  return moodPool[moodPickIndex] || null
+}
+
+async function pickMood(key) {
+  if (!MOOD_PICKS.some((item) => item.key === key)) return
+  // 重复点击同一心情时当作“换一个”，减少一次请求
+  if (moodPick === key && moodPool.length > 1) {
+    rotateMoodPick()
+    return
+  }
+  moodPick = key
+  moodPickIndex = 0
+  moodPool = []
+  moodPickLoading = true
+  emit()
+  try {
+    const api = require('../services/api')
+    api.createMoodLog(key).catch(() => {})
+    const list = normalizeBoxList(await api.listBoxes({ mood: key, page: 1, pageSize: 10 }))
+    moodPool = list
+    // 随机起点，让每次心情推送更有“盲”感
+    moodPickIndex = list.length ? Math.floor(Math.random() * list.length) : 0
+  } catch (e) {
+    moodPool = []
+    moodPickIndex = 0
+  } finally {
+    moodPickLoading = false
+    emit()
+  }
+}
+
+function rotateMoodPick() {
+  if (!moodPool.length) return
+  moodPickIndex = (moodPickIndex + 1) % moodPool.length
+  emit()
+}
+
+function openMoodPick() {
+  const box = moodPickBox()
+  if (!box) return
+  try {
+    const api = require('../services/api')
+    api.createMoodLog(moodPick, numericId(box.id)).catch(() => {})
+  } catch (e) {}
+  openUnboxModal(box.id)
 }
 
 function handleBanner(item) {
@@ -747,7 +832,48 @@ function handleBanner(item) {
 }
 
 function filterCategoryAll() {
+  exitSearch()
   state.category = 'all'
+  emit()
+  hydrateRemote({ mood: state.mood === 'all' ? undefined : state.mood })
+}
+
+function onSearchInput(value) {
+  ui.searchKeyword = String(value || '')
+  emit()
+}
+
+function exitSearch() {
+  ui.searchActive = false
+  searchResults = []
+}
+
+async function submitSearch() {
+  const keyword = (ui.searchKeyword || '').trim()
+  if (!keyword) {
+    clearSearch()
+    return
+  }
+  ui.searching = true
+  emit()
+  try {
+    const api = require('../services/api')
+    const result = await api.listBoxes({ keyword, page: 1, pageSize: 20 })
+    searchResults = normalizeBoxList(result)
+    ui.searchActive = true
+  } catch (e) {
+    searchResults = []
+    ui.searchActive = true
+    showDemoToast('搜索失败，请稍后重试')
+  } finally {
+    ui.searching = false
+    emit()
+  }
+}
+
+function clearSearch() {
+  ui.searchKeyword = ''
+  exitSearch()
   emit()
 }
 
@@ -859,10 +985,15 @@ async function submitWxLogin(chosenAvatar) {
     let info = wx.getStorageSync('wechatProfile') || {}
     if (picked) {
       avatarErrorTried = false
-      const saved = await persistAvatar(picked)
-      info.avatarUrl = saved || picked
-      avatarSrc = info.avatarUrl
-      rememberAvatarPath(info.avatarUrl)
+      // 上传服务器拿可共享 URL（社区里别人看到的是它）；本机显示用本地副本，避免真机直连图片失败
+      let uploaded = ''
+      if (/^(wxfile:|file:|http:|https:)/.test(picked) && picked.indexOf('data:image/') !== 0) {
+        try { const up = await api.uploadImage(picked); uploaded = (up && up.url) || '' } catch (e) {}
+      }
+      const localCopy = persistAvatarSync(picked)
+      info.avatarUrl = uploaded || localCopy || picked
+      avatarSrc = localCopy || info.avatarUrl
+      rememberAvatarPath(localCopy || info.avatarUrl)
       wx.setStorageSync('wechatProfile', info)
     } else if (isUsableAvatar(info.avatarUrl)) {
       info.avatarUrl = await persistAvatar(info.avatarUrl) || info.avatarUrl
@@ -919,9 +1050,26 @@ async function applyChosenAvatar(src) {
   const picked = avatarFromEvent(src)
   if (!picked) return
   avatarErrorTried = false
-  const path = await persistAvatar(picked)
-  rememberAvatarPath(path || picked)
-  avatarSrc = path || picked
+  // 上传服务器给社区共享；本机显示用本地副本，真机上不依赖网络加载
+  let uploaded = ''
+  if (/^(wxfile:|file:|http:|https:)/.test(picked) && picked.indexOf('data:image/') !== 0) {
+    try { const up = await api.uploadImage(picked); uploaded = (up && up.url) || '' } catch (e) {}
+  }
+  const localCopy = persistAvatarSync(picked)
+  const path = uploaded || localCopy || picked
+  rememberAvatarPath(localCopy || path)
+  avatarSrc = localCopy || path
+  // 已登录且上传成功则同步到后端资料，社区立即生效
+  if (uploaded && wx.getStorageSync('token')) {
+    const api = require('../services/api')
+    api.updateProfile({ avatarUrl: uploaded }).then((user) => {
+      if (user && user.avatarUrl) {
+        state.user = Object.assign({}, state.user, { avatarUrl: user.avatarUrl })
+        wx.setStorageSync('user', state.user)
+        emit()
+      }
+    }).catch(() => {})
+  }
   saveState()
   emit()
 }
@@ -1034,21 +1182,17 @@ async function confirmSandboxPay() {
   try {
     const api = require('../services/api')
     const payment = await api.payOrder(currentOrder.no)
+    if (!payment || payment.mock !== true) {
+      showDemoToast('当前环境未开启模拟支付')
+      return
+    }
     currentOrder = { ...currentOrder, payUrl: payment && payment.payUrl, payQrCode: payment && (payment.qrCodeBase64 || payment.qrCodeUrl), payMock: payment && payment.mock === true }
     const index = state.orders.findIndex((order) => order.no === currentOrder.no)
     if (index >= 0) state.orders[index] = currentOrder
     saveState()
-    if (currentOrder.payMock) {
-      await refreshPaidOrder()
-    } else {
-      ui.payUrl = currentOrder.payUrl || ''
-      ui.payQrCode = currentOrder.payQrCode || ''
-      ui.payMock = false
-      emit()
-      startPaymentPolling()
-    }
+    await refreshPaidOrder()
   } catch (e) {
-    showDemoToast('无法创建支付宝订单，请稍后重试')
+    showDemoToast('模拟支付失败，请稍后重试')
   }
 }
 
@@ -1086,10 +1230,10 @@ function startPaymentPolling() {
 function runRemoteUnboxResult() {
   ui.unboxStep = 'drawing'
   ui.drawAnimating = true
-  ui.drawStatusText = '正在验证价值保底'
+  ui.drawStatusText = '正在验证订单信息'
   ui.unbox = true
   afterUi()
-  const statuses = ['正在验证价值保底', '正在摇匀候选目的地', '正在匹配你的主题线路', '路线卡即将揭晓']
+  const statuses = ['正在验证订单信息', '正在摇匀候选目的地', '正在匹配你的主题线路', '路线卡即将揭晓']
   let statusIndex = 0
   clearInterval(drawStatusTimer)
   drawStatusTimer = setInterval(() => {
@@ -1108,7 +1252,7 @@ function runRemoteUnboxResult() {
 
 function openUnboxModal(boxId) {
   if (!requireLogin({ type: 'unbox', boxId })) return
-  currentBox = findBox(boxId) || boxes[0]
+  currentBox = findBox(boxId) || moodPool.find((b) => b.id === boxId) || boxes[0]
   ui.unboxStep = 'confirm'
   ui.unbox = true
   afterUi()
@@ -1350,27 +1494,69 @@ function onAiHistRailClick() {
   toggleAiHistory()
 }
 
-function openAiChat(id) {
+async function openAiChat(id) {
   state.aiCurrentId = id
   saveState()
   emit()
+  if (!state.loggedIn) return
+  const session = state.aiSessions.find((s) => s.id === id)
+  if (!session || session.loaded) return
+  try {
+    const api = require('../services/api')
+    const history = await api.aiConversationMessages(id, { limit: 50 })
+    session.messages = [{ role: 'bot', text: aiConfig.greet }].concat((history || []).map((message) => ({
+      role: message.role === 'assistant' ? 'bot' : 'user',
+      text: message.content,
+      fallback: message.fallback === true,
+    })))
+    session.loaded = true
+    saveState()
+    emit()
+  } catch (e) {
+    showDemoToast('会话加载失败，请重试')
+  }
 }
 
-function newAiChat() {
-  if (state.loggedIn) {
-    showDemoToast('当前账号保留一个连续对话')
+async function newAiChat() {
+  // 当前会话还没有用户消息时直接复用（清屏回到问候语），
+  // 避免反复点“＋ 新对话”在服务端堆积一堆空的“新对话”
+  const cur = currentAiSession()
+  if (cur && !(cur.messages || []).some((m) => m.role === 'user')) {
+    cur.title = '新对话'
+    cur.time = '刚刚'
+    cur.loaded = true
+    cur.messages = [{ role: 'bot', text: aiConfig.greet || AI_GREET }]
+    state.aiCurrentId = cur.id
+    saveState()
+    emit()
     return
   }
-  const empty = state.aiSessions.find((s) => s.title === '新对话' && s.messages.length <= 1)
-  if (empty) {
-    openAiChat(empty.id)
+  if (!state.loggedIn) {
+    const ses = blankAiSession()
+    state.aiSessions.push(ses)
+    state.aiCurrentId = ses.id
+    saveState()
+    emit()
     return
   }
-  const ses = blankAiSession()
-  state.aiSessions.push(ses)
-  state.aiCurrentId = ses.id
-  saveState()
-  emit()
+  try {
+    const api = require('../services/api')
+    const created = await api.createAiConversation()
+    const ses = {
+      id: created.id,
+      title: '新对话',
+      time: '刚刚',
+      messageCount: 0,
+      loaded: true,
+      messages: [{ role: 'bot', text: aiConfig.greet || AI_GREET }],
+    }
+    state.aiSessions.push(ses)
+    state.aiCurrentId = ses.id
+    saveState()
+    emit()
+  } catch (e) {
+    showDemoToast('新对话创建失败')
+  }
 }
 
 function persistAiMessage(role, text, recIds, sid) {
@@ -1413,7 +1599,25 @@ function typeAiMessage(text, recIds, sid) {
 
 async function sendUserMessage(text, viaQuick) {
   if (aiBusy || !text) return
-  const sid = state.aiCurrentId
+  let sid = state.aiCurrentId
+  // 会话 id 必须属于当前登录用户，切换账号后残留的旧会话会被后端拒绝（403 无权访问该会话）
+  const uid = state.loggedIn ? (wx.getStorageSync('user') || {}).id : null
+  const sidOwned = (s) => !!s && !!uid && (s === 'user:' + uid || s.indexOf('user:' + uid + ':') === 0)
+  if (state.loggedIn && !sidOwned(sid)) {
+    try {
+      const api = require('../services/api')
+      const created = await api.createAiConversation()
+      const current = currentAiSession() || blankAiSession()
+      current.id = created.id
+      state.aiSessions = (state.aiSessions || []).filter((s) => s.id === created.id || s.messages.length > 1)
+      if (!state.aiSessions.some((s) => s.id === created.id)) state.aiSessions.push(current)
+      state.aiCurrentId = created.id
+      sid = created.id
+    } catch (e) {
+      showDemoToast('会话创建失败')
+      return
+    }
+  }
   aiBusy = true
   persistAiMessage('user', text, null, sid)
   emit()
@@ -1422,14 +1626,35 @@ async function sendUserMessage(text, viaQuick) {
     const reply = await api.aiChat({
       text,
       viaQuick: viaQuick === true,
-      sessionId: state.loggedIn ? undefined : (state.aiGuestSessionId || undefined),
+      sessionId: state.loggedIn ? sid : (state.aiGuestSessionId || undefined),
     })
     if (!state.loggedIn && reply.sessionId) state.aiGuestSessionId = reply.sessionId
     const ids = (reply.recommendBoxes || []).map((box) => 'box_' + box.id)
     await typeAiMessage(reply.content, ids, sid)
     if (reply.fallback) showDemoToast('小途已切换到本地旅行建议')
   } catch (e) {
-    persistAiMessage('bot', '消息没有送达，请稍后再试。', null, sid)
+    // 会话失效（无权访问/不存在）时自动建新会话重试一次
+    const msg = (e && e.message) || ''
+    let recovered = false
+    if (state.loggedIn && (msg.indexOf('无权访问该会话') >= 0 || msg.indexOf('会话不存在') >= 0)) {
+      try {
+        const api = require('../services/api')
+        const created = await api.createAiConversation()
+        const cur = state.aiSessions.find((s) => s.id === sid) || currentAiSession() || blankAiSession()
+        cur.id = created.id
+        state.aiSessions = (state.aiSessions || []).filter((s) => s.id === created.id || s.messages.length > 1)
+        if (!state.aiSessions.some((s) => s.id === created.id)) state.aiSessions.push(cur)
+        state.aiCurrentId = created.id
+        sid = created.id
+        const retry = await api.aiChat({ text, viaQuick: viaQuick === true, sessionId: sid })
+        const ids = (retry.recommendBoxes || []).map((box) => 'box_' + box.id)
+        await typeAiMessage(retry.content, ids, sid)
+        recovered = true
+      } catch (retryError) {
+        recovered = false
+      }
+    }
+    if (!recovered) persistAiMessage('bot', '消息没有送达，请稍后再试。', null, sid)
   } finally {
     aiRendering = false
     aiBusy = false
@@ -1451,19 +1676,32 @@ async function hydrateAi() {
       quickQuestions: (config && config.quickQuestions) || [],
     }
     if (state.loggedIn) {
-      const history = await api.aiMessages({ limit: 16 })
-      const session = {
-        id: 'server_user',
-        title: '最近对话',
-        time: '已同步',
-        messages: [{ role: 'bot', text: aiConfig.greet }].concat((history || []).map((message) => ({
-          role: message.role === 'assistant' ? 'bot' : 'user',
-          text: message.content,
-          fallback: message.fallback === true,
-        }))),
+      const conversations = await api.aiConversations()
+      state.aiSessions = (conversations || []).slice().reverse().map((item) => ({
+        id: item.id,
+        title: item.title || '新对话',
+        time: item.updatedAt ? String(item.updatedAt).slice(5, 16) : '已同步',
+        preview: item.preview || '',
+        messageCount: item.messageCount || 0,
+        loaded: false,
+        messages: [],
+      }))
+      if (!state.aiSessions.length) {
+        const created = await api.createAiConversation()
+        state.aiSessions = [{ id: created.id, title: '新对话', time: '刚刚', messageCount: 0, loaded: true, messages: [{ role: 'bot', text: aiConfig.greet }] }]
+        state.aiCurrentId = created.id
+      } else {
+        // 恢复时优先落回最近一个有消息的会话；空的“新对话”不作为默认会话，
+        // 否则重新打开小程序看起来就像聊天记录丢了
+        const saved = state.aiSessions.find((s) => s.id === state.aiCurrentId)
+        const withMessages = state.aiSessions.filter((s) => (s.messageCount || 0) > 0)
+        if (saved && ((saved.messageCount || 0) > 0 || !withMessages.length)) {
+          state.aiCurrentId = saved.id
+        } else {
+          state.aiCurrentId = (withMessages.length ? withMessages[withMessages.length - 1] : state.aiSessions[state.aiSessions.length - 1]).id
+        }
       }
-      state.aiSessions = [session]
-      state.aiCurrentId = session.id
+      await openAiChat(state.aiCurrentId)
     } else if (state.aiSessions.length === 1 && state.aiSessions[0].messages.length <= 1) {
       state.aiSessions[0].messages = [{ role: 'bot', text: aiConfig.greet }]
     }
@@ -1476,15 +1714,17 @@ async function hydrateAi() {
 }
 
 function onMineMenu(action) {
-  if (action === 'orders') openOrderSheet()
+  if (action === 'orders') wx.navigateTo({ url: '/pages/orders/index' })
   else if (action === 'login') openLogin({ type: 'mine' })
   else if (action === 'stats') wx.navigateTo({ url: '/pages/mine/stats-detail' })
   else if (action === 'edit') openProfileEditor()
   else if (action === 'badges') switchNav('badges')
-  else if (action === 'trips') wx.switchTab({ url: '/pages/trips/index' })
+  else if (action === 'trips') wx.navigateTo({ url: '/pages/trips/index' })
   else if (action === 'checkins') wx.navigateTo({ url: '/pages/checkin/index' })
   else if (action === 'collections') wx.navigateTo({ url: '/pages/community/collections' })
   else if (action === 'achievements') wx.navigateTo({ url: '/pages/achievements/index' })
+  else if (action === 'points') wx.navigateTo({ url: '/pages/points/index' })
+  else if (action === 'coupons') wx.navigateTo({ url: '/pages/coupon/index' })
   else if (action === 'logout') logoutUser()
 }
 
@@ -1552,15 +1792,15 @@ async function submitProfile() {
     saveState()
     ui.profile = false
     showDemoToast('资料已保存')
-    emit()
+    afterUi()
   } catch (e) {
     showDemoToast((e && e.message) || '资料保存失败')
   }
 }
 
-function applyRemoteBoxes(list) {
-  if (!Array.isArray(list)) return
-  boxes = list.map((item, i) => ({
+function normalizeBoxList(result) {
+  const list = Array.isArray(result) ? result : (result && Array.isArray(result.list) ? result.list : [])
+  return list.map((item, i) => ({
     id: 'box_' + (item.id != null ? item.id : i),
     rank: item.rankTag || item.tag || '',
     name: item.name || '',
@@ -1569,8 +1809,14 @@ function applyRemoteBoxes(list) {
     price: Number(item.price || 0),
     guarantee: Number(item.minValue || 0),
     moods: Array.isArray(item.moods) ? item.moods : [],
-    img: item.coverUrl || '',
+    // 管理端本地上传的封面是 /uploads/... 相对路径，须经 resolveMedia 拼接后端地址
+    img: resolveMedia(item.coverUrl),
   }))
+}
+
+function applyRemoteBoxes(result) {
+  if (!result) return
+  boxes = normalizeBoxList(result)
   if (specialIndex >= boxes.length) specialIndex = Math.max(0, Math.min(1, boxes.length - 1))
   contentLoaded = true
   contentError = ''
@@ -1658,7 +1904,7 @@ function mapRemoteTrip(item) {
     dest: item.location,
     val: Number(item.valueCent || 0) / 100,
     price: Number(item.priceCent || 0) / 100,
-    img: findBox('box_' + item.boxId)?.img || '',
+    img: resolveMedia(item.boxCoverUrl) || findBox('box_' + item.boxId)?.img || '',
     date: item.openedDate || '',
     highlight: item.highlight || '',
     includeList: Array.isArray(item.includeList) ? item.includeList : [],
@@ -1689,7 +1935,7 @@ function hydrateTransactions() {
         nickname: user.nickname || '途友',
         wxName: user.nickname || '',
         channel: user.registerChannel === 'wechat' ? '微信' : '手机',
-        avatarUrl: keepAvatar(user.avatarUrl || cachedProfile.avatarUrl),
+        avatarUrl: keepAvatar(resolveMedia(user.avatarUrl) || cachedProfile.avatarUrl),
         gender: user.gender == null ? 0 : user.gender,
         city: user.city || '',
       }
@@ -1794,6 +2040,18 @@ function hydrateRemote(params) {
   }
 }
 
+function refreshHome() {
+  if (!contentLoaded || contentError) {
+    contentLoaded = false
+    contentError = ''
+    emit()
+  }
+  const params = {}
+  if (state.category && state.category !== 'all') params.category = state.category
+  if (state.mood && state.mood !== 'all') params.mood = state.mood
+  hydrateRemote(params)
+}
+
 function init() {
   try {
     const cached = wx.getStorageSync('wechatProfile') || {}
@@ -1833,12 +2091,19 @@ module.exports = {
   init,
   subscribe,
   snapshot,
+  refreshHome,
   setSpecial,
   openCurrentSpecial,
   filterCategory,
   filterMood,
+  pickMood,
+  rotateMoodPick,
+  openMoodPick,
   handleBanner,
   filterCategoryAll,
+  onSearchInput,
+  submitSearch,
+  clearSearch,
   openUnboxModal,
   closeModal,
   goCheckout,

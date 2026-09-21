@@ -1,0 +1,11 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="hint">加载中...</view>
+  <view wx:elif="{{error}}" class="hint" bindtap="retry">{{error}}</view>
+  <view wx:elif="{{item}}" class="card">
+    <view class="name">{{item.prizeName}}</view>
+    <view class="row">状态 {{item.status === 'granted' ? '已发放' : item.status === 'failed' ? '发放失败' : item.status}}</view>
+    <view wx:if="{{item.status === 'failed'}}" class="row">失败原因：{{item.failureReason || '奖品发放失败，请联系客服'}}</view>
+    <view wx:if="{{item.status === 'granted'}}" class="row">发放时间 {{item.grantedAt}}</view>
+    <button wx:if="{{item.status === 'granted' && item.userCouponId}}" class="btn" bindtap="openCoupon">进入卡包查看</button>
+  </view>
+</view>

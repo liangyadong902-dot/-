@@ -13,7 +13,12 @@ module.exports = {
   myPersonality: () => request.get('/personality/my-result', undefined, { silent: true }),
   aiConfig: () => request.get('/ai/config', undefined, { silent: true }),
   aiMessages: (params) => request.get('/ai/messages', params, { silent: true }),
-  aiChat: (data) => request.post('/ai/chat', data, { silent: true }),
+  aiConversations: () => request.get('/ai/conversations', undefined, { silent: true }),
+  createAiConversation: () => request.post('/ai/conversations', {}, { silent: true }),
+  aiConversationMessages: (id, params) => request.get('/ai/conversations/' + encodeURIComponent(id) + '/messages', params, { silent: true }),
+  // Provider responses can be slower than ordinary page requests. Keep the
+  // request open long enough for the backend's bounded provider/fallback path.
+  aiChat: (data) => request.post('/ai/chat', data, { silent: true, timeout: 60000 }),
   listBoxes: (params) => request.get('/boxes', params, { silent: true }),
   listBanners: () => request.get('/banners', undefined, { silent: true }),
   listBadges: () => request.get('/badges', undefined, { silent: true }),
@@ -69,6 +74,7 @@ module.exports = {
   updateCartItem: (id, data) => request.patch('/cart/items/' + id, data),
   removeCartItem: (id) => request.delete('/cart/items/' + id),
   checkoutCart: (itemIds) => request.post('/cart/checkout', { itemIds }),
+  updateProfile: (fields) => request.put('/me', fields),
   uploadImage: (filePath) => new Promise((resolve, reject) => {
     const app = getApp()
     const baseUrl = (app && app.globalData && app.globalData.baseUrl) || require('../utils/constants').BASE_URL
@@ -81,13 +87,18 @@ module.exports = {
       success: (res) => {
         try {
           const body = JSON.parse(res.data || '{}')
-          if (body.code !== 0) return reject(new Error(body.message || '上传失败'))
+          if (res.statusCode === 401 || body.code === 401) {
+            wx.removeStorageSync('token')
+            wx.removeStorageSync('user')
+            return reject(new Error('请先登录'))
+          }
+          if (body.code !== 0) return reject(new Error(body.message || '图片上传失败'))
           const data = body.data || {}
           if (data.url && data.url.indexOf('/') === 0) data.url = baseUrl.replace(/\/api\/v1$/, '') + data.url
           resolve(data)
-        } catch (e) { reject(e) }
+        } catch (e) { reject(new Error('图片上传响应异常')) }
       },
-      fail: reject,
+      fail: (err) => reject(new Error((err && err.errMsg) || '图片上传失败')),
     })
   }),
 }

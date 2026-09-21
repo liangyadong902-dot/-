@@ -12,6 +12,7 @@ public class TripVO {
     private Long orderId;
     private Long boxId;
     private String boxName;
+    private String boxCoverUrl;
     private String boxCategory;
     private Integer priceCent;
     private String routeName;

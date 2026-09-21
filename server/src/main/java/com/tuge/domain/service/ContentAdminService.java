@@ -50,7 +50,7 @@ import java.util.Set;
 @Service
 public class ContentAdminService {
 
-    private static final Set<String> CATEGORIES = Set.of("nearby", "province", "cross", "theme");
+    private static final Set<String> CATEGORIES = Set.of("nearby", "province", "cross", "theme", "guide");
     private static final Set<String> MOODS = Set.of("happy", "emo", "bored", "curious");
     private static final Set<String> STATUSES = Set.of("on", "off");
     private static final Set<String> JUMP_TYPES = Set.of("none", "category", "box", "url");
@@ -383,13 +383,18 @@ public class ContentAdminService {
         route.setCategory(request.category());
         route.setLocation(request.destination().trim());
         route.setScene(request.scene() == null ? "" : request.scene());
+        route.setImageUrl(request.imageUrl() == null ? "" : request.imageUrl().trim());
         route.setValueCent(Money.cent(request.value()));
         route.setCostCent(request.cost() == null ? null : Money.cent(request.cost()));
         route.setBadgeId(request.badgeId());
         route.setHighlight(request.highlight() == null ? "" : request.highlight());
         route.setIncludeJson(writeJson(request.includes() == null ? List.of() : request.includes()));
         route.setGuideJson(writeJson(request.guide() == null ? Map.of() : request.guide()));
-        route.setGuideVersion(request.guideVersion() == null ? 1 : request.guideVersion());
+        if (request.guideVersion() != null) {
+            route.setGuideVersion(request.guideVersion());
+        } else if (route.getGuideVersion() == null) {
+            route.setGuideVersion(1);
+        }
         route.setMoodText(request.moodText() == null ? "" : request.moodText());
         route.setStatus(request.status() == null ? "on" : request.status());
     }
@@ -464,6 +469,7 @@ public class ContentAdminService {
         vo.setCategory(route.getCategory());
         vo.setDestination(route.getLocation());
         vo.setScene(route.getScene());
+        vo.setImageUrl(route.getImageUrl());
         vo.setValue(Money.yuan(route.getValueCent()));
         vo.setCost(route.getCostCent() == null ? null : Money.yuan(route.getCostCent()));
         vo.setBadgeId(route.getBadgeId());

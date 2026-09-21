@@ -1,0 +1,12 @@
+<view class="page">
+  <view wx:if="{{loading && !list.length}}" class="hint">加载中...</view>
+  <view wx:elif="{{error && !list.length}}" class="hint" bindtap="retry">{{error}}</view>
+  <view wx:elif="{{empty}}" class="hint">暂无积分明细</view>
+  <view wx:else class="list">
+    <view class="row" wx:for="{{list}}" wx:key="id">
+      <view class="left"><view class="desc">{{item.description || item.type}}</view><view class="time">{{item.createdAt}}</view></view>
+      <view class="amt {{item.change > 0 ? 'plus' : 'minus'}}">{{item.change > 0 ? '+' : ''}}{{item.change}}</view>
+    </view>
+    <view class="more" bindtap="more">{{hasMore ? '加载更多' : '没有更多了'}}</view>
+  </view>
+</view>

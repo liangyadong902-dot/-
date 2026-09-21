@@ -2,6 +2,14 @@ const api = require('../../services/api')
 
 const SAVED_KEY = 'tuge-saved-boxes'
 
+const CATEGORY_LABELS = {
+  nearby: '周边游',
+  province: '省内游',
+  cross: '跨省游',
+  theme: '主题专线',
+  guide: '纯攻略',
+}
+
 Page({
   data: { box: null, loading: true, error: '', saved: false },
   onLoad(options) { this.id = options.id; this.load() },
@@ -9,9 +17,18 @@ Page({
     try {
       const box = await api.getBox(this.id)
       box.gallery = box.imageUrls && box.imageUrls.length ? box.imageUrls : [box.coverUrl]
-      box.hasMultipleImages = box.gallery.length > 1
       box.guidePreview = box.guidePreview || {}
       box.includes = box.includes && box.includes.length ? box.includes : []
+      box.moods = Array.isArray(box.moods) ? box.moods : []
+      box.scenes = Array.isArray(box.scenes) ? box.scenes : []
+      box.tag = box.tag || CATEGORY_LABELS[box.category] || '旅行盲盒'
+      box.rankTag = box.rankTag || ''
+      const previewScenes = Array.isArray(box.guidePreview.sceneTags) ? box.guidePreview.sceneTags : []
+      box.sceneText = box.scenes.length ? box.scenes.join(' · ') : previewScenes.join(' · ')
+      box.guidePreviewText = box.guidePreview.summary || box.guidePreview.notice || ''
+      box.gallery = box.gallery.filter(Boolean)
+      if (!box.gallery.length) box.gallery = ['']
+      box.hasMultipleImages = box.gallery.length > 1
       box.ratePercent = Math.max(100, Math.round((Number(box.minValue || 0) / Number(box.price || 1)) * 100))
       const saved = (wx.getStorageSync(SAVED_KEY) || []).indexOf(String(this.id)) >= 0
       this.setData({ box, saved, loading: false, error: '' })

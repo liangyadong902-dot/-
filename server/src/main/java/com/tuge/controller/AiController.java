@@ -6,6 +6,7 @@ import com.tuge.domain.dto.AiChatRequest;
 import com.tuge.domain.service.AiChatService;
 import com.tuge.domain.service.AiConfigService;
 import com.tuge.domain.vo.AiConfigVO;
+import com.tuge.domain.vo.AiConversationVO;
 import com.tuge.domain.vo.AiReplyVO;
 import com.tuge.domain.vo.ChatMessageVO;
 import jakarta.validation.Valid;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -44,6 +46,23 @@ public class AiController {
     @GetMapping("/messages")
     public Result<List<ChatMessageVO>> messages(@RequestParam(defaultValue = "16") int limit) {
         return Result.success(chatService.messages(JwtContext.getUserId(), limit));
+    }
+
+    @GetMapping("/conversations")
+    public Result<List<AiConversationVO>> conversations() {
+        return Result.success(chatService.conversations(JwtContext.getUserId()));
+    }
+
+    @PostMapping("/conversations")
+    public Result<AiConversationVO> createConversation() {
+        String id = chatService.createConversation(JwtContext.getUserId());
+        return Result.success(new AiConversationVO(id, "新对话", "", null, 0));
+    }
+
+    @GetMapping("/conversations/{conversationId}/messages")
+    public Result<List<ChatMessageVO>> conversationMessages(@PathVariable String conversationId,
+                                                             @RequestParam(defaultValue = "50") int limit) {
+        return Result.success(chatService.messages(JwtContext.getUserId(), conversationId, limit));
     }
 
     @PostMapping("/chat")

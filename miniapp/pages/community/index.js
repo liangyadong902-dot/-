@@ -1,5 +1,6 @@
 const makePage = require('../../behaviors/tuge-page')
 const api = require('../../services/api')
+const { resolveMedia, fetchDisplayMediaList } = require('../../utils/request')
 
 const RATIOS = [1.26, 1.04, 1.42, 1.18, 1.34, 1.08]
 
@@ -9,7 +10,8 @@ function decoratePosts(list) {
     ratio: RATIOS[index % RATIOS.length],
     tagText: (post.topic && post.topic.name) || '旅途',
     authorMark: ((post.author && post.author.nickname) || '途').slice(0, 1),
-    cover: post.imageUrls && post.imageUrls.length ? post.imageUrls[0] : '',
+    authorAvatar: resolveMedia((post.author && post.author.avatarUrl) || ''),
+    cover: post.imageUrls && post.imageUrls.length ? resolveMedia(post.imageUrls[0]) : '',
   }))
 }
 
@@ -21,6 +23,9 @@ Page(makePage(2, {
     posts: [], topics: [], creators: [],
   },
   onLoad() { this.loadAll() },
+  onStoreShow() {
+    if (this.data.error || !this.data.posts.length) this.loadAll()
+  },
   onPullDownRefresh() { this.loadAll().finally(() => wx.stopPullDownRefresh()) },
   async loadAll() {
     const view = this.data.view
@@ -49,12 +54,14 @@ Page(makePage(2, {
               userId: user.userId,
               nickname: user.nickname || '途友',
               mark: (user.nickname || '途').slice(0, 1),
+              avatar: resolveMedia(user.avatarUrl || ''),
               bio: (item.postCount || 0) + ' 篇笔记 · ' + (item.checkinCount || 0) + ' 次打卡',
               followed: !!user.followed,
             }
           }),
           loading: false,
         })
+        this.hydrateCreatorsMedia()
         return
       }
       const postsRequest = view === 'collections'
@@ -68,9 +75,49 @@ Page(makePage(2, {
         (topics.list || []).map((item) => ({ key: 'topic-' + item.topicId, label: item.name, topicId: item.topicId }))
       )
       this.setData({ posts: decoratePosts(posts.list), categories, loading: false })
+      this.hydratePostsMedia()
     } catch (e) {
       this.setData({ loading: false, error: '社区暂时没有连上，稍后再试' })
     }
+  },
+  // 真机 image 渲染层加载不了明文 http 图片：先下载到本地临时文件再替换显示地址
+  async hydratePostsMedia() {
+    const view = this.data.view
+    const posts = this.data.posts
+    if (!posts.length) return
+    const urls = []
+    posts.forEach((post) => {
+      if (post.cover) urls.push(post.cover)
+      if (post.authorAvatar) urls.push(post.authorAvatar)
+    })
+    const resolved = await fetchDisplayMediaList(urls)
+    if (this.data.view !== view) return
+    const mapping = {}
+    urls.forEach((url, index) => { mapping[url] = resolved[index] })
+    const patch = {}
+    posts.forEach((post, index) => {
+      const cover = post.cover && mapping[post.cover]
+      const avatar = post.authorAvatar && mapping[post.authorAvatar]
+      if (cover && cover !== post.cover) patch['posts[' + index + '].cover'] = cover
+      if (avatar && avatar !== post.authorAvatar) patch['posts[' + index + '].authorAvatar'] = avatar
+    })
+    if (Object.keys(patch).length) this.setData(patch)
+  },
+  async hydrateCreatorsMedia() {
+    const view = this.data.view
+    const creators = this.data.creators
+    if (!creators.length) return
+    const urls = creators.map((item) => item.avatar).filter(Boolean)
+    const resolved = await fetchDisplayMediaList(urls)
+    if (this.data.view !== view) return
+    const mapping = {}
+    urls.forEach((url, index) => { mapping[url] = resolved[index] })
+    const patch = {}
+    creators.forEach((item, index) => {
+      const avatar = item.avatar && mapping[item.avatar]
+      if (avatar && avatar !== item.avatar) patch['creators[' + index + '].avatar'] = avatar
+    })
+    if (Object.keys(patch).length) this.setData(patch)
   },
   switchView(e) {
     const view = e.currentTarget.dataset.view

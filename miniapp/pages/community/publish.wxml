@@ -1,1 +1,126 @@
-<view class="publish-page"><view class="publish-head"><view class="publish-kicker">WRITE THE JOURNEY</view><view class="publish-title">把这次出发留给大家</view><view class="publish-hint">真实的路线、照片和感受，会成为下一位旅行者的参考。</view></view><view class="publish-form"><view class="field"><text>标题</text><input maxlength="30" placeholder="给这篇笔记一个标题" value="{{title}}" bindinput="inputTitle"/></view><view class="field"><text>正文</text><textarea maxlength="500" placeholder="说说这趟旅程吧…" value="{{content}}" bindinput="inputContent" auto-height="true"/></view><view class="field"><text>图片 {{images.length}}/9</text><view class="image-grid"><view wx:for="{{images}}" wx:key="*this" class="upload-image"><image src="{{item}}" mode="aspectFill"/><view class="remove-image" data-index="{{index}}" bindtap="removeImage">×</view></view><view wx:if="{{images.length < 9}}" class="add-image" bindtap="chooseImages">＋<text>添加图片</text></view></view></view><view class="field"><text>话题</text><scroll-view class="topic-scroll" scroll-x show-scrollbar="{{false}}"><view wx:for="{{topics}}" wx:key="topicId" class="topic-chip {{topicId === item.topicId ? 'active' : ''}}" data-id="{{item.topicId}}" data-name="{{item.name}}" bindtap="chooseTopic">#{{item.name}}</view></scroll-view></view><view class="field"><text>地点（可选）</text><input maxlength="100" placeholder="例如：吉安·渼陂古村" value="{{locationName}}" bindinput="inputLocation"/></view><view class="publish-note">提交后默认进入内容审核，审核通过后会公开展示。</view><button class="submit-button" bindtap="submit" loading="{{sending}}">{{sending ? '正在提交' : '提交笔记'}}</button><view wx:if="{{uploadProgress}}" class="upload-progress">{{uploadProgress}}</view></view></view>
+<view class="publish-page">
+  <view class="publish-nav" style="padding-top: {{statusBarHeight}}px;">
+    <view class="publish-nav-bar" style="height: {{navBarHeight}}px;">
+      <view class="publish-back" bindtap="goBack" hover-class="publish-back-hover" role="button" aria-label="返回">
+        <text class="publish-back-icon">←</text>
+      </view>
+      <text class="publish-nav-title">发布笔记</text>
+      <view class="publish-nav-space"></view>
+    </view>
+  </view>
+
+  <view class="publish-head">
+    <view class="publish-kicker">WRITE THE JOURNEY</view>
+    <view class="publish-title">把这次出发，留给大家</view>
+    <view class="publish-hint">真实的路线、照片和感受，会成为下一位旅行者的参考。</view>
+  </view>
+
+  <view class="publish-form">
+    <view class="publish-card">
+      <view class="field">
+        <view class="field-head">
+          <text class="field-label">标题</text>
+          <text class="field-count">{{title.length}}/30</text>
+        </view>
+        <input
+          class="title-input"
+          maxlength="30"
+          placeholder="给这篇笔记一个标题"
+          placeholder-class="field-placeholder"
+          value="{{title}}"
+          bindinput="inputTitle"
+        />
+      </view>
+
+      <view class="field field-last">
+        <view class="field-head">
+          <text class="field-label">正文</text>
+          <text class="field-count">{{content.length}}/500</text>
+        </view>
+        <textarea
+          class="content-input"
+          maxlength="500"
+          placeholder="记录路线、风景，或旅途中难忘的一刻…"
+          placeholder-class="field-placeholder"
+          value="{{content}}"
+          bindinput="inputContent"
+          show-confirm-bar="{{false}}"
+        />
+      </view>
+    </view>
+
+    <view class="publish-card media-card">
+      <view class="field-head media-head">
+        <view>
+          <text class="field-label">旅途照片</text>
+          <text class="field-tip">第一张图片将作为封面</text>
+        </view>
+        <text class="field-count">{{images.length}}/9</text>
+      </view>
+      <view class="image-grid">
+        <view wx:for="{{images}}" wx:key="*this" class="upload-image">
+          <image src="{{item}}" mode="aspectFill" />
+          <view wx:if="{{index === 0}}" class="cover-tag">封面</view>
+          <view class="remove-image" data-index="{{index}}" catchtap="removeImage">×</view>
+        </view>
+        <view wx:if="{{images.length < 9}}" class="add-image" bindtap="chooseImages">
+          <text class="add-icon">＋</text>
+          <text class="add-label">添加图片</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="publish-card meta-card">
+      <view class="field">
+        <view class="field-head">
+          <text class="field-label">选择话题</text>
+          <text class="field-optional">选填</text>
+        </view>
+        <scroll-view class="topic-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+          <view class="topic-list">
+            <view
+              wx:for="{{topics}}"
+              wx:key="topicId"
+              class="topic-chip {{topicId === item.topicId ? 'active' : ''}}"
+              data-id="{{item.topicId}}"
+              data-name="{{item.name}}"
+              bindtap="chooseTopic"
+            ># {{item.name}}</view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <view class="field field-last">
+        <view class="field-head">
+          <text class="field-label">旅途地点</text>
+          <text class="field-optional">选填</text>
+        </view>
+        <view class="location-input-wrap">
+          <text class="location-mark">⌖</text>
+          <input
+            class="location-input"
+            maxlength="100"
+            placeholder="例如：吉安 · 渼陂古村"
+            placeholder-class="field-placeholder"
+            value="{{locationName}}"
+            bindinput="inputLocation"
+          />
+        </view>
+      </view>
+    </view>
+
+    <view class="publish-note">
+      <view class="note-mark">✓</view>
+      <text>提交后将进入内容审核，审核通过后会在社区公开展示。</text>
+    </view>
+
+    <button
+      class="submit-button"
+      bindtap="submit"
+      loading="{{sending}}"
+      disabled="{{sending}}"
+      hover-class="submit-button-hover"
+    >{{sending ? '正在提交' : '发布旅途笔记'}}</button>
+    <view wx:if="{{uploadProgress}}" class="upload-progress">{{uploadProgress}}</view>
+  </view>
+</view>

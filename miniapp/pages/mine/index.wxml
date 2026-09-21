@@ -24,15 +24,35 @@
       <view class="stat-tile"><text class="strong">{{statWelfare}}</text><text class="span">公益里程</text></view>
     </view>
     <view wx:if="{{statsError}}" class="empty-hint">{{statsError}}</view>
-    <view class="menu-list">
-      <view class="menu-row" wx:for="{{mineMenu}}" wx:key="key" data-action="{{item.action}}" bindtap="onMenu">
-        <text class="b">{{item.b}}</text>
-        <text class="small">{{item.small}}</text>
+    <view class="mine-menu-groups">
+      <view class="mine-menu-group">
+        <view class="mine-section-label">旅程与订单</view>
+        <view class="menu-list">
+          <view class="menu-row" wx:for="{{mineJourneyMenu}}" wx:key="key" data-action="{{item.action}}" bindtap="onMenu">
+            <text class="b">{{item.b}}</text><text class="small">{{item.small}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="mine-menu-group">
+        <view class="mine-section-label">我的内容</view>
+        <view class="menu-list">
+          <view class="menu-row" wx:for="{{mineContentMenu}}" wx:key="key" data-action="{{item.action}}" bindtap="onMenu">
+            <text class="b">{{item.b}}</text><text class="small">{{item.small}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="mine-menu-group">
+        <view class="mine-section-label">账户与服务</view>
+        <view class="menu-list">
+          <view class="menu-row" wx:for="{{mineAccountMenu}}" wx:key="key" data-action="{{item.action}}" bindtap="onMenu">
+            <text class="b">{{item.b}}</text><text class="small">{{item.small}}</text>
+          </view>
+        </view>
       </view>
     </view>
     <view class="service-block">
-      <view class="h4">价值保底规则</view>
-      <view class="p">票面价值不低于售价 120%，符合保障规则可申请退换。</view>
+      <view class="h4">退换规则</view>
+      <view class="p">未出行且符合退换规则时，可在“我的订单”中申请退换。</view>
     </view>
     <view class="service-block">
       <view class="h4">AI 情绪匹配</view>

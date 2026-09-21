@@ -13,6 +13,7 @@ public class AdminRouteVO {
     private String category;
     private String destination;
     private String scene;
+    private String imageUrl;
     private Double value;
     private Double cost;
     private Long badgeId;

@@ -2,7 +2,7 @@
 
 > 版本：v1.0
 > 阶段：Phase 1
-> 更新时间：2026-09-18
+> 更新时间：2026-09-20
 > Timebox：1.5 周（10个工作日）
 
 ---
@@ -16,21 +16,21 @@
 | 交付物 | 说明 | 优先级 |
 |--------|------|--------|
 | 后端工程 `server/` | Spring Boot 3 + MyBatis-Plus，可直接启动 | P0 |
-| 数据库 40 张表 | `docs/schema.sql` 全部执行 | P0 |
+| 数据库 41 张表 | `docs/schema.sql` 全部执行 | P0 |
 | 种子数据 | `docs/seed.sql` A/B/C 三段全部导入 | P0 |
 | 管理端 `admin-web/` | Vue 3.5 + Element Plus，可登录 | P0 |
-| 小程序 `miniapp/` | 原生微信小程序，6个 tab 可切换 | P1 |
+| 小程序 `miniapp/` | 原生微信小程序，5 个 tab 可切换 | P1 |
 | 接口契约 `docs/openapi.yaml` | 覆盖全部 140 个接口 | P0 |
 | 冒烟测试通过 | `GET /api/v1/boxes` 返回 6 个盲盒 | P0 |
 
 ### 1.2 验收标准
 
-- [ ] `server/` 能启动，端口 8080
-- [ ] `mysql> show tables` 显示 40 张表
-- [ ] `GET http://localhost:8080/api/v1/boxes` 返回统一响应体与 6 条盲盒
+- [x] `server/` 能启动，端口 8080
+- [x] `mysql> show tables` 显示 41 张表
+- [x] `GET http://localhost:8080/api/v1/boxes` 返回统一响应体与 6 条盲盒
 - [ ] `admin-web/` 能启动，端口 5173，登录页可用 `admin/tuge` 登录
-- [ ] `miniapp/` 能在微信开发者工具打开，6 个 tab 能切换
-- [ ] `docs/openapi.yaml` 格式校验通过
+- [ ] `miniapp/` 能在微信开发者工具打开，5 个 tab 能切换
+- [x] `docs/openapi.yaml` 格式校验通过
 
 ---
 
@@ -207,7 +207,7 @@ mysql -uroot -p < docs/schema.sql
 
 # 3. 验证表数量
 mysql -uroot -p tuge -e "SELECT COUNT(*) as table_count FROM information_schema.tables WHERE table_schema='tuge';"
-# 期望结果：40
+# 期望结果：41
 ```
 
 **预期输出**：
@@ -215,7 +215,7 @@ mysql -uroot -p tuge -e "SELECT COUNT(*) as table_count FROM information_schema.
 +-------------+
 | table_count |
 +-------------+
-|          40 |
+|          41 |
 +-------------+
 ```
 
@@ -1332,7 +1332,7 @@ cd admin-web && pnpm dev
 | TC-01 | `GET /api/v1/boxes` | 返回 6 个盲盒 |
 | TC-02 | `GET /api/v1/banners` | 返回 Banner 列表 |
 | TC-03 | 管理端登录 `admin/tuge` | 登录成功，进入工作台 |
-| TC-04 | 小程序首页 6 个 tab 切换 | 无报错，正常显示 |
+| TC-04 | 小程序首页 5 个 tab 切换 | 无报错，正常显示 |
 | TC-05 | `GET /api/v1/health` | 返回 `{"code":0}` |
 
 ---
@@ -1342,12 +1342,27 @@ cd admin-web && pnpm dev
 阶段一验收通过后，进入**阶段二：内容域**。
 
 **阶段二前置依赖**：
-- [x] 阶段一全部验收标准通过
+- [ ] 阶段一全部验收标准通过（微信开发者工具与管理端登录手工验收待补）
 - [x] 接口契约已冻结
 - [ ] Mock 服务已配置（可选，用于前端并行开发）
+
+### 9.1 2026-09-20 收尾复核
+
+| 检查项 | 结果 |
+|--------|------|
+| 服务器 MySQL 表数量 | 41 |
+| `blind_box` / `travel_route` / `badge` / `banner` | 6 / 6 / 12 / 2 |
+| `GET /api/v1/health` | HTTP 200，统一响应 `code=0` |
+| `GET /api/v1/boxes` | HTTP 200，统一响应，6 条 |
+| `GET /api/v1/banners` | HTTP 200，统一响应，2 条 |
+| `GET /api/v1/badges` | HTTP 200，统一响应，12 条 |
+| `GET /api-docs` | HTTP 200，OpenAPI 3.0.1 |
+| `docs/openapi.yaml` | YAML 与 Redocly 语义校验通过；47 个路径与运行时 `/api-docs` 完全一致 |
+
+当前服务器数据库账号可读但缺少 `biz_order` 的 `UPDATE` 权限，订单超时任务与管理端写操作不能在该账号下完成在线验收。该问题不影响公开只读接口验收，但在补齐服务器写权限前不得将阶段一到阶段三的写入联调标记为完成。
 
 ---
 
 *文档版本：v1.0*
-*更新时间：2026-09-18*
+*更新时间：2026-09-20*
 *负责人：待定*

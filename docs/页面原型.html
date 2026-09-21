@@ -87,8 +87,10 @@
     .scroll-content {
       flex: 1;
       overflow-y: auto;
-      padding: 0 0 92px;
+      padding: 0 0 128px;
       scrollbar-width: none;
+      position: relative;
+      z-index: 1;
     }
     .scroll-content::-webkit-scrollbar { display: none; }
 
@@ -872,7 +874,7 @@
     .badge-card-item:not(.locked) .stamp { border-style: solid; border-color: var(--sage-deep); }
 
     .ticket-card {
-      display: flex; gap: 0;
+      display: block;
       background: var(--paper);
       border-radius: 16px;
       overflow: hidden;
@@ -881,7 +883,8 @@
       cursor: pointer;
       position: relative;
     }
-    .ticket-card img { width: 92px; height: 92px; object-fit: cover; flex-shrink: 0; }
+    .ticket-main { display:flex; }
+    .ticket-main > img { width: 104px; height: 108px; object-fit: cover; flex-shrink: 0; }
     .ticket-body { padding: 10px 12px; flex: 1; min-width: 0; }
     .ticket-meta { font-size: 10px; color: var(--sage-deep); font-weight: 700; }
     .ticket-name { font-size: 14px; font-weight: 800; margin: 3px 0; }
@@ -892,6 +895,28 @@
       font-size: 9px; font-weight: 700; color: var(--sage-deep);
       background: var(--sage-mist); padding: 2px 7px; border-radius: 99px;
     }
+    .ticket-route-preview { position:relative; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; padding:12px 12px 9px; border-top:1px dashed var(--line); }
+    .ticket-route-preview::before { content:''; position:absolute; left:17%; right:17%; top:18px; height:1px; background:var(--sage-soft); }
+    .ticket-route-node { position:relative; z-index:1; min-width:0; text-align:center; }
+    .ticket-route-node i { display:block; width:9px; height:9px; margin:0 auto 6px; border-radius:50%; background:var(--paper); border:2px solid var(--sage-deep); }
+    .ticket-route-node:first-child i { background:var(--sage-deep); }
+    .ticket-route-node b { display:block; font-size:9.5px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+    .ticket-route-node span { display:block; margin-top:2px; font-size:8.5px; color:var(--muted); }
+    .ticket-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:2px 12px 12px; }
+    .ticket-actions button { min-height:44px; border-radius:999px; font:700 11px inherit; cursor:pointer; }
+    .ticket-actions .route-btn { border:1.2px solid var(--ink); background:var(--paper); color:var(--ink); }
+    .ticket-actions .guide-btn { border:0; background:var(--sage); color:#fff; }
+    .trip-detail-cover { width:100%; height:148px; object-fit:cover; border-radius:15px; margin-bottom:10px; }
+    .trip-detail-pills { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; margin-bottom:12px; }
+    .trip-detail-pills span { flex-shrink:0; padding:4px 8px; border-radius:999px; background:var(--sage-mist); color:var(--sage-deep); font-size:9.5px; font-weight:700; }
+    .trip-detail-route { padding:12px 12px 2px; background:var(--paper); border:1px solid var(--line); border-radius:14px; }
+    .trip-detail-route .guide-stop { padding-bottom:14px; }
+    .trip-attractions { border-top:1px solid var(--line); }
+    .trip-attraction { padding:10px 0; border-bottom:1px solid var(--line); }
+    .trip-attraction:last-child { border-bottom:0; }
+    .trip-attraction b { display:flex; justify-content:space-between; gap:10px; font-size:11.5px; }
+    .trip-attraction b span { flex-shrink:0; color:var(--sage-deep); font-size:9px; }
+    .trip-attraction p { margin-top:4px; color:var(--muted); font-size:10px; line-height:1.55; }
     .empty-box { text-align: center; padding: 36px 12px 20px; color: var(--muted); }
     .empty-box p { font-size: 13px; font-weight: 700; color: var(--ink); margin: 10px 0 4px; }
     .empty-box span { font-size: 12px; display: block; margin-bottom: 14px; }
@@ -947,7 +972,7 @@
       border: 1.3px solid var(--line); background: var(--paper); border-radius: 14px;
       font-family: inherit; font-size: 13px; color: var(--ink); cursor: pointer;
     }
-    .modal-sheet.tall { max-height: 82%; overflow-y: auto; }
+    .modal-sheet.tall { max-height: 88%; overflow-y: auto; }
     .result-mark {
       width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 10px;
       background: var(--sage-mist); border: 1.5px solid var(--ink);
@@ -1019,6 +1044,394 @@
 
     .empty-hint { text-align: center; padding: 48px 12px; color: var(--muted); font-size: 12px; }
 
+    /* —— 商品广场 / 社区扩展 —— */
+    .market-toolbar { display:flex; gap:7px; overflow-x:auto; padding:8px 18px 4px; scrollbar-width:none; }
+    .market-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; padding:8px 18px 22px; }
+    .market-card { background:var(--paper); border-radius:18px; overflow:hidden; box-shadow:0 4px 14px rgba(60,52,44,.05); cursor:pointer; }
+    .market-card img { width:100%; height:116px; object-fit:cover; }
+    .market-card .prod-info { padding:9px 10px 11px; }
+    .market-card .prod-name { white-space:normal; min-height:32px; }
+    .market-card .prod-desc { white-space:normal; line-height:1.4; min-height:30px; }
+    .market-card .market-actions { display:flex; gap:6px; margin-top:8px; }
+    .market-actions button { flex:1; height:28px; border:0; border-radius:99px; font-size:10px; font-weight:700; font-family:inherit; cursor:pointer; }
+    .market-actions .cart-add { background:var(--sage-mist); color:var(--sage-deep); }
+    .market-actions .buy-now { background:var(--sage); color:#fff; }
+    .market-cart-float {
+      position:absolute; left:18px; right:18px; bottom:80px; z-index:31;
+      min-height:44px; padding:10px 16px; display:none;
+      justify-content:space-between; align-items:center;
+      background:var(--ink); color:#fff; border-radius:999px; cursor:pointer;
+      box-shadow:0 7px 22px rgba(60,52,44,.24);
+    }
+    .iphone-frame[data-tab="market"] .market-cart-float { display:flex; }
+    .subpage-back {
+      position:absolute; top:52px; right:18px; z-index:3;
+      width:38px; height:38px; border:1.2px solid rgba(60,52,44,.16); border-radius:50%;
+      background:rgba(255,253,248,.88); color:var(--ink); cursor:pointer;
+      display:grid; place-items:center; box-shadow:0 3px 10px rgba(60,52,44,.05);
+    }
+    .product-detail-page { min-height:100%; background:var(--cream); padding-bottom:18px; }
+    .product-detail-hero { position:relative; height:292px; overflow:hidden; background:var(--cream-2); }
+    .product-detail-hero::after {
+      content:''; position:absolute; inset:auto 0 0; height:96px;
+      background:linear-gradient(180deg, transparent, rgba(28,24,20,.38)); pointer-events:none;
+    }
+    .product-detail-hero img { width:100%; height:100%; object-fit:cover; display:block; }
+    .product-back {
+      position:absolute; top:52px; left:16px; z-index:2;
+      width:40px; height:40px; border:0; border-radius:50%;
+      background:rgba(255,253,248,.9); color:var(--ink); cursor:pointer;
+      display:grid; place-items:center; box-shadow:0 4px 14px rgba(60,52,44,.15);
+    }
+    .product-rank {
+      position:absolute; left:18px; bottom:18px; z-index:2;
+      padding:5px 10px; border-radius:999px; background:rgba(255,253,248,.9);
+      color:var(--sage-deep); font-size:10px; font-weight:800;
+    }
+    .product-detail-body { padding:18px 18px 10px; }
+    .product-detail-title { font-family:'Noto Serif SC',serif; font-size:23px; font-weight:900; line-height:1.35; }
+    .product-detail-desc { color:var(--muted); font-size:13px; line-height:1.7; margin:6px 0 16px; }
+    .product-price-row { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; padding-bottom:15px; border-bottom:1px solid var(--line); }
+    .product-price-row .price { font-family:'Noto Serif SC',serif; color:var(--sage-deep); font-size:28px; font-weight:900; }
+    .product-price-row .price small { font:600 11px 'Noto Sans SC',sans-serif; color:var(--muted); margin-left:4px; }
+    .guarantee-seal { text-align:right; color:var(--sage-deep); }
+    .guarantee-seal strong { display:block; font-size:15px; }
+    .guarantee-seal span { font-size:10px; color:var(--muted); }
+    .product-section { padding:16px 0; border-bottom:1px solid var(--line); }
+    .product-section h4 { font-size:14px; margin-bottom:10px; }
+    .service-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+    .service-item { min-height:72px; background:var(--paper); border-radius:12px; padding:10px 8px; text-align:center; box-shadow:0 3px 10px rgba(60,52,44,.04); }
+    .service-item svg { color:var(--sage-deep); margin-bottom:5px; }
+    .service-item span { display:block; font-size:10px; line-height:1.45; color:var(--muted); }
+    .product-note { font-size:11px; color:var(--muted); line-height:1.7; }
+    .guide-entry {
+      width:100%; min-height:64px; margin-top:14px; padding:11px 13px;
+      display:flex; align-items:center; gap:11px; text-align:left;
+      border:1.2px solid var(--sage-soft); border-radius:14px;
+      background:var(--sage-mist); color:var(--ink); cursor:pointer; font-family:inherit;
+    }
+    .guide-entry .icon {
+      width:38px; height:38px; flex-shrink:0; border-radius:50%;
+      display:grid; place-items:center; background:var(--paper); color:var(--sage-deep);
+    }
+    .guide-entry .copy { flex:1; min-width:0; }
+    .guide-entry b { display:block; font-size:13px; }
+    .guide-entry small { display:block; color:var(--muted); font-size:10.5px; margin-top:3px; line-height:1.45; }
+    .guide-entry .chev { color:var(--sage-deep); font-size:18px; }
+    .product-actions-bar {
+      position:sticky; bottom:0; z-index:8; display:grid; grid-template-columns:1fr 1.35fr; gap:9px;
+      padding:11px 18px calc(12px + env(safe-area-inset-bottom));
+      background:rgba(246,241,230,.96); border-top:1px solid var(--line); backdrop-filter:blur(10px);
+    }
+    /* —— 详细出行攻略 —— */
+    .guide-page { min-height:100%; background:var(--cream); padding-bottom:0; }
+    .guide-hero { position:relative; height:250px; overflow:hidden; background:var(--cream-2); color:#fff; }
+    .guide-hero::after {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(180deg,rgba(28,24,20,.12) 10%,rgba(28,24,20,.75) 100%);
+    }
+    .guide-hero img { width:100%; height:100%; object-fit:cover; display:block; }
+    .guide-hero-copy { position:absolute; left:18px; right:18px; bottom:18px; z-index:2; }
+    .guide-kicker { font-size:10px; font-weight:700; letter-spacing:.12em; opacity:.86; }
+    .guide-title { font-family:'Noto Serif SC',serif; font-size:23px; font-weight:900; line-height:1.3; margin:5px 0 8px; text-wrap:balance; }
+    .guide-place { display:flex; align-items:center; gap:5px; font-size:11px; opacity:.9; }
+    .guide-meta { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; margin-top:11px; }
+    .guide-meta::-webkit-scrollbar { display:none; }
+    .guide-meta span { flex-shrink:0; padding:4px 8px; border-radius:999px; background:rgba(255,253,248,.19); border:1px solid rgba(255,255,255,.3); font-size:9.5px; font-weight:600; }
+    .guide-anchorbar {
+      position:sticky; top:54px; z-index:9; display:grid; grid-template-columns:repeat(5,1fr);
+      padding:8px 14px; background:rgba(255,253,248,.96); border-bottom:1px solid var(--line); backdrop-filter:blur(10px);
+    }
+    .guide-anchorbar button { height:34px; border:0; background:none; color:var(--muted); font:600 11px inherit; cursor:pointer; position:relative; }
+    .guide-anchorbar button.on { color:var(--ink); font-weight:800; }
+    .guide-anchorbar button.on::after { content:''; position:absolute; left:50%; bottom:0; width:16px; height:2px; transform:translateX(-50%); background:var(--sage-deep); border-radius:2px; }
+    .guide-body { padding:16px 18px 26px; }
+    .guide-weather { display:flex; gap:10px; align-items:flex-start; padding:12px 13px; background:var(--sage-mist); border-radius:14px; margin-bottom:22px; }
+    .guide-weather svg { flex-shrink:0; color:var(--sage-deep); margin-top:1px; }
+    .guide-weather b { display:block; font-size:12px; margin-bottom:3px; }
+    .guide-weather p { font-size:10.5px; color:var(--muted); line-height:1.55; }
+    .guide-facts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); border:1px solid var(--line); border-radius:14px; overflow:hidden; margin:-8px 0 24px; }
+    .guide-fact { min-height:60px; padding:10px 11px; background:var(--paper); border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
+    .guide-fact:nth-child(2n) { border-right:0; }
+    .guide-fact:nth-last-child(-n+2) { border-bottom:0; }
+    .guide-fact span { display:block; color:var(--muted); font-size:9px; margin-bottom:3px; }
+    .guide-fact strong { display:block; font-size:11px; line-height:1.45; }
+    .guide-section { padding:0 0 24px; margin-bottom:22px; border-bottom:1px solid var(--line); }
+    .guide-section:last-child { border-bottom:0; margin-bottom:0; }
+    .guide-section-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:14px; }
+    .guide-section-head h3 { font-family:'Noto Serif SC',serif; font-size:18px; font-weight:900; }
+    .guide-section-head span { color:var(--muted); font-size:10px; }
+    .guide-summary { font-size:12px; line-height:1.75; color:var(--muted); margin:-5px 0 14px; }
+    .guide-timeline { position:relative; padding-left:26px; }
+    .guide-timeline::before { content:''; position:absolute; left:7px; top:7px; bottom:7px; width:1px; background:var(--sage-soft); }
+    .guide-stop { position:relative; padding:0 0 17px; }
+    .guide-stop:last-child { padding-bottom:0; }
+    .guide-stop::before { content:''; position:absolute; left:-24px; top:5px; width:9px; height:9px; border-radius:50%; background:var(--paper); border:2px solid var(--sage-deep); }
+    .guide-stop .time { font-size:10px; font-weight:800; color:var(--sage-deep); margin-bottom:3px; }
+    .guide-stop h4 { font-size:13px; margin-bottom:4px; }
+    .guide-stop p { color:var(--muted); font-size:11px; line-height:1.65; }
+    .guide-stop em { display:inline-block; margin-top:6px; padding:3px 7px; border-radius:999px; background:var(--paper); color:var(--sage-deep); font-size:9px; font-style:normal; font-weight:700; }
+    .guide-attraction { padding:14px 0; border-bottom:1px solid var(--line); }
+    .guide-attraction:last-child { border-bottom:0; }
+    .guide-attraction-head { display:grid; grid-template-columns:28px 1fr auto; gap:9px; align-items:center; margin-bottom:7px; }
+    .guide-attraction-index { width:28px; height:28px; display:grid; place-items:center; border-radius:50%; background:var(--sage-mist); color:var(--sage-deep); font-family:'Noto Serif SC',serif; font-size:11px; font-weight:900; }
+    .guide-attraction-head h4 { font-size:13px; }
+    .guide-attraction-head span { color:var(--sage-deep); font-size:9px; font-weight:700; }
+    .guide-attraction > p { font-size:11px; color:var(--muted); line-height:1.7; }
+    .guide-attraction-detail { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:9px; }
+    .guide-attraction-detail div { min-height:54px; padding:8px 9px; background:var(--paper); border:1px solid var(--line); border-radius:10px; }
+    .guide-attraction-detail b { display:block; color:var(--sage-deep); font-size:9px; margin-bottom:3px; }
+    .guide-attraction-detail span { display:block; color:var(--muted); font-size:9.5px; line-height:1.5; }
+    .guide-transit-row { display:grid; grid-template-columns:38px 1fr; gap:11px; padding:12px 0; border-bottom:1px solid var(--line); }
+    .guide-transit-row:last-child { border-bottom:0; }
+    .guide-transit-icon { width:38px; height:38px; border-radius:12px; background:var(--sage-mist); color:var(--sage-deep); display:grid; place-items:center; }
+    .guide-transit-row b { display:block; font-size:12px; }
+    .guide-transit-row p { color:var(--muted); font-size:10.5px; line-height:1.6; margin-top:3px; }
+    .guide-cost-row { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:9px 0; border-bottom:1px dashed var(--line); font-size:11px; }
+    .guide-cost-row:last-child { border-bottom:0; }
+    .guide-cost-row span { color:var(--muted); }
+    .guide-cost-row strong { text-align:right; font-size:11px; }
+    .guide-cost-row small { display:block; color:var(--sage-deep); font-size:9px; margin-top:2px; font-weight:600; }
+    .guide-living-row { padding:12px 0; border-bottom:1px solid var(--line); }
+    .guide-living-row:last-child { border-bottom:0; }
+    .guide-living-row b { display:block; font-size:12px; margin-bottom:4px; }
+    .guide-living-row p { font-size:10.5px; color:var(--muted); line-height:1.65; }
+    .guide-planb { padding:13px 14px; background:var(--sage-mist); border-radius:14px; }
+    .guide-planb-row { display:grid; grid-template-columns:54px 1fr; gap:10px; padding:8px 0; border-bottom:1px solid rgba(108,126,88,.18); }
+    .guide-planb-row:last-child { border-bottom:0; }
+    .guide-planb-row b { color:var(--sage-deep); font-size:10px; }
+    .guide-planb-row p { color:var(--muted); font-size:10.5px; line-height:1.55; }
+    .guide-checks { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    .guide-check {
+      min-height:44px; padding:8px 9px; display:flex; align-items:center; gap:8px;
+      border:1px solid var(--line); border-radius:11px; background:var(--paper); color:var(--ink);
+      font:600 10.5px inherit; text-align:left; cursor:pointer;
+    }
+    .guide-check i { width:17px; height:17px; flex-shrink:0; border:1.4px solid var(--sage); border-radius:5px; display:grid; place-items:center; font-style:normal; color:#fff; font-size:11px; }
+    .guide-check.done { color:var(--muted); text-decoration:line-through; }
+    .guide-check.done i { background:var(--sage); }
+    .guide-tip { display:grid; grid-template-columns:22px 1fr; gap:8px; margin-bottom:11px; }
+    .guide-tip:last-child { margin-bottom:0; }
+    .guide-tip b { width:22px; height:22px; border-radius:50%; background:var(--sage-mist); color:var(--sage-deep); display:grid; place-items:center; font-size:10px; }
+    .guide-tip p { font-size:11px; line-height:1.65; color:var(--muted); }
+    .guide-emergency { padding:12px 13px; background:var(--paper); border:1px solid var(--line); border-radius:14px; font-size:11px; line-height:1.8; }
+    .guide-emergency strong { color:var(--sage-deep); }
+    .guide-rule { display:grid; grid-template-columns:20px 1fr; gap:8px; margin-bottom:11px; }
+    .guide-rule:last-child { margin-bottom:0; }
+    .guide-rule svg { color:var(--sage-deep); margin-top:1px; }
+    .guide-rule p { font-size:11px; line-height:1.65; color:var(--muted); }
+    .guide-faq details { border-bottom:1px solid var(--line); }
+    .guide-faq details:last-child { border-bottom:0; }
+    .guide-faq summary { min-height:44px; display:flex; align-items:center; justify-content:space-between; gap:10px; list-style:none; cursor:pointer; font-size:11.5px; font-weight:700; }
+    .guide-faq summary::-webkit-details-marker { display:none; }
+    .guide-faq summary::after { content:'+'; color:var(--sage-deep); font-size:17px; font-weight:400; }
+    .guide-faq details[open] summary::after { content:'−'; }
+    .guide-faq p { padding:0 22px 12px 0; font-size:10.5px; line-height:1.65; color:var(--muted); }
+    .guide-actions { position:sticky; bottom:0; z-index:8; display:grid; grid-template-columns:1fr 1.35fr; gap:9px; padding:11px 18px calc(12px + env(safe-area-inset-bottom)); background:rgba(246,241,230,.96); border-top:1px solid var(--line); backdrop-filter:blur(10px); }
+    .mine-section-label { font-size:11px; font-weight:700; color:var(--muted); margin:14px 2px 7px; }
+    .mine-section-label:first-child { margin-top:0; }
+    .iphone-frame[data-tab="product"] .bottom-tabbar,
+    .iphone-frame[data-tab="guide"] .bottom-tabbar,
+    .iphone-frame[data-tab="trips"] .bottom-tabbar,
+    .iphone-frame[data-tab="badges"] .bottom-tabbar,
+    .iphone-frame[data-tab="cart"] .bottom-tabbar,
+    .iphone-frame[data-tab="records"] .bottom-tabbar { display:none; }
+    .iphone-frame[data-tab="product"] .scroll-content,
+    .iphone-frame[data-tab="guide"] .scroll-content,
+    .iphone-frame[data-tab="trips"] .scroll-content,
+    .iphone-frame[data-tab="badges"] .scroll-content,
+    .iphone-frame[data-tab="cart"] .scroll-content,
+    .iphone-frame[data-tab="records"] .scroll-content { padding-bottom:0; }
+    /* —— 社区 · 小红书式信息流 —— */
+    .xhs-top {
+      position:sticky; top:0; z-index:6;
+      background:
+        radial-gradient(56px 30px at 12% 0%, #f7faf3 0 62%, transparent 63%),
+        radial-gradient(64px 32px at 62% -4%, #eef5e5 0 64%, transparent 65%),
+        linear-gradient(180deg, #E3EDD6 0%, #EAF1E0 100%);
+      padding:50px 12px 6px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .xhs-top .scallop-row { bottom:-5px; height:22px; }
+    .xhs-top .scallop-row i { height:20px; }
+    .xhs-icon-btn {
+      width:32px; height:32px; flex-shrink:0; border:0; border-radius:50%;
+      background:rgba(255,253,248,.86); color:var(--ink);
+      display:grid; place-items:center; cursor:pointer; position:relative; z-index:1;
+    }
+    .xhs-tabs { flex:1; display:flex; justify-content:center; gap:22px; position:relative; z-index:1; }
+    .xhs-tabs button { border:0; background:none; padding:4px 0; color:var(--muted); font:600 14px inherit; cursor:pointer; }
+    .xhs-tabs button.on { color:var(--ink); font-weight:800; position:relative; }
+    .xhs-tabs button.on::after {
+      content:''; position:absolute; left:50%; bottom:-3px; transform:translateX(-50%);
+      width:18px; height:2.5px; border-radius:2px; background:var(--sage-deep);
+    }
+    .xhs-chips { display:flex; gap:7px; overflow-x:auto; padding:12px 12px 10px; scrollbar-width:none; }
+    .xhs-chips::-webkit-scrollbar { display:none; }
+    .xhs-chips button {
+      flex-shrink:0; border:0; border-radius:999px; padding:6px 13px;
+      background:var(--paper); color:var(--muted); font:600 12px inherit;
+      cursor:pointer; box-shadow:0 2px 8px rgba(60,52,44,.04);
+    }
+    .xhs-chips button.on { background:var(--sage); color:#fff; }
+    .xhs-feed { columns:2; column-gap:9px; padding:0 12px 172px; }
+    .xhs-card {
+      break-inside:avoid; margin-bottom:9px; background:var(--paper);
+      border-radius:14px; overflow:hidden; cursor:pointer;
+      box-shadow:0 3px 12px rgba(60,52,44,.05);
+    }
+    .xhs-cover { position:relative; width:100%; background:var(--cream-2); }
+    .xhs-cover img { width:100%; display:block; object-fit:cover; }
+    .xhs-badge {
+      position:absolute; left:7px; top:7px; display:flex; align-items:center; gap:3px;
+      background:rgba(60,52,44,.5); color:#fff; font-size:8.5px; font-weight:700;
+      padding:2px 6px; border-radius:999px; backdrop-filter:blur(3px);
+    }
+    .xhs-title {
+      font-size:12.5px; font-weight:700; line-height:1.45; padding:8px 9px 0;
+      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    }
+    .xhs-foot { display:flex; justify-content:space-between; align-items:center; gap:6px; padding:7px 9px 9px; }
+    .xhs-author { display:flex; align-items:center; gap:5px; min-width:0; }
+    .xhs-author .ava {
+      width:18px; height:18px; flex-shrink:0; border-radius:50%;
+      background:var(--sage-mist); color:var(--sage-deep);
+      font-size:9px; font-weight:800; display:grid; place-items:center;
+    }
+    .xhs-author span { font-size:10px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:62px; }
+    .xhs-like {
+      display:flex; align-items:center; gap:3px; flex-shrink:0;
+      border:0; background:none; padding:0; cursor:pointer;
+      font:600 10px inherit; color:var(--muted);
+    }
+    .xhs-like.on { color:#D4705F; }
+    .xhs-compose {
+      position:absolute; right:18px; bottom:88px; z-index:31;
+      display:none; align-items:center; gap:4px; height:44px; padding:0 17px;
+      border:0; border-radius:999px; background:var(--sage); color:#fff;
+      font:700 13px inherit; cursor:pointer;
+      box-shadow:0 6px 18px rgba(108,126,88,.36);
+    }
+    .iphone-frame[data-tab="community"] .xhs-compose { display:flex; }
+    /* 笔记详情 */
+    .xhs-detail {
+      position:absolute; inset:0; z-index:95; background:var(--cream);
+      display:flex; flex-direction:column;
+      transform:translateX(100%); transition:transform .3s cubic-bezier(.22,1,.36,1);
+      visibility:hidden;
+    }
+    .xhs-detail.on { transform:translateX(0); visibility:visible; }
+    .xhs-detail-head { display:flex; align-items:center; gap:9px; padding:52px 14px 10px; flex-shrink:0; }
+    .xhs-detail-head .ava {
+      width:34px; height:34px; flex-shrink:0; border-radius:50%;
+      background:var(--sage-mist); color:var(--sage-deep);
+      font-weight:800; font-size:13px; display:grid; place-items:center;
+    }
+    .xhs-detail-head .who { min-width:0; flex:1; }
+    .xhs-detail-head .who strong { font-size:13px; display:block; }
+    .xhs-detail-head .who small { font-size:10px; color:var(--muted); }
+    .xhs-follow {
+      height:28px; padding:0 14px; flex-shrink:0;
+      border:1.2px solid var(--sage-deep); border-radius:999px;
+      background:transparent; color:var(--sage-deep); font:700 11px inherit; cursor:pointer;
+    }
+    .xhs-follow.on { background:var(--sage-mist); border-color:transparent; color:var(--muted); }
+    .xhs-close {
+      width:30px; height:30px; flex-shrink:0; border:0; border-radius:50%;
+      background:rgba(255,253,248,.86); color:var(--ink);
+      font-size:17px; line-height:1; cursor:pointer;
+    }
+    .xhs-detail-body { flex:1; overflow-y:auto; padding:4px 14px 20px; scrollbar-width:none; }
+    .xhs-detail-body::-webkit-scrollbar { display:none; }
+    .xhs-gallery { display:flex; gap:8px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; border-radius:16px; }
+    .xhs-gallery::-webkit-scrollbar { display:none; }
+    .xhs-gallery img { width:100%; flex-shrink:0; border-radius:16px; object-fit:cover; scroll-snap-align:center; }
+    .xhs-detail-title { font-family:'Noto Serif SC',serif; font-size:17px; font-weight:900; line-height:1.4; margin:14px 0 8px; }
+    .xhs-detail-text { font-size:13.5px; line-height:1.8; color:var(--ink); white-space:pre-wrap; }
+    .xhs-detail-tags { display:flex; flex-wrap:wrap; gap:7px; margin:11px 0 2px; }
+    .xhs-detail-tags span { font-size:11.5px; font-weight:600; color:var(--sage-deep); }
+    .xhs-detail-meta { font-size:10.5px; color:var(--muted); margin:10px 0 0; }
+    .xhs-samebox {
+      display:flex; align-items:center; gap:10px; margin:14px 0; padding:10px 12px;
+      background:var(--sage-mist); border-radius:14px; cursor:pointer;
+    }
+    .xhs-samebox img { width:46px; height:46px; border-radius:10px; object-fit:cover; flex-shrink:0; }
+    .xhs-samebox .n { flex:1; min-width:0; }
+    .xhs-samebox b { font-size:12.5px; display:block; }
+    .xhs-samebox small { font-size:10px; color:var(--muted); }
+    .xhs-samebox em { font-style:normal; font-size:11.5px; font-weight:800; color:var(--sage-deep); flex-shrink:0; }
+    .xhs-divider { height:1px; background:var(--line); margin:14px 0; }
+    .xhs-cmt { display:flex; gap:8px; padding:9px 0; }
+    .xhs-cmt .ava {
+      width:24px; height:24px; flex-shrink:0; border-radius:50%;
+      background:var(--cream-2); color:var(--sage-deep);
+      font-size:10px; font-weight:800; display:grid; place-items:center;
+    }
+    .xhs-cmt .c { min-width:0; flex:1; }
+    .xhs-cmt b { font-size:11.5px; }
+    .xhs-cmt p { font-size:12.5px; line-height:1.55; margin-top:2px; }
+    .xhs-cmt small { font-size:10px; color:var(--muted); display:block; margin-top:3px; }
+    .xhs-bar {
+      display:flex; align-items:center; gap:11px; flex-shrink:0;
+      padding:9px 14px calc(12px + env(safe-area-inset-bottom));
+      background:var(--paper); border-top:1px solid var(--line);
+    }
+    .xhs-bar input {
+      flex:1; height:38px; border:0; border-radius:999px; background:var(--cream-2);
+      padding:0 14px; font:400 12.5px inherit; outline:none; color:var(--ink);
+    }
+    .xhs-bar .act {
+      border:0; background:none; padding:0; display:flex; flex-direction:column;
+      align-items:center; gap:2px; color:var(--muted); font:600 9px inherit; cursor:pointer;
+    }
+    .xhs-bar .act.on { color:#D4705F; }
+    .xhs-bar .act.collect.on { color:var(--caramel, #D4924A); }
+    /* 发布页 */
+    .xhs-pub-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+    .xhs-pub-slot {
+      aspect-ratio:1; border-radius:12px; display:grid; place-items:center;
+      background:var(--cream-2); color:var(--muted);
+    }
+    .xhs-pub-slot.add { border:1.5px dashed var(--sage); background:var(--sage-mist); color:var(--sage-deep); font-size:22px; cursor:pointer; }
+    .xhs-pub-slot img { width:100%; height:100%; object-fit:cover; border-radius:12px; }
+    .xhs-pub-title {
+      width:100%; border:0; border-bottom:1px solid var(--line); background:none;
+      padding:10px 2px; font:700 15px inherit; color:var(--ink); outline:none; margin-bottom:8px;
+    }
+    .xhs-pub-body {
+      width:100%; border:0; background:none; padding:6px 2px; outline:none;
+      font:400 13px/1.7 inherit; color:var(--ink); resize:none; height:96px;
+    }
+    .xhs-pub-row {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:11px 2px; border-bottom:1px solid var(--line); font-size:13px;
+    }
+    .xhs-pub-row span { color:var(--muted); font-size:12px; }
+    .xhs-topic-row, .xhs-creator {
+      width:100%; display:flex; align-items:center; gap:11px;
+      background:var(--paper); border:0; border-radius:14px;
+      padding:11px 12px; margin-bottom:8px; cursor:pointer;
+      font-family:inherit; color:inherit; text-align:left;
+      box-shadow:0 3px 12px rgba(60,52,44,.05);
+    }
+    .xhs-topic-row .n, .xhs-creator .n { flex:1; min-width:0; }
+    .xhs-topic-row b, .xhs-creator b { font-size:13px; display:block; }
+    .xhs-topic-row small, .xhs-creator small { font-size:10.5px; color:var(--muted); display:block; margin-top:2px; }
+    .xhs-topic-row em { font-style:normal; font-size:11px; color:var(--muted); flex-shrink:0; }
+    .xhs-creator .rk {
+      width:18px; text-align:center; flex-shrink:0;
+      font-family:'Noto Serif SC',serif; font-weight:900; font-size:14px; color:var(--sage-deep);
+    }
+    @media (max-width:420px) { .xhs-compose { right:16px; } }
+
+    .detail-cover { width:100%; height:180px; object-fit:cover; border-radius:18px; margin-bottom:12px; }
+    .detail-row { display:flex; justify-content:space-between; align-items:center; margin:8px 0; font-size:12px; }
+    .detail-price { font-family:'Noto Serif SC',serif; color:var(--sage-deep); font-size:24px; font-weight:900; }
+    .record-row { background:var(--paper); border-radius:14px; padding:11px 12px; margin-bottom:8px; box-shadow:0 4px 12px rgba(60,52,44,.04); }
+    .record-row .record-top { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); }
+    .record-row strong { display:block; margin-top:4px; font-size:13px; }
+    .record-row .record-foot { display:flex; justify-content:space-between; margin-top:6px; font-size:11px; color:var(--muted); }
+
     .bottom-tabbar {
       position: absolute; bottom: 0; left: 0; width: 100%;
       height: 72px;
@@ -1029,10 +1442,12 @@
       box-shadow: 0 -8px 24px rgba(60,52,44,0.06);
       z-index: 30;
     }
+    .bottom-tabbar .tab-item { pointer-events: auto; }
     .tab-item {
+      flex: 1;
       display: flex; flex-direction: column; align-items: center; gap: 3px;
-      color: #C0B3A5; font-size: 10px; cursor: pointer; min-width: 56px;
-      min-height: 44px;
+      color: #C0B3A5; font-size: 9px; cursor: pointer; min-width: 0;
+      min-height: 44px; position: relative; z-index: 1;
     }
     .tab-item.active { color: var(--sage-deep); font-weight: 700; }
     .tab-item.active svg { color: var(--sage-deep); }
@@ -1047,18 +1462,19 @@
       position: absolute; inset: 0;
       background: rgba(60,52,44,0.42);
       backdrop-filter: blur(4px);
-      z-index: 50; display: flex; align-items: flex-end; justify-content: center;
+      z-index: 90; display: flex; align-items: flex-end; justify-content: center;
       opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
     }
     .modal-overlay.active { opacity: 1; pointer-events: auto; }
     .modal-sheet {
       width: 100%; background: var(--cream);
       border-radius: 28px 28px 0 0;
-      padding: 12px 20px 48px;
+      padding: 12px 20px calc(48px + env(safe-area-inset-bottom));
       transform: translateY(100%);
       transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-      max-height: 82%;
+      max-height: 86%;
       overflow-y: auto;
+      position: relative;
     }
     .modal-overlay.active .modal-sheet { transform: translateY(0); }
     .sheet-handle {
@@ -1085,10 +1501,68 @@
       background: var(--sage-mist); border-radius: 14px;
       padding: 12px 14px; font-size: 12px; line-height: 1.9;
     }
-    @keyframes pulseBox {
-      50% { transform: scale(0.96); opacity: 0.75; }
+    /* —— 开盒特效 —— */
+    .unbox-drawing { padding:14px 0 8px; text-align:center; overflow:hidden; }
+    .unbox-scene { position:relative; height:220px; max-width:310px; margin:0 auto; perspective:700px; }
+    .unbox-shadow { position:absolute; left:50%; bottom:24px; width:150px; height:15px; transform:translateX(-50%); border-radius:50%; background:rgba(60,52,44,.13); filter:blur(5px); }
+    .unbox-base {
+      position:absolute; left:50%; bottom:35px; width:126px; height:92px; transform:translateX(-50%);
+      background:var(--sage); border:2px solid var(--ink); border-radius:8px 8px 14px 14px;
+      box-shadow:inset 0 -9px 0 rgba(60,52,44,.08), 0 10px 18px rgba(60,52,44,.13);
     }
-    .pulse-box { animation: pulseBox 1s ease-in-out infinite; }
+    .unbox-base::before { content:''; position:absolute; left:55px; top:0; bottom:0; width:14px; background:var(--cream-2); border-left:1.5px solid var(--ink); border-right:1.5px solid var(--ink); }
+    .unbox-base span { position:absolute; left:0; right:0; bottom:10px; font-family:'Noto Serif SC',serif; font-size:10px; font-weight:900; color:#fff; letter-spacing:.08em; }
+    .unbox-lid {
+      position:absolute; left:50%; bottom:119px; width:142px; height:30px; transform:translateX(-50%); transform-origin:18px 26px;
+      background:var(--sage-soft); border:2px solid var(--ink); border-radius:8px 8px 5px 5px; z-index:5;
+    }
+    .unbox-lid::before { content:''; position:absolute; left:62px; top:-2px; width:14px; height:30px; background:var(--cream-2); border-left:1.5px solid var(--ink); border-right:1.5px solid var(--ink); }
+    .unbox-ticket {
+      position:absolute; left:50%; bottom:67px; z-index:3; width:94px; height:118px; padding:12px 8px;
+      transform:translateX(-50%) translateY(58px) rotate(-2deg); opacity:0;
+      background:var(--paper); border:1.5px solid var(--ink); border-radius:8px; box-shadow:4px 6px 0 rgba(60,52,44,.1);
+    }
+    .unbox-ticket::after { content:''; position:absolute; left:10px; right:10px; top:37px; height:1px; border-top:1px dashed var(--sage); }
+    .unbox-ticket b { display:block; font-family:'Noto Serif SC',serif; font-size:14px; color:var(--sage-deep); margin-top:27px; }
+    .unbox-ticket small { display:block; font-size:8px; color:var(--muted); margin-top:6px; letter-spacing:.08em; }
+    .unbox-rays i { position:absolute; left:50%; bottom:122px; width:2px; height:46px; background:var(--sage); transform-origin:50% 70px; opacity:0; }
+    .unbox-rays i:nth-child(1) { transform:rotate(-68deg); }
+    .unbox-rays i:nth-child(2) { transform:rotate(-43deg); }
+    .unbox-rays i:nth-child(3) { transform:rotate(-20deg); }
+    .unbox-rays i:nth-child(4) { transform:rotate(20deg); }
+    .unbox-rays i:nth-child(5) { transform:rotate(43deg); }
+    .unbox-rays i:nth-child(6) { transform:rotate(68deg); }
+    .unbox-confetti i { position:absolute; left:50%; top:72px; width:7px; height:13px; border-radius:2px; opacity:0; }
+    .unbox-confetti i:nth-child(1) { background:var(--blush); margin-left:-92px; }
+    .unbox-confetti i:nth-child(2) { background:var(--sage); margin-left:-55px; }
+    .unbox-confetti i:nth-child(3) { background:#D7B86B; margin-left:-18px; }
+    .unbox-confetti i:nth-child(4) { background:var(--sage-soft); margin-left:27px; }
+    .unbox-confetti i:nth-child(5) { background:var(--blush); margin-left:64px; }
+    .unbox-confetti i:nth-child(6) { background:#D7B86B; margin-left:94px; }
+    .unbox-drawing.animating .unbox-base { animation:unboxShake .7s ease .12s both, unboxSettle .45s ease 1.95s both; }
+    .unbox-drawing.animating .unbox-lid { animation:lidOpen 1s cubic-bezier(.2,.8,.2,1) .65s both; }
+    .unbox-drawing.animating .unbox-ticket { animation:ticketReveal 1.25s cubic-bezier(.16,1,.3,1) 1.02s both; }
+    .unbox-drawing.animating .unbox-rays i { animation:rayFlash .9s ease 1s both; }
+    .unbox-drawing.animating .unbox-confetti i:nth-child(odd) { animation:confettiLeft 1.45s ease-out .82s both; }
+    .unbox-drawing.animating .unbox-confetti i:nth-child(even) { animation:confettiRight 1.45s ease-out .9s both; }
+    .draw-title { font-family:'Noto Serif SC',serif; font-size:17px; margin-top:0; }
+    .draw-status { min-height:18px; font-size:10.5px; color:var(--muted); margin-top:5px; transition:opacity .18s ease; }
+    .draw-progress { width:180px; height:4px; margin:11px auto 0; border-radius:99px; overflow:hidden; background:var(--line); }
+    .draw-progress span { display:block; width:0; height:100%; background:var(--sage-deep); border-radius:99px; }
+    .unbox-drawing.animating .draw-progress span { animation:drawProgress 2.65s linear both; }
+    .reveal-in { animation:resultReveal .5s cubic-bezier(.16,1,.3,1) both; }
+    @keyframes unboxShake { 0%,100%{transform:translateX(-50%) rotate(0)} 20%{transform:translateX(-50%) rotate(-4deg)} 40%{transform:translateX(-50%) rotate(4deg)} 60%{transform:translateX(-50%) rotate(-3deg)} 80%{transform:translateX(-50%) rotate(3deg)} }
+    @keyframes unboxSettle { 50%{transform:translateX(-50%) translateY(-6px)} 100%{transform:translateX(-50%) translateY(0)} }
+    @keyframes lidOpen { 0%{transform:translateX(-50%) rotate(0)} 55%{transform:translateX(-50%) translateY(-48px) rotate(-13deg)} 100%{transform:translateX(-50%) translate(-64px,-55px) rotate(-28deg)} }
+    @keyframes ticketReveal { 0%{transform:translateX(-50%) translateY(58px) rotate(-2deg);opacity:0} 35%{opacity:1} 75%{transform:translateX(-50%) translateY(-27px) rotate(2deg);opacity:1} 100%{transform:translateX(-50%) translateY(-20px) rotate(0);opacity:1} }
+    @keyframes rayFlash { 0%{opacity:0;height:8px} 45%{opacity:.8;height:46px} 100%{opacity:0;height:58px} }
+    @keyframes confettiLeft { 0%{opacity:0;transform:translate(0,20px) rotate(0)} 20%{opacity:1} 100%{opacity:0;transform:translate(-34px,118px) rotate(230deg)} }
+    @keyframes confettiRight { 0%{opacity:0;transform:translate(0,20px) rotate(0)} 20%{opacity:1} 100%{opacity:0;transform:translate(30px,122px) rotate(-250deg)} }
+    @keyframes drawProgress { to{width:100%} }
+    @keyframes resultReveal { from{opacity:0;transform:translateY(14px) scale(.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+    @media (prefers-reduced-motion:reduce) {
+      .unbox-drawing.animating .unbox-base,.unbox-drawing.animating .unbox-lid,.unbox-drawing.animating .unbox-ticket,.unbox-drawing.animating .unbox-rays i,.unbox-drawing.animating .unbox-confetti i,.unbox-drawing.animating .draw-progress span { animation-duration:.01ms; animation-delay:0s; }
+    }
   </style>
 </head>
 <body>
@@ -1164,7 +1638,7 @@
             <div class="eyebrow">TODAY'S SPECIAL</div>
             <h2 id="specialName">隐世古村<br>慢生活盒</h2>
             <p id="specialDesc">非遗体验 · 古镇慢游<br>票面保底 120%</p>
-            <button class="link-cta" id="specialCta" type="button" onclick="openCurrentSpecial()">立即开启
+            <button class="link-cta" id="specialCta" type="button" onclick="openCurrentSpecial()">查看详情
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h12"/><path d="M13 6l6 6-6 6"/></svg>
             </button>
             <svg class="doodle-arrow" width="52" height="28" viewBox="0 0 52 28" fill="none">
@@ -1181,7 +1655,7 @@
             <input type="text" placeholder="今天想去哪里放空呢？" />
             <button class="btn-search" type="button">搜索</button>
           </div>
-          <button class="gift-btn" type="button" onclick="switchNav('badges', document.querySelectorAll('.tab-item')[2])">
+          <button class="gift-btn" type="button" onclick="navTo('badges')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18"/><path d="M12 8c-2-3 2-5 4-3s0 3-4 3z"/><path d="M12 8c2-3-2-5-4-3s0 3 4 3z"/></svg>
             <small>图鉴</small>
           </button>
@@ -1331,6 +1805,9 @@
       <div class="tab-view" id="tab-badges">
         <div class="cloud-head sub-cloud">
           <div class="scallop-row" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <button class="subpage-back" type="button" aria-label="返回个人中心" onclick="navTo('mine')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
           <div class="sub-cloud-copy">
             <div class="sub-kicker">Collect &amp; know</div>
             <div class="sub-title">旅行图鉴</div>
@@ -1360,6 +1837,9 @@
       <div class="tab-view" id="tab-trips">
         <div class="cloud-head sub-cloud">
           <div class="scallop-row" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <button class="subpage-back" type="button" aria-label="返回个人中心" onclick="navTo('mine')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
           <div class="sub-cloud-copy">
             <div class="sub-kicker">On the road</div>
             <div class="sub-title">我的行程</div>
@@ -1391,7 +1871,7 @@
             <div class="stat-tile"><strong id="statLevel">Lv.1</strong><span>当前等级</span></div>
             <div class="stat-tile"><strong id="statWelfare">0 km</strong><span>公益里程</span></div>
           </div>
-          <div class="menu-list" id="mineMenu"></div>
+          <div id="mineMenu"></div>
           <div class="service-block">
             <h4>价值保底规则</h4>
             <p>票面价值不低于售价 120%，符合保障规则可申请退换。</p>
@@ -1406,38 +1886,200 @@
           </div>
         </div>
       </div>
+      <div class="tab-view" id="tab-market">
+        <div class="cloud-head sub-cloud"><div class="scallop-row" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="sub-cloud-copy"><div class="sub-kicker">Pick your surprise</div><div class="sub-title">商品广场</div><div class="sub-desc">先逛一圈，再把想去的地方装进盒子</div></div></div>
+        <div class="market-toolbar" id="marketFilters"></div>
+        <div class="market-grid" id="marketGrid"></div>
+      </div>
+
+      <div class="tab-view" id="tab-product">
+        <div class="product-detail-page">
+          <div class="product-detail-hero">
+            <img id="pdImg" alt="">
+            <button class="product-back" type="button" aria-label="返回商品列表" onclick="closeProductDetail()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <span class="product-rank" id="pdRank">精选</span>
+          </div>
+          <div class="product-detail-body">
+            <h2 class="product-detail-title" id="pdName"></h2>
+            <p class="product-detail-desc" id="pdDesc"></p>
+            <div class="product-price-row">
+              <div class="price"><span id="pdPrice"></span><small>开盒价</small></div>
+              <div class="guarantee-seal"><strong id="pdGuarantee"></strong><span id="pdGuaranteeRate">票面价值保底</span></div>
+            </div>
+            <section class="product-section">
+              <h4>服务包含</h4>
+              <div class="service-grid" id="pdServices"></div>
+            </section>
+            <section class="product-section">
+              <h4>开盒说明</h4>
+              <p class="product-note">付款后随机解锁对应主题线路，票面价值不低于页面标注的保底金额。未出行且符合保障规则时，可在“我的订单”中申请退换。</p>
+              <button class="guide-entry" type="button" onclick="openGuideForProduct()">
+                <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m4 6 5-2 6 2 5-2v14l-5 2-6-2-5 2zM9 4v14M15 6v14"/></svg></span>
+                <span class="copy"><b>查看主题出行攻略</b><small>行程节奏、交通方案、费用与必带物品</small></span>
+                <span class="chev">›</span>
+              </button>
+            </section>
+          </div>
+          <div class="product-actions-bar">
+            <button class="btn-block btn-line" type="button" onclick="addCurrentToCart()">加入购物车</button>
+            <button class="btn-block btn-sage" type="button" onclick="buyCurrentProduct()">立即开盒</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-view" id="tab-guide">
+        <div class="guide-page">
+          <header class="guide-hero">
+            <img id="guideImg" alt="">
+            <button class="product-back" type="button" aria-label="返回上一页" onclick="closeGuide()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <div class="guide-hero-copy">
+              <div class="guide-kicker" id="guideKicker">TRAVEL GUIDE</div>
+              <h2 class="guide-title" id="guideTitle">出行攻略</h2>
+              <div class="guide-place" id="guidePlace"></div>
+              <div class="guide-meta" id="guideMeta"></div>
+            </div>
+          </header>
+          <nav class="guide-anchorbar" aria-label="攻略目录">
+            <button class="on" type="button" onclick="jumpGuide('guideRoute',this)">行程</button>
+            <button type="button" onclick="jumpGuide('guideTransit',this)">交通</button>
+            <button type="button" onclick="jumpGuide('guideBudget',this)">费用</button>
+            <button type="button" onclick="jumpGuide('guidePrepare',this)">准备</button>
+            <button type="button" onclick="jumpGuide('guideKnow',this)">须知</button>
+          </nav>
+          <main class="guide-body">
+            <div class="guide-weather">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8" cy="8" r="3"/><path d="M14 18H6a4 4 0 0 1 0-8h1M14 18h3a3 3 0 0 0 0-6 5 5 0 0 0-9-2"/></svg>
+              <div><b id="guideWeatherTitle">出发前提醒</b><p id="guideWeatherText"></p></div>
+            </div>
+            <div class="guide-facts" id="guideFacts"></div>
+            <section class="guide-section" id="guideRoute">
+              <div class="guide-section-head"><h3>分时行程</h3><span id="guideRouteSpan"></span></div>
+              <p class="guide-summary" id="guideSummary"></p>
+              <div class="guide-timeline" id="guideTimeline"></div>
+            </section>
+            <section class="guide-section" id="guideAttractionsSection" style="display:none;">
+              <div class="guide-section-head"><h3>沿途景点详解</h3><span>按实际行走顺序</span></div>
+              <div id="guideAttractions"></div>
+            </section>
+            <section class="guide-section" id="guideTransit">
+              <div class="guide-section-head"><h3>交通与集合</h3><span>建议提前确认</span></div>
+              <div id="guideTransitList"></div>
+            </section>
+            <section class="guide-section">
+              <div class="guide-section-head"><h3>餐食与住宿</h3><span>补给与休息</span></div>
+              <div id="guideLivingList"></div>
+            </section>
+            <section class="guide-section" id="guideBudget">
+              <div class="guide-section-head"><h3>费用明细</h3><span>实际以订单为准</span></div>
+              <div id="guideCostList"></div>
+            </section>
+            <section class="guide-section" id="guidePrepare">
+              <div class="guide-section-head"><h3>出发清单</h3><span>点击可勾选</span></div>
+              <div class="guide-checks" id="guideChecklist"></div>
+            </section>
+            <section class="guide-section">
+              <div class="guide-section-head"><h3>天气与备选</h3><span>Plan B</span></div>
+              <div class="guide-planb" id="guidePlanB"></div>
+            </section>
+            <section class="guide-section" id="guideKnow">
+              <div class="guide-section-head"><h3>预约与变更</h3><span>下单前确认</span></div>
+              <div id="guideRules"></div>
+            </section>
+            <section class="guide-section">
+              <div class="guide-section-head"><h3>避坑与安全</h3><span>出发前必读</span></div>
+              <div id="guideTips"></div>
+              <div class="guide-emergency"><strong>应急信息</strong><br>订单服务：在“我的订单”中联系客服<br>紧急求助：报警 110 · 急救 120</div>
+            </section>
+            <section class="guide-section">
+              <div class="guide-section-head"><h3>常见问题</h3><span>出发前查看</span></div>
+              <div class="guide-faq" id="guideFaq"></div>
+            </section>
+          </main>
+          <div class="guide-actions">
+            <button class="btn-block btn-line" id="guideSaveBtn" type="button" onclick="toggleGuideSave(this)">收藏攻略</button>
+            <button class="btn-block btn-sage" type="button" onclick="askGuideAi()">问问 AI 搭子</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-view" id="tab-community">
+        <div class="xhs-top">
+          <div class="scallop-row" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <button class="xhs-icon-btn" type="button" aria-label="搜索笔记" onclick="showDemoToast('搜索笔记：原型演示')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+          </button>
+          <div class="xhs-tabs" id="communityTabs">
+            <button class="on" data-community="discover" type="button">发现</button>
+            <button data-community="follow" type="button">关注</button>
+            <button data-community="topics" type="button">话题</button>
+            <button data-community="creators" type="button">达人</button>
+          </div>
+          <button class="xhs-icon-btn" type="button" aria-label="我的收藏" onclick="openMyCollection()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg>
+          </button>
+        </div>
+        <div class="xhs-chips" id="communityChips"></div>
+        <div class="xhs-feed" id="communityGrid"></div>
+      </div>
+
+
+      <div class="tab-view" id="tab-records">
+        <div class="cloud-head sub-cloud"><div class="scallop-row" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><button class="subpage-back" type="button" aria-label="返回个人中心" onclick="navTo('mine')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button><div class="sub-cloud-copy"><div class="sub-kicker">Money trail</div><div class="sub-title">支付记录</div><div class="sub-desc">每一笔支付，都留在你的旅途里</div></div></div>
+        <div class="page-pad" id="paymentRecordsList"></div>
+      </div>
+
+      <div class="tab-view" id="tab-cart">
+        <div class="cloud-head sub-cloud"><div class="scallop-row" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><button class="subpage-back" type="button" aria-label="返回上一页" onclick="closeCartPage()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button><div class="sub-cloud-copy"><div class="sub-kicker">Saved for later</div><div class="sub-title">我的购物车</div><div class="sub-desc">选好几份惊喜，一次结算</div></div></div>
+        <div class="page-pad" id="cartPageList"></div>
+      </div>
+
+    </div>
+
+    <button class="xhs-compose" type="button" onclick="openPostComposer()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M12 5v14M5 12h14"/></svg>
+      发布
+    </button>
+
+    <div class="market-cart-float" id="marketCartFloat" role="button" tabindex="0" onclick="openCartPage()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCartPage()}">
+      <span>购物车 · <b id="marketCartCount">0</b> 件</span><strong id="marketCartTotal">¥0</strong>
     </div>
 
     <nav class="bottom-tabbar">
-      <div class="tab-item active" onclick="switchNav('home', this)">
+      <div class="tab-item active" data-tab="home" onclick="switchNav('home', this)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></svg>
         <span>首页</span>
       </div>
-      <div class="tab-item" onclick="switchNav('ai', this)">
+      <div class="tab-item" data-tab="market" onclick="switchNav('market', this)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 9h16l-1 11H5L4 9z"/><path d="M7 9V6a5 5 0 0 1 10 0v3M9 13h6"/></svg>
+        <span>商品</span>
+      </div>
+      <div class="tab-item" data-tab="community" onclick="switchNav('community', this)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-5 4v-4.5a2.5 2.5 0 0 1-2-2.5z"/><path d="M8 8h8M8 11h5"/></svg>
+        <span>社区</span>
+      </div>
+      <div class="tab-item" data-tab="ai" onclick="switchNav('ai', this)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3"/><path d="M6 19c1.5-3 4-4.5 6-4.5S16.5 16 18 19"/><path d="M19 8h2M3 8h2M12 2v1"/></svg>
         <span>AI搭子</span>
       </div>
-      <div class="tab-item" onclick="switchNav('badges', this)">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 14.5 8l5.5.8-4 3.9.9 5.5L12 16l-4.9 2.2.9-5.5-4-3.9L9.5 8z"/></svg>
-        <span>图鉴</span>
-      </div>
-      <div class="tab-item" onclick="switchNav('trips', this)">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-        <span>行程</span>
-      </div>
-      <div class="tab-item" onclick="switchNav('mine', this)">
+      <div class="tab-item" data-tab="mine" onclick="switchNav('mine', this)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span>我的</span>
       </div>
     </nav>
     <div class="home-indicator"></div>
 
-    <div class="modal-overlay" id="unboxModal">
+      <div class="modal-overlay" id="postModal"><div class="modal-sheet tall"><div class="sheet-handle"></div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><h3 style="font-family:'Noto Serif SC',serif;font-size:18px;">分享这一站</h3><button type="button" aria-label="关闭发布页" style="font-size:22px;color:var(--muted);cursor:pointer;border:0;background:none;line-height:1;" onclick="closePostComposer()">×</button></div><div class="xhs-pub-grid" id="postImageGrid"><div class="xhs-pub-slot add" onclick="addPostImage()">＋</div></div><input class="xhs-pub-title" id="postTitle" maxlength="30" placeholder="填写标题会有更多赞哦～"><textarea class="xhs-pub-body" id="postText" maxlength="500" placeholder="写下这次开盒后的心情…"></textarea><div style="font-size:10px;color:var(--muted);text-align:right;margin:2px 2px 10px;"><span id="postCharCount">0</span> / 500</div><div class="xhs-pub-row"><b>添加话题</b><span class="mood-chip active" style="margin:0;">#盲盒开箱</span></div><div class="xhs-pub-row"><b>标记地点</b><span>＋ 添加打卡地点</span></div><div class="xhs-pub-row"><b>关联盲盒</b><span id="postLinkBox">未关联</span></div><button class="btn-block btn-sage" type="button" onclick="publishPost()">发布</button></div></div>
+
+      <div class="modal-overlay" id="unboxModal">
       <div class="modal-sheet">
         <div class="sheet-handle"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
           <h3 style="font-family:'Noto Serif SC',serif;font-size:18px;" id="mBoxName">周边微度假盲盒</h3>
-          <span style="font-size:22px;color:var(--muted);cursor:pointer;line-height:1;" onclick="closeModal()">×</span>
+          <span id="unboxClose" style="font-size:22px;color:var(--muted);cursor:pointer;line-height:1;" onclick="closeModal()">×</span>
         </div>
         <div id="stepConfirm">
           <div style="height:140px;border-radius:18px;overflow:hidden;margin-bottom:14px;">
@@ -1468,12 +2110,18 @@
           <button type="button" class="btn-block btn-line" style="margin-top:8px;" onclick="cancelCurrentOrder()">取消订单</button>
           <button type="button" class="btn-block btn-line" style="margin-top:8px;" onclick="closeModal()">稍后再付</button>
         </div>
-        <div id="stepDrawing" style="display:none;text-align:center;padding:36px 0;">
-          <div class="pulse-box" style="width:64px;height:64px;border-radius:20px;background:var(--sage-mist);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6C7E58" stroke-width="1.6"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13"/></svg>
+        <div id="stepDrawing" class="unbox-drawing" style="display:none;">
+          <div class="unbox-scene" aria-hidden="true">
+            <div class="unbox-rays"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="unbox-confetti"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="unbox-shadow"></div>
+            <div class="unbox-ticket"><small>DESTINATION CARD</small><b>路线卡</b><small>途个惊喜</small></div>
+            <div class="unbox-lid"></div>
+            <div class="unbox-base"><span>途个惊喜</span></div>
           </div>
-          <h4>小途正在拆开纸盒…</h4>
-          <p style="font-size:11px;color:var(--muted);margin-top:6px;">保底线路匹配中</p>
+          <h4 class="draw-title">正在开启你的旅行盲盒</h4>
+          <p class="draw-status" id="drawStatus">正在验证价值保底</p>
+          <div class="draw-progress"><span></span></div>
         </div>
         <div id="stepResult" style="display:none;">
           <div style="height:140px;border-radius:18px;overflow:hidden;margin-bottom:12px;">
@@ -1525,7 +2173,9 @@
           <h3 style="font-family:'Noto Serif SC',serif;font-size:18px;" id="tdName">线路名称</h3>
           <span style="font-size:22px;color:var(--muted);cursor:pointer;line-height:1;" onclick="closeTripDetail()">×</span>
         </div>
+        <img class="trip-detail-cover" id="tdImg" alt="">
         <p id="tdDest" style="font-size:12px;color:var(--muted);margin-bottom:12px;"></p>
+        <div class="trip-detail-pills" id="tdMeta"></div>
         <div class="soft-panel" style="margin-bottom:14px;">
           <div style="display:flex;justify-content:space-between;"><span>票面价值</span><strong id="tdVal">¥0</strong></div>
           <div style="display:flex;justify-content:space-between;"><span>购入价</span><strong id="tdPrice">¥0</strong></div>
@@ -1534,6 +2184,19 @@
           <h4 style="font-size:13px;font-weight:800;margin-bottom:6px;">线路亮点</h4>
           <p id="tdHighlight" style="font-size:13px;color:var(--muted);line-height:1.65;"></p>
         </div>
+        <div style="margin-bottom:14px;">
+          <h4 style="font-size:13px;font-weight:800;margin-bottom:8px;">详细分时路线</h4>
+          <div class="trip-detail-route"><div class="guide-timeline" id="tdTimeline"></div></div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <h4 style="font-size:13px;font-weight:800;margin-bottom:4px;">沿途景点看点</h4>
+          <div class="trip-attractions" id="tdAttractions"></div>
+        </div>
+        <button class="guide-entry" type="button" style="margin:0 0 14px;" onclick="openGuideForTrip(currentTripId)">
+          <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m4 6 5-2 6 2 5-2v14l-5 2-6-2-5 2zM9 4v14M15 6v14"/></svg></span>
+          <span class="copy"><b>查看完整出行攻略</b><small id="tdGuideHint">交通、费用、行前清单与天气备选</small></span>
+          <span class="chev">›</span>
+        </button>
         <div style="margin-bottom:14px;">
           <h4 style="font-size:13px;font-weight:800;margin-bottom:6px;">服务包含</h4>
           <div class="include-list" id="tdInclude"></div>
@@ -1601,6 +2264,11 @@
         <button type="button" class="btn-block btn-sage" onclick="submitRefund()">提交申请</button>
       </div>
     </div>
+    <div class="xhs-detail" id="postDetail" aria-hidden="true">
+      <div class="xhs-detail-head" id="postDetailHead"></div>
+      <div class="xhs-detail-body" id="postDetailBody"></div>
+      <div class="xhs-bar" id="postDetailBar"></div>
+    </div>
     <div class="demo-toast" id="demoToast"></div>
   </div>
 
@@ -1621,18 +2289,202 @@
       { id: 'r5', category: 'cross', name: '大理苍山洱海', dest: '云南 · 大理', value: 880, badge: '文艺', moodText: '去有风的地方重新开始', img: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80' },
       { id: 'r6', category: 'theme', name: '西关深巷寻味记', dest: '广州 · 西关', value: 168, badge: '美食', moodText: '烟火气是最好的良药', img: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80' }
     ];
+    const SERVICE_BY_CAT = {
+      nearby: ['当日交通衔接', '主题体验项目', '小途路线指引'],
+      province: ['往返交通衔接', '一晚精选住宿', '核心景点权益'],
+      cross: ['跨省交通组合', '当地住宿体验', '全程行程支持'],
+      theme: ['主题体验权益', '当地导览路线', '餐食或手作项目']
+    };
+    const GUIDE_BY_CAT = {
+      nearby: {
+        duration: '1 天', pace: '轻松', transit: '集合巴士 / 自驾', best: '春秋友好',
+        weather: '郊外早晚温差较明显，建议携带薄外套和雨具。出发前 24 小时请在订单页查看最终集合信息。',
+        summary: '一日微度假以“不赶路”为原则，上午慢游，下午完成主题体验，预留充足返程时间。',
+        schedule: [
+          ['08:00', '集合出发', '提前 15 分钟到达，核对订单和应急联系人。', '建议吃好早餐'],
+          ['09:30', '抵达与热身慢游', '先熟悉公共设施、返程上车点和导览路线。', '步行约 2–3 km'],
+          ['11:30', '当地午餐', '优先选择明码标价餐馆，忌口或过敏请提前说明。', '用餐约 60 分钟'],
+          ['13:00', '主题体验', '根据开盒线路进行非遗、徒步、露营或采风体验。', '核心环节'],
+          ['16:30', '集合返程', '清点随身物品，提前 10 分钟回到指定上车点。', '预计 18:00 抵达']
+        ],
+        transport: [
+          ['集合巴士', '开盒后在订单页查看集合点。建议搭乘公共交通前往，避免返程取车。'],
+          ['自驾方案', '导航以订单页目的地停车场为准，山路路段请勿盲目进入小路。']
+        ],
+        costs: [['当地午餐', '约 ¥40–80 / 人', '通常需自理'], ['个人消费', '按需准备', '伴手礼与加购项目'], ['停车费', '以现场为准', '仅自驾需要']],
+        packing: ['身份证 / 订单', '轻便外套', '防晒与遮阳帽', '雨具', '充电宝', '少量饮用水'],
+        tips: ['集合迟到可能影响整体发车，建议预留 20 分钟机动时间。', '体验项目以订单所列权益为准，现场临时加购前先确认价格。', '山野、湖畔等地区不要离开标识清晰的公共步道。', '如遇恶劣天气，以平台发送的延期或改线通知为准。']
+      },
+      province: {
+        duration: '2 天 1 晚', pace: '适中', transit: '高铁 + 接驳', best: '提前 3 天准备',
+        weather: '山区天气变化快，气温通常低于城区。出发前请根据实时天气增减防风保暖层。',
+        summary: '两日行程将核心景观与休息时间拆开，避免单日过度奔波，适合希望深度体验的出行者。',
+        schedule: [
+          ['D1 08:00', '出发与接驳', '按订单提示抵达集合点，核对返程班次。', '证件随身携带'],
+          ['D1 11:00', '核心景观游览', '由领队按当日客流与天气调整游览顺序。', '穿防滑鞋'],
+          ['D1 17:30', '入住与自由活动', '入住后先确认次日集合时间，夜间不单独前往未开放区域。', '含 1 晚住宿'],
+          ['D2 07:30', '日出 / 慢游线', '根据天气选择日出点或替代慢游线。', '早餐后出发'],
+          ['D2 14:30', '返程', '预留交通换乘时间，不建议购买过紧的返程班次。', '提前 40 分钟到站']
+        ],
+        transport: [['高铁优先', '建议选择上午抵达的班次，开盒后根据接驳时间再购票。'], ['当地接驳', '车辆信息通常在出发前 1 天发布，请保持手机畅通。']],
+        costs: [['差价房型', '以选择为准', '单人出行可能补房差'], ['个人餐食', '约 ¥100–200', '未标注包含的餐次'], ['缆车 / 观光车', '按订单权益', '加购前先确认']],
+        packing: ['身份证件', '防滑步行鞋', '防风外套', '换洗衣物', '常用药品', '便携充电器'],
+        tips: ['暂不要在开盒前购买不可退改的大交通票。', '山景线台阶较多，膝盖不适者建议携带护具并告知领队。', '酒店名称与房型以出发通知为准，不以示意图作为承诺。', '游览顺序可因天气调整，但已承诺权益不减少。']
+      },
+      cross: {
+        duration: '3 天 2 晚', pace: '舒展', transit: '飞机 / 高铁', best: '提前 7 天准备',
+        weather: '跨省出行气候差异较大，请同时查看出发地与目的地天气，行李建议采用叠穿方式。',
+        summary: '三天行程保留一段自由时间，第一天不排强度活动，第三天预留充足的大交通换乘余量。',
+        schedule: [['D1', '抵达与入住', '抵达后先确认接驳点和酒店信息，晚间就近活动。', '不排高强度行程'], ['D2 09:00', '目的地核心体验', '跟随当地路线完成核心景观与主题体验。', '全天主行程'], ['D2 17:00', '自由时间', '根据体力选择餐食、散步或提前返回住宿地。', '不建议远距离离队'], ['D3 09:30', '城市慢游', '安排轻量游览和伴手礼时间。', '行李可寄存'], ['D3 14:00', '返程换乘', '航班建议提前 2 小时到达机场，高铁提前 45 分钟。', '预留交通余量']],
+        transport: [['大交通', '开盒确认目的地后再购票，优先选可退改或较宽松的班次。'], ['当地出行', '接驳和主行程用车以订单为准，自由时间建议使用正规平台叫车。']],
+        costs: [['往返大交通', '按实际班次', '确认目的地后购买'], ['个人餐食', '约 ¥200–400', '依消费习惯变化'], ['行李托运', '以承运方为准', '廉航请特别留意']],
+        packing: ['身份证件', '大交通票据', '换洗衣物', '防晒 / 保暖层', '常用药与口罩', '充电器与充电宝'],
+        tips: ['确认目的地前不要锁定不可退改票务。', '飞机与高铁的免费行李额不同，购票时一并核对。', '跨省行程请保留酒店地址和返程票据离线截图。', '自由活动时不轻信非正规拉客、包车和低价票务。']
+      },
+      theme: {
+        duration: '1 天', pace: '慢游', transit: '地铁 + 步行', best: '全年可去',
+        weather: '主题线以城市步行为主，建议穿着轻便防滑鞋，雨天准备折叠伞。',
+        summary: '围绕美食、非遗或城市文化展开，不追求打卡数量，每站都留出真正体验的时间。',
+        schedule: [['09:30', '老城集合', '确认领队联系方式，熟悉当日步行路线。', '全程约 4–6 km'], ['10:00', '文化导览', '从历史街区或当地市场开始，了解主题背景。', '建议轻装'], ['11:30', '主题餐食', '按线路品尝当地特色，过敏信息请在开始前告知。', '少量多次'], ['14:00', '手作 / 非遗体验', '核心体验预留 90–120 分钟，完成后可带走作品。', '主题权益'], ['16:30', '自由慢游', '可继续探店或从附近公共交通站返程。', '弹性结束']],
+        transport: [['公共交通', '集合点优先选在地铁或公交可达区域，具体出口以订单通知为准。'], ['步行衔接', '线路主要靠步行衔接，无需额外包车，不建议穿新鞋。']],
+        costs: [['加购餐食', '约 ¥50–120 / 人', '标注外的自选品项'], ['伴手礼', '按需准备', '理性购买'], ['公共交通', '约 ¥10–30', '往返集合点']],
+        packing: ['身份证 / 订单', '轻便步行鞋', '折叠伞', '环保袋', '充电宝', '过敏药品'],
+        tips: ['美食线建议不要提前吃得过饱，但也不建议空腹太久。', '有过敏或忌口时，不要只靠现场口头说明，同时在订单备注。', '老城街区部分店铺只支持现场排队，预留弹性时间。', '体验过程中尊重当地居民生活，拍摄人物前先征得同意。']
+      }
+    };
+    const GUIDE_DETAIL_BY_CAT = {
+      nearby: {
+        facts: [['预计步行', '4–6 km'], ['乘车时间', '单程 1–2.5 小时'], ['厕所补给', '主站点可用'], ['通信信号', '部分山野较弱'], ['适合人群', '新手、朋友、亲子'], ['慎重选择', '行动不便或晕车严重']],
+        living: [['餐食', '午餐以当地家常菜为主，特殊忌口请在出发前 1 天写入订单备注。'], ['住宿', '一日线不含住宿；若需延住，请在目的地公布后自行确认可退改房型。'], ['水与补给', '建议自带 500–800 ml 饮用水，乡野路段商店密度较低。']],
+        planB: [['小雨', '保留可步行路段，将户外体验改为室内非遗或当地导览。'], ['强对流', '取消山野和水边环节，平台提供延期或同类路线调整。'], ['拥堵', '优先保留核心体验，压缩自由停留，不减少订单承诺权益。']],
+        rules: ['目的地与集合点会在开盒后展示，不建议提前购买不可退改的衔接交通。', '出发前 24 小时发布领队、车辆和最终集合信息。', '如需变更出行人，应在供应商锁定名单前联系客服。', '已开盒未出行的退换，以订单页保障条件和审核结果为准。'],
+        faq: [['一个人可以参加吗？', '可以。集合出行线会安排领队和统一交通，自驾线请定时向应急联系人报平安。'], ['可以带宠物吗？', '需根据开盒后的景区、餐厅与交通规定确认，未标注可携带时默认不建议。'], ['老人和儿童能去吗？', '轻松线可参加，但需结合步行量、台阶和当日天气评估。'], ['雨天会直接取消吗？', '普通小雨优先启用备选方案；涉及安全风险时才会延期或改线。']]
+      },
+      province: {
+        facts: [['预计步行', '8–12 km / 2 天'], ['海拔变化', '以路线通知为准'], ['行李建议', '20 寸内 + 背包'], ['通信信号', '山顶可能较弱'], ['适合人群', '有基础体力的成人'], ['慎重选择', '心肺不适、恐高或膝伤']],
+        living: [['餐食', '含餐情况以订单为准，山上餐饮选择有限，可自备少量能量食品。'], ['住宿', '默认为标准间拼住规则，单人出行的补房差和房型升级请在支付前确认。'], ['早餐与出发', '次日晨间行程较早，入住时即确认早餐时间和行李寄存点。']],
+        planB: [['低能见度', '取消观日出与临崖观景，改走低海拔环线或人文景点。'], ['索道停运', '改用观光车或短线步道，无法替代的权益按订单规则处理。'], ['强降雨', '以景区官方开放情况为准，必要时调整住宿和返程日期。']],
+        rules: ['建议开盒后再预订衔接高铁，班次与接驳间至少留 60 分钟。', '房型、同住人和特殊需求需在名单锁定前提交。', '出发通知包含领队电话、车牌号、酒店和建议车次，请提前离线保存。', '因天气调整游览顺序不视为减少权益；项目取消时需提供替代方案或按规则处理。'],
+        faq: [['需要徒步装备吗？', '普通防滑步行鞋即可，无需专业登山装备；膝盖敏感可自带护膝或手杖。'], ['住宿可以升级吗？', '在同一供应商有可用房型时可补差升级，以确认时实时房态为准。'], ['会强制购物吗？', '行程不设强制购物环节，个人自愿消费请保留凭证。'], ['返程票怎么买？', '建议根据攻略的返程时间再加 60–90 分钟余量。']]
+      },
+      cross: {
+        facts: [['预计步行', '10–18 km / 3 天'], ['交通强度', '多次换乘'], ['行李建议', '20 寸行李箱'], ['证件要求', '身份证原件'], ['适合人群', '时间弹性、喜欢未知'], ['慎重选择', '近期无法调休或晕机']],
+        living: [['餐食', '建议预留至少 2 顿自由用餐，方便根据当地口味调整；过敏信息建议准备文字版备忘。'], ['住宿', '连续住宿优先选同一地点，减少搬运行李；酒店地址和联系方式需离线保存。'], ['行李', '优先携带可叠穿衣物，不建议携带过多单次用品，并预留返程行李空间。']],
+        planB: [['班次延误', '优先联系订单客服，同步保留承运方延误凭证和改签记录。'], ['极端天气', '主行程暂停时优先保障住宿与返程，后续权益按供应商通知处理。'], ['身体不适', '停止高强度环节，留在公共区域并联系领队，必要时优先就医。']],
+        rules: ['目的地解锁后再购买大交通，优先选择免费退改或低改签成本班次。', '请确保出行人姓名与证件完全一致，错误可能导致无法出票或入住。', '有托运、儿童、老人或无障碍需求时，需在预订交通前完成备注。', '出发前建议购买与行程天数匹配的旅行保险，并保存保单与紧急报案方式。'],
+        faq: [['盲盒包含机票吗？', '页面明确写入权益时才包含；否则往返大交通需自理。'], ['可以提前知道省份吗？', '跨省盲盒的目的地在开盒后一次性解锁，下单前只展示主题和保底价值。'], ['临时发烧怎么办？', '立即联系领队或订单客服，优先就医；退改申请需保留相关凭证。'], ['可以自由离队吗？', '自由活动时间可离队，但必须记住集合时间并保持联系畅通。']]
+      },
+      theme: {
+        facts: [['预计步行', '4–7 km'], ['体验时长', '6–8 小时'], ['厕所补给', '城区公共设施'], ['支付方式', '建议保留少量现金'], ['适合人群', '美食、人文和手作爱好者'], ['慎重选择', '严重食物过敏未备注']],
+        living: [['餐食', '采用少量多次的品尝节奏，不保证每一站都有座位；过敏食材需反复确认。'], ['住宿', '城市主题线默认当日结束，需住宿时建议选择地铁可达且免费取消的房型。'], ['作品携带', '非遗或手作作品可自带环保袋，易碎物品先向店家确认包装方式。']],
+        planB: [['雨天', '优先保留室内市场、手作和餐食体验，减少露天街区停留。'], ['店铺临休', '使用同类体验替代，若涉及权益价差应在现场说明。'], ['排队过长', '先执行预约项目，非预约餐食点可调整到非高峰时段。']],
+        rules: ['需预约的手作或非遗项目会在出发通知中标明开始时间和迟到规则。', '餐食权益以指定套餐或兑换额度为准，超出部分由用户现场自理。', '过敏、素食或宗教饮食要求需提前备注，不能保证所有店铺都可替换。', '自由慢游环节不设强制购物，个人消费和配送需求由用户自行决定。'],
+        faq: [['吃不完可以打包吗？', '需根据店铺和食品安全要求确认，现做冷食和部分汤品不建议长时间携带。'], ['可以只参加手作项目吗？', '若不影响已预约时间，可提前与领队确认自由参与范围。'], ['小朋友能操作吗？', '需看具体工具和年龄限制，涉及明火、刀具或高温时必须有成人陪同。'], ['需要全程跟领队吗？', '预约项目之间可自由活动，但需按时到达下一集合点。']]
+      }
+    };
+    const ROUTE_GUIDES = {
+      r1: {
+        summary: '线路以渼陂古村的建筑、宗族文化和红色历史为主线，大部分为青石板路。行程不追求走完每条小巷，重点是在几个核心建筑与非遗体验间留出观察时间。',
+        weather: '古村青石板遇雨易滑，夏季巷道闷热。建议穿防滑鞋，阵雨天避免进入无管理的老宅和河埂边缘。',
+        schedule: [['08:00', '集合前往渼陂', '核对订单与返程集合点，途中由领队介绍古村参观礼仪。', '车程以通知为准'], ['09:30', '古村入口与村史导读', '从村落格局、水系与古街走向建立整体认知。', '停留约 30 分钟'], ['10:10', '宗祠建筑群', '观看天井、木构件和门楣细节，不跨越封闭区域。', '停留约 50 分钟'], ['11:20', '青石古街与午餐', '沿主街慢行，在规范经营点用餐。', '用餐约 70 分钟'], ['13:10', '红色旧址区', '根据当日开放情况参观旧址与陈列。', '安静参观'], ['14:30', '非遗体验与返程', '完成打糍粑等当日安排的体验，清点物品后集合。', '预计 16:30 返程']],
+        facts: [['预计步行', '5–7 km'], ['路面情况', '青石板为主'], ['主要台阶', '宗祠与老宅入口'], ['信号情况', '主街基本稳定'], ['适合人群', '人文、建筑、摄影爱好者'], ['慎重选择', '雨天行动不便者']],
+        attractions: [['古村入口与村史区', '30 分钟', '先看村落总平面与历史沿革，理解后面宗祠、古街和水系的关系。', '村落格局、水塘与入口视角', '先拍导览图，离线保存回程集合点'], ['宗祠建筑群', '50 分钟', '重点观察天井采光、木构造、门楣与建筑轴线，听完导读再自由观看细节。', '木构件、天井、门楣', '室内不开闪光灯，不触摸老构件'], ['青石古街', '60–90 分钟', '主街与支巷尺度不同，适合慢行观察老宅门面和居民生活。', '早晨光影、古街纵深感', '拍摄居民和室内生活前先征得同意'], ['红色旧址区', '45–60 分钟', '以当日实际开放的陈列空间为准，按时间线阅读而不是只看建筑外观。', '历史时间线与保留建筑', '保持安静，服从室内拍摄规定'], ['非遗体验坊', '60–90 分钟', '当日体验项目根据供应商排期确认，先听演示再上手。', '制作过程与当地生活技艺', '有食物过敏或手部伤口要提前说明']],
+        living: [['午餐', '优先选择明码标价的当地家常菜，用餐前确认是否包含在订单权益中。'], ['补给', '主街周边可购买饮用水，进入支巷前先完成补给。'], ['休息', '宗祠与古街之间安排一次固定休息，不建议坐在居民门槛。']],
+        planB: [['小雨', '保留宗祠、红色旧址和非遗体验，减少河埂与支巷步行。'], ['旧址未开放', '改为村史导读与建筑外观路线，不擅自进入封闭区域。'], ['体验调整', '原定非遗项目不可用时，替换为同等时长的当地技艺体验。']],
+        tips: ['古建筑内部光线较暗，拍摄时提高稳定性，不使用强闪光。', '雨后青石板比普通水泥路更滑，下坡时放慢速度。', '古村仍有居民生活，不进入未标明开放的民宅和院落。', '开放空间和体验项目以出发当天现场管理为准。']
+      },
+      r2: {
+        summary: '以茶园步道、岩茶制作与云雾景观为主线的徒步采风行程。重点不是赶景点，而是理解茶园地形、步行节奏与制茶工序。',
+        weather: '茶山雾气、阵雨和湿滑路面较常见，防滑鞋和轻量雨具是必带项。',
+        schedule: [['08:00', '集合出发', '确认徒步装备、饮水和返程时间。', '轻装出发'], ['09:30', '茶园入口热身', '进行简单拉伸，了解步道分岔和安全边界。', '20 分钟'], ['10:00', '茶垄步道徒步', '沿已开放步道上行，中途安排摄影停留。', '约 2 小时'], ['12:20', '茶山午餐', '补充热量与水分，不立即进行高强度上坡。', '60 分钟'], ['13:40', '岩茶工坊', '了解萎凋、做青、焙火等基本工序，根据当日安排试饮。', '70 分钟'], ['15:10', '云雾观景点与返程', '能见度允许时停留观景，雨天改为工坊深度体验。', '16:30 前下山']],
+        facts: [['预计步行', '7–9 km'], ['累计上下', '约 2–3 小时'], ['路面情况', '土路、石阶与茶垄边道'], ['信号情况', '山坳路段可能较弱'], ['适合人群', '徒步、茶文化、摄影爱好者'], ['慎重选择', '膝关节不适或易滑倒者']],
+        attractions: [['茶园入口与导览点', '20 分钟', '确认步道线路、卫生间和返程集合点，同时认识当地茶树与地形。', '茶垄线条与山谷视野', '进山前完成补给和上厕所'], ['茶垄步道', '90–120 分钟', '徒步核心段，保持单列行走，不踩入种植区和未开放小路。', '曲线茶垄、云雾与山体层次', '湿滑路段不边走边拍摄'], ['茶山观景台', '30–40 分钟', '能见度好时可观察茶园与山谷关系，起雾时减少停留。', '宽景、逆光茶垄', '不翻越护栏，风大时收好帽子'], ['岩茶工坊', '60–90 分钟', '从鲜叶到焙火的工序导读，试饮时记录香气、滋味和回甘差异。', '制茶工具、焙火工序、试饮', '空腹和对咖啡因敏感者不要连续浓茶试饮']],
+        living: [['午餐', '优先选热食和易消化主食，避免饭后立即快速爬升。'], ['饮水', '入山前至少准备 800 ml 饮水，工坊试饮不能代替饮水。'], ['能量补给', '少量坚果、能量棒即可，不携带气味过重或易泄漏食品。']],
+        planB: [['起雾', '取消高处观景停留，保留安全步道与茶厂体验。'], ['持续降雨', '将长距离徒步替换为工坊、茶文化导读和室内试饮。'], ['高温', '缩短中午户外段，徒步提前到早间并增加补水点。']],
+        tips: ['茶园属于生产空间，不采摘、不踩茶垄、不进入未开放作业区。', '山间路段不建议使用三脚架长时占道。', '试饮前先说明孕期、睡眠障碍或咖啡因敏感情况。', '所有步道与工坊开放情况以当日通知为准。']
+      },
+      r3: {
+        summary: '围绕仙女湖湖畔散步、日落观景、露营体验和夜间观星展开。这条线步行强度不高，但夜间温差、露水和照明是准备重点。',
+        weather: '湖边傍晚降温快，无风城区的穿着往往不够。观星受云量影响，不保证每次都有晴朗星空。',
+        schedule: [['13:30', '营地签到与安全说明', '确认帐篷区、卫生间、紧急出口和水边安全线。', '30 分钟'], ['14:10', '湖畔栈道慢行', '沿开放栈道观景，不离开护栏区域。', '60 分钟'], ['15:30', '搭建与营地体验', '在工作人员指引下完成帐篷、防潮和照明检查。', '70 分钟'], ['17:10', '日落观景与晚餐', '日落时间随季节变化，提前到观景区并完成保暖。', '不占用安全通道'], ['19:30', '星空导读', '关闭非必要强光，等待眼睛适应黑暗后再观察。', '云多时改夜间自然导读'], ['21:00', '营地收尾', '清点火源、垃圾与贵重物品，按订单安排返程或入住。', '不单独前往水边']],
+        facts: [['预计步行', '3–5 km'], ['地形特点', '平缓栈道与草地'], ['夜间温差', '通常高于白天体感预期'], ['通信信号', '营地内基本可用'], ['适合人群', '露营新手、亲子、情侣'], ['慎重选择', '怕冷、对虫类敏感者']],
+        attractions: [['营地签到区', '30 分钟', '首先熟悉营地分区、用电规则、卫生间与紧急集合点。', '营地全景与湖岸方向', '先记安全信息，再开始拍照'], ['湖畔栈道', '50–60 分钟', '适合慢行观察水面、风向和湖岸植被，不翻越栏杆或前往未开放岸线。', '湖面反光、栈道线条', '逆光较强，建议准备遮阳和手机防掉绳'], ['日落观景区', '40–60 分钟', '日落方位和时间随季节变化，以领队当天建议的安全区域为准。', '湖面色温变化、剪影', '不使用未固定的高位支架'], ['星空营区', '60–90 分钟', '先进行 10–15 分钟暗适应，再开始辨认亮星与星座。', '低光环境与湖畔夜色', '使用红光或低亮照明，避免手电直射他人']],
+        living: [['晚餐', '以营地套餐或统一用餐为主，烧烤食材需充分加热。'], ['保暖', '即使白天炎热，也建议携带长袖外套和可收纳防风层。'], ['防虫与照明', '带个人可用的防虫用品和备用小照明，不在帐篷内使用明火。']],
+        planB: [['多云', '将观星改为星图导读、湖畔夜间声景观察或营地体验。'], ['强风', '取消帐篷和水边停留，转移至固定建筑或按平台通知改期。'], ['降雨', '湖畔栈道可能关闭，优先保留室内体验并提前结束夜间环节。']],
+        tips: ['水边活动全程在开放区域内进行，夜间不单独前往岸线。', '帐篷拍摄不能影响消防通道和相邻营位。', '星空与日落属自然现象，不作为每次行程的可控承诺。', '离开营地前检查明火、电源、垃圾与个人物品。']
+      },
+      r4: {
+        summary: '两日山岳线以三清山高山栈道和花岗岩峰林为核心，通常结合索道与步行环线。景点取舍会根据体力、客流和能见度调整。',
+        weather: '山上风大、温度低且天气切换快。必须准备防风防雨层，不使用普通塑料雨衣代替稳定防护。',
+        schedule: [['D1 08:00', '抵达索道站与检票', '核对返程时间、末班索道与天气通知。', '避开高峰排队'], ['D1 10:00', '南清园峰林线', '以东方女神、巨蟒出山等观景方向串联步道。', '4–6 小时'], ['D1 17:00', '返回住宿区', '在天黑前结束主步道，入住后确认次日路线。', '完成拉伸'], ['D2 07:30', '早间观景 / 替代线', '能见度好时进行早间观景，否则延后出发。', '不摸黑走未开放路段'], ['D2 09:30', '西海岸高空栈道', '结合客流与体力完成精华段，不强求全程环线。', '2–3 小时'], ['D2 14:30', '下山与返程', '在末班索道前留足排队时间，不临时加走远线。', '提前确认返程班次']],
+        facts: [['预计步行', '12–16 km / 2 天'], ['台阶强度', '较多且连续'], ['索道环节', '受风速与检修影响'], ['通信信号', '高山路段可能不稳定'], ['适合人群', '有基础体力的山岳景观爱好者'], ['慎重选择', '恐高、膝伤或心肺不适者']],
+        attractions: [['索道站与入山口', '30–60 分钟', '了解当日步道开放、末班索道与天气预警，在上山前完成补给。', '山势总览与线路标识', '排队时也要保留下山时间余量'], ['东方女神观景区', '30–40 分钟', '以侧向观景角度识别峰体轮廓，人流大时不长时间占用主观景位。', '花岗岩轮廓与云海背景', '不翻越护栏寻找拍摄角度'], ['巨蟒出山观景区', '30–40 分钟', '观察垂直石柱与周围峰林的尺度对比，雾中可缩短等待。', '独立石柱、层叠山体', '风大时收好松散物品'], ['南清园步道', '3–4 小时', '台阶和观景平台交替，建议小步幅、均匀速度，不在上坡段突然冲刺。', '奇峰、古松、山谷层次', '每 45–60 分钟短休，避免久坐后立即起身'], ['西海岸高空栈道', '2–3 小时', '路线相对平缓但暴露感较强，恐高者走靠山侧并减少向下观望。', '高山栈道、云海与日落方向', '雷电、大风或结冰时不进入']],
+        living: [['山上补给', '补给点价格与品类有限，建议自带水和少量高能量食品。'], ['住宿', '根据订单安排在山上或山下，两者对次日出发时间影响较大。'], ['晚间恢复', '入住后先补水、拉伸和检查足部，不再安排高强度自由活动。']],
+        planB: [['索道停运', '以现场通知为准调整入山方式；无法安全替代时不强行徒步上山。'], ['低能见度', '减少高空栈道停留，优先选择林下步道和近距离峰林观景。'], ['体力不足', '在可返回的节点缩短环线，保留索道排队与返程时间。']],
+        tips: ['上山前确认索道末班时间，不以网络旧攻略的时间作准。', '高山天气变化时以景区现场管理和领队判断为准。', '膝关节压力主要来自连续下台阶，下行比上行更需控制速度。', '不在栈道转角、狭窄处和紧急通道架设拍摄设备。']
+      },
+      r5: {
+        summary: '三天线围绕大理古城、苍山景观与洱海沿线展开，在高原环境中保持较慢节奏。抵达当天不安排高强度活动，第二天再进入核心行程。',
+        weather: '大理日照和紫外线较强，早晚温差明显，苍山与洱海边风力可能增大。重点是防晒、补水和分层穿着。',
+        schedule: [['D1 14:00', '抵达与古城慢游', '入住后先休息、补水，傍晚再进行低强度步行。', '不赶景点'], ['D2 08:30', '苍山索道区', '根据当日开放、风力和预约时段完成上山体验。', '保留改线时间'], ['D2 14:30', '洱海生态廊道', '选择一段慢行或骑行，不追求环海全程。', '2–3 小时'], ['D2 18:00', '洱海日落方向', '按风力与云量决定停留，不在公路边临时停车。', '安全优先'], ['D3 09:00', '喜洲古镇与田野视角', '以建筑与当地生活为主，控制商业化打卡停留。', '2 小时'], ['D3 13:30', '返程换乘', '取行李后前往车站或机场，预留大交通余量。', '航班提前 2 小时']],
+        facts: [['预计步行', '12–18 km / 3 天'], ['环境特点', '高原日照与昼夜温差'], ['主要交通', '索道、接驳、步行 / 骑行'], ['行李建议', '20 寸行李箱'], ['适合人群', '喜欢风景、慢游和摄影'], ['慎重选择', '近期呼吸系统不适者']],
+        attractions: [['大理古城', '2–3 小时', '抵达当天以低强度慢行为主，记住酒店方向和回程路线，不在旅途第一餐过度饮酒。', '城门轴线、街巷、傍晚光线', '商品和拍摄服务先确认价格'], ['苍山索道及开放步道', '3–4 小时', '根据索道开放和当日风力选择可行路线，不自行进入封闭或非正式步道。', '山脊、洱海俯瞰与高山植被', '索道会因天气调整，提前准备平地替代方案'], ['洱海生态廊道', '2–3 小时', '选一段慢行或骑行即可，将体力留给返程，不临时挑战长距离环海。', '湿地、水面反光、苍山背景', '骑行佩戴头盔，避让行人和村落出入口'], ['喜洲古镇', '2 小时', '以建筑立面、院落格局与田野环境为观察重点，不将商业化店铺数量当成行程主体。', '白族建筑、古镇街巷、田野边界', '未开放民居不进入，田地不踩踏']],
+        living: [['高原饮食', '刚抵达时优先清淡、热食和充足饮水，少量尝试陌生食材。'], ['住宿位置', '古城内便于步行但车辆接驳可能不到门；城外住宿更便于大交通衔接。'], ['行李寄存', '第三天慢游前先确认酒店寄存和最晚取件时间。']],
+        planB: [['苍山索道停运', '改为古城人文、洱海廊道安全段或室内手作体验。'], ['洱海边大风', '取消骑行和长时间水边停留，改为有遮挡的城镇步行。'], ['大交通延误', '优先保障住宿和返程，不在延误后强行压缩高强度景点。']],
+        tips: ['到达首日不过量饮酒、不立即进行高强度运动。', '洱海沿线骑行只走允许通行的路段，不进入生态保护区。', '苍山索道与步道开放以当日现场信息为准。', '日照强时即使体感不热也需持续防晒和补水。']
+      },
+      r6: {
+        summary: '以广州西关的骑楼、水系、粤剧与老广餐食为主线，采用少量多次的品尝方式。行程重点是街区脉络和饮食文化，不是将每家网红店都排入。',
+        weather: '广州高温高湿时体感较强，老城步行需频繁进出室内外。建议轻便穿着、持续补水，雨季携带折叠伞。',
+        schedule: [['08:30', '西关早茶', '以少量多次品尝开始，不在第一站就过量点单。', '70 分钟'], ['10:00', '泮塘五约与荔枝湾涌', '沿水系了解西关聚落与城市变迁。', '90 分钟'], ['12:00', '骑楼街区寻味', '按路线品尝一至两种小吃，中途保留休息。', '90 分钟'], ['14:00', '粤剧与西关文化展馆', '以当日开放展陈为准，了解粤剧表演、服饰和舞台文化。', '60–90 分钟'], ['15:40', '永庆坊街区慢游', '观察骑楼、街巷尺度与更新后的公共空间。', '70 分钟'], ['17:00', '糖水收尾与返程', '根据当日体感与排队情况选择收尾品类。', '附近公共交通返程']],
+        facts: [['预计步行', '5–7 km'], ['品尝节奏', '4–6 个小份项目'], ['主要路面', '城市人行道与骑楼'], ['卫生间', '商场、展馆与公共设施'], ['适合人群', '美食、城市史、建筑爱好者'], ['慎重选择', '严重食物过敏未备注者']],
+        attractions: [['西关早茶点', '60–75 分钟', '先确认权益套餐和自费项目，以小份分享方式品尝，给后续站点留胃口。', '点心笼、茶市氛围、老店空间', '海鲜、坚果和奶制品过敏要逐项确认'], ['泮塘五约', '40–60 分钟', '关注河涌、社区街巷和传统聚落结构，避免只在商业门面停留。', '岭南聚落、水系、骑楼细节', '保持社区通行，不阻挡居民门口'], ['荔枝湾涌', '40–60 分钟', '沿已开放步道观察水系与桥梁，将其与西关城市生活联系起来。', '河涌、桥梁、岭南植被', '雨天注意河边湿滑和积水'], ['粤剧文化展陈空间', '60–90 分钟', '从行当、服饰、乐器和舞台四个角度阅读展陈，如遇当日演出按现场规则观看。', '粤剧服饰、舞台美术、岭南园林空间', '展厅拍摄和演出录像以现场规定为准'], ['永庆坊街区', '60–90 分钟', '观察旧建筑保留与新业态介入的关系，选择一两处重点看，不必遍历所有店铺。', '骑楼、街巷、公共空间更新', '高峰时段人多，注意贵重物品和团队集合时间']],
+        living: [['品尝原则', '少量多次、先确认价格与过敏原，不为了打卡连续排队。'], ['补水', '高温高湿时每小时补水，不只依赖甜饮和茶饮。'], ['休息', '中午安排室内展馆或有空调的用餐环节，降低长时间暴晒。']],
+        planB: [['雨天', '保留早茶、粤剧展陈和骑楼有遮蔽路段，减少河涌边停留。'], ['店铺临休', '使用同类且明码标价的店铺替代，不为单一名店破坏整体路线。'], ['高温', '将室外步行集中到早间和傍晚，中午转入展馆与用餐。']],
+        tips: ['老城餐饮店面积有限，等位时不阻塞骑楼和社区通道。', '过敏信息不只告知领队，每次点餐时也需向店家重复确认。', '展馆、演出和个别街区的开放以当日现场信息为准。', '购买需冷藏的伴手礼时，先评估返程时长与保温条件。']
+      }
+    };
     const TUGE_BADGES = [
       { name: '古村', mark: '村' }, { name: '山野', mark: '山' }, { name: '美食', mark: '味' },
       { name: '徽派', mark: '徽' }, { name: '文艺', mark: '文' }, { name: '海滨', mark: '海' },
       { name: '红色', mark: '红' }, { name: '乡村', mark: '乡' }, { name: '探险', mark: '探' },
       { name: '露营', mark: '营' }, { name: '研学', mark: '学' }, { name: '摄影', mark: '影' }
     ];
-    const SERVICE_BY_CAT = {
-      nearby: ['往返交通', '午餐一份', '向导陪同'],
-      province: ['大巴往返', '两日住宿', '向导陪同', '景区门票'],
-      cross: ['交通衔接', '住宿', '向导', '行程保险'],
-      theme: ['市内交通', '美食体验', '向导讲解']
-    };
+    const TUGE_TOPICS = [
+      { tag: '#周末去哪儿', views: '128.4万', desc: '周边一日游的解法都在这' },
+      { tag: '#盲盒开箱', views: '96.7万', desc: '今天拆到哪一条线路' },
+      { tag: '#小众秘境', views: '74.2万', desc: '人少、风大、心静' },
+      { tag: '#美食探店', views: '61.8万', desc: '为一口吃的出发' },
+      { tag: '#一个人旅行', views: '43.5万', desc: '独自出发也安心' },
+      { tag: '#古村慢生活', views: '28.1万', desc: '青石板与老樟树' }
+    ];
+    const TUGE_CREATORS = [
+      { name: '小鹿', bio: '古村收集者 · 已开盒 12 次', fans: '1.2万', badge: '村' },
+      { name: '北北', bio: '露营与星空 · 已开盒 18 次', fans: '9824', badge: '营' },
+      { name: '阿茶', bio: '一个人走过的山路', fans: '6310', badge: '山' },
+      { name: '米粒', bio: '为了早茶可以起很早', fans: '4188', badge: '味' }
+    ];
+    const TUGE_POSTS = [
+      { id:'p1', title:'青石板上的慢生活，真的会把皱抚平', author:'小鹿', place:'吉安 · 青原区', likes:1287, comments:186, collects:342, cat:'古村', boxId:'box_2', ratio:1.28, topic:'#古村慢生活',
+        imgs:['https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80'],
+        text:'开盒开到了渼陂古村，票面 148 比售价高了一截。\n早上八点的青石板还带着露水，打糍粑的阿婆说今天有集市。\n没做任何攻略，走到哪儿算哪儿，反而遇见了最舒服的一下午。' },
+      { id:'p2', title:'湖边搭好帐篷，等一场不赶时间的日落', author:'北北', place:'仙女湖畔', likes:964, comments:112, collects:268, cat:'露营', boxId:'box_3', ratio:1.0, topic:'#小众秘境',
+        imgs:['https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80'],
+        text:'湖畔星空营地之夜，帐篷、晚餐、向导都包含在内。\n傍晚湖面像一块烧红的铁，风一吹又凉下来。\n夜里抬头的时候，真的有人在旁边轻轻「哇」了一声。' },
+      { id:'p3', title:'一个人的周末，也可以有很具体的风', author:'阿茶', place:'武夷山周边', likes:742, comments:94, collects:156, cat:'山野', boxId:'box_1', ratio:1.44, topic:'#一个人旅行',
+        imgs:['https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80'],
+        text:'一个人走也安心，线路含向导和交通。\n茶垄步道走了两个小时，云雾从脚边漫过去。\n不用等谁，也不用迁就谁的节奏，这大概就是我想要的松弛。' },
+      { id:'p4', title:'把烟火气装进一日游里', author:'米粒', place:'广州 · 西关', likes:613, comments:77, collects:129, cat:'美食', boxId:'box_6', ratio:1.26, topic:'#美食探店',
+        imgs:['https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80','https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80'],
+        text:'早茶、骑楼、糖水，一条线吃下来。\n开盒的时候还担心会不会踩雷，结果老城寻味专线是真的懂吃。\n下次想试试主题盒里的非遗路线。' },
+      { id:'p5', title:'爬了三清山，云在脚下走', author:'林深', place:'上饶 · 玉山', likes:428, comments:52, collects:97, cat:'徽派', boxId:'box_4', ratio:1.4, topic:'#周末去哪儿',
+        imgs:['https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80'],
+        text:'省内仙山问道二日，大巴、住宿、门票全包。\n五点半起床看日出，栈道上全是等云海的人。\n站在高处的时候，天地确实会开朗一点。' },
+      { id:'p6', title:'第一次跨省开盒，去有风的地方', author:'小满', place:'云南 · 大理', likes:356, comments:41, collects:88, cat:'文艺', boxId:'box_5', ratio:1.47, topic:'#盲盒开箱',
+        imgs:['https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80'],
+        text:'跨省限定冒险盲盒，抽到了大理。\n苍山索道上去的时候心里有点空，洱海边又慢慢被填满。\n票面 880，保底是真的在兜住我。' }
+    ];
+
     const TEST_QUESTIONS = [
       {
         question: '周末有空你更倾向于？',
@@ -1687,7 +2539,7 @@
       { type: 'culture', name: '人文记录者', mark: '文', desc: '你钟情于历史与文化，在旅途中探索精神的厚度。', recommend: '红色研学、非遗体验、古镇人文类盲盒最适合你。' }
     ];
 
-    let state = { category: 'nearby', mood: 'all', trips: [], badges: [], savedTotal: 0, personality: null, aiSessions: [], aiCurrentId: '', aiHistCollapsed: true, aiHistFoldTouched: false, loggedIn: false, user: { phone: '', nickname: '', channel: '' }, orders: [], refunds: [] };
+    let state = { category: 'nearby', mood: 'all', trips: [], badges: [], savedTotal: 0, personality: null, aiSessions: [], aiCurrentId: '', aiHistCollapsed: true, aiHistFoldTouched: false, loggedIn: false, user: { phone: '', nickname: '', channel: '' }, orders: [], refunds: [], cart: [], paymentRecords: [], posts: [], likes: {}, collects: {}, follows: [], comments: {} };
     let currentBox = null;
     let drawnRoute = null;
     let specialIndex = 1;
@@ -1698,6 +2550,8 @@
     let currentOrder = null;
     let loginAfter = null;
     let payTimer = null;
+    let drawRevealTimer = null;
+    let drawStatusTimer = null;
     let smsLeft = 0;
     let smsTick = null;
     let orderFilter = 'all';
@@ -1730,6 +2584,13 @@
       if (!state.user) state.user = { phone: '', nickname: '', channel: '' };
       if (!Array.isArray(state.orders)) state.orders = [];
       if (!Array.isArray(state.refunds)) state.refunds = [];
+      if (!Array.isArray(state.cart)) state.cart = [];
+      if (!Array.isArray(state.paymentRecords)) state.paymentRecords = [];
+      if (!Array.isArray(state.posts)) state.posts = [];
+      if (!state.likes || typeof state.likes !== 'object') state.likes = {};
+      if (!state.collects || typeof state.collects !== 'object') state.collects = {};
+      if (!Array.isArray(state.follows)) state.follows = [];
+      if (!state.comments || typeof state.comments !== 'object') state.comments = {};
       pullLedger();
       expireOrders();
       applyLedgerRefunds();
@@ -1885,7 +2746,7 @@
       state.trips = [{
         id: 'trip_preview', orderId: no, valid: true, boxName: '隐世古村慢生活盒', name: r.name,
         dest: r.dest, val: r.value, price: price, img: r.img, date: '2026-09-17',
-        moodText: r.moodText, category: r.category, diary: ''
+        moodText: r.moodText, category: r.category, routeId: r.id, diary: ''
       }, ...state.trips];
       if (state.savedTotal === 0) state.savedTotal = r.value - price;
       if (r.badge && !state.badges.includes(r.badge)) state.badges.push(r.badge);
@@ -1924,8 +2785,404 @@
       }).join('');
     }
     function openCurrentSpecial() {
-      openUnboxModal(TUGE_BOXES[specialIndex].id);
+      openProductDetail(TUGE_BOXES[specialIndex].id);
     }
+
+    let marketCategory = 'all';
+    let currentProduct = null;
+    let productReturnTab = 'market';
+    let cartReturnTab = 'market';
+    let currentGuide = null;
+    let guideReturnTab = 'product';
+    let communityMode = 'discover';
+    function cartItems() { return (state.cart || []).map(id => TUGE_BOXES.find(b => b.id === id)).filter(Boolean); }
+    function cartSummary() { return cartItems().reduce((a, b) => ({ count:a.count + 1, total:a.total + b.price }), { count:0, total:0 }); }
+    function updateCartBadge() { const s = cartSummary(); document.querySelectorAll('#marketCartCount').forEach(x => x.textContent = s.count); document.querySelectorAll('#marketCartTotal').forEach(x => x.textContent = '¥' + s.total); }
+    function addToCart(id) { if (!state.cart.includes(id)) state.cart.push(id); saveState(); updateCartBadge(); showDemoToast('已加入购物车'); }
+    function openProductDetail(id) {
+      currentProduct = TUGE_BOXES.find(b => b.id === id);
+      if (!currentProduct) return;
+      const activeTab = document.querySelector('.iphone-frame').dataset.tab;
+      if (activeTab !== 'product') productReturnTab = activeTab || 'market';
+      const services = SERVICE_BY_CAT[currentProduct.category] || SERVICE_BY_CAT.nearby;
+      document.getElementById('pdName').textContent = currentProduct.name;
+      document.getElementById('pdImg').src = currentProduct.img;
+      document.getElementById('pdImg').alt = currentProduct.name;
+      document.getElementById('pdDesc').textContent = currentProduct.desc;
+      document.getElementById('pdRank').textContent = currentProduct.rank || '精选';
+      document.getElementById('pdPrice').textContent = '¥' + currentProduct.price;
+      document.getElementById('pdGuarantee').textContent = '≥ ¥' + currentProduct.guarantee;
+      document.getElementById('pdGuaranteeRate').textContent = '票面保底 ' + Math.round(currentProduct.guarantee / currentProduct.price * 100) + '%';
+      document.getElementById('pdServices').innerHTML = services.map((service, i) => `<div class="service-item">
+        ${i === 0
+          ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 17h18M5 17l1-8h12l1 8M8 9V6h8v3"/></svg>'
+          : i === 1
+            ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21s6-5.1 6-11a6 6 0 1 0-12 0c0 5.9 6 11 6 11z"/><circle cx="12" cy="10" r="2"/></svg>'
+            : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m4 6 5-2 6 2 5-2v14l-5 2-6-2-5 2zM9 4v14M15 6v14"/></svg>'}
+        <span>${service}</span>
+      </div>`).join('');
+      navTo('product');
+    }
+    function closeProductDetail() { navTo(productReturnTab || 'market'); }
+    function addCurrentToCart() { if (currentProduct) addToCart(currentProduct.id); }
+    function buyCurrentProduct() { if (currentProduct) openUnboxModal(currentProduct.id); }
+    function openGuideForProduct(id) {
+      const product = (id && TUGE_BOXES.find(b => b.id === id)) || currentProduct || TUGE_BOXES[0];
+      currentProduct = product;
+      guideReturnTab = 'product';
+      currentGuide = {
+        kind: 'product', category: product.category, title: product.name + '出行攻略',
+        place: '目的地将在开盒后揭晓', img: product.img,
+        price: product.price, guarantee: product.guarantee
+      };
+      renderGuide();
+      navTo('guide');
+    }
+    function openGuideForTrip(id) {
+      const trip = (state.trips || []).find(t => t.id === id);
+      if (!trip) return;
+      const route = TUGE_ROUTES.find(r => r.id === trip.routeId || r.name === trip.name);
+      closeTripDetail();
+      guideReturnTab = 'trips';
+      currentGuide = {
+        kind: 'trip', category: trip.category, title: trip.name,
+        place: trip.dest, img: trip.img, price: trip.price, value: trip.val,
+        routeId: route ? route.id : ''
+      };
+      renderGuide();
+      navTo('guide');
+    }
+    function renderGuide() {
+      if (!currentGuide) return;
+      const baseCfg = GUIDE_BY_CAT[currentGuide.category] || GUIDE_BY_CAT.nearby;
+      const baseDetails = GUIDE_DETAIL_BY_CAT[currentGuide.category] || GUIDE_DETAIL_BY_CAT.nearby;
+      const routeCfg = currentGuide.kind === 'trip' ? ROUTE_GUIDES[currentGuide.routeId] : null;
+      const cfg = routeCfg ? { ...baseCfg, ...routeCfg } : baseCfg;
+      const details = routeCfg ? { ...baseDetails, ...routeCfg } : baseDetails;
+      document.getElementById('guideImg').src = currentGuide.img;
+      document.getElementById('guideImg').alt = currentGuide.title;
+      document.getElementById('guideKicker').textContent = currentGuide.kind === 'trip' ? 'ROUTE GUIDE · 已解锁' : 'THEME GUIDE · 开盒前';
+      document.getElementById('guideTitle').textContent = currentGuide.title;
+      document.getElementById('guidePlace').innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s6-5.1 6-11a6 6 0 1 0-12 0c0 5.9 6 11 6 11z"/><circle cx="12" cy="10" r="2"/></svg><span>' + currentGuide.place + '</span>';
+      document.getElementById('guideMeta').innerHTML = [cfg.duration, cfg.pace + '节奏', cfg.transit, cfg.best].map(x => '<span>' + x + '</span>').join('');
+      document.getElementById('guideWeatherText').textContent = cfg.weather;
+      document.getElementById('guideFacts').innerHTML = details.facts.map(row => `<div class="guide-fact"><span>${row[0]}</span><strong>${row[1]}</strong></div>`).join('');
+      document.getElementById('guideRouteSpan').textContent = cfg.duration + ' 建议安排';
+      document.getElementById('guideSummary').textContent = cfg.summary;
+      document.getElementById('guideTimeline').innerHTML = cfg.schedule.map(stop => `<article class="guide-stop">
+        <div class="time">${stop[0]}</div><h4>${stop[1]}</h4><p>${stop[2]}</p><em>${stop[3]}</em>
+      </article>`).join('');
+      const attractionSection = document.getElementById('guideAttractionsSection');
+      attractionSection.style.display = routeCfg ? 'block' : 'none';
+      document.getElementById('guideAttractions').innerHTML = routeCfg ? routeCfg.attractions.map((item, i) => `<article class="guide-attraction">
+        <div class="guide-attraction-head"><b class="guide-attraction-index">${String(i + 1).padStart(2, '0')}</b><h4>${item[0]}</h4><span>${item[1]}</span></div>
+        <p>${item[2]}</p>
+        <div class="guide-attraction-detail"><div><b>核心看点</b><span>${item[3]}</span></div><div><b>游览提醒</b><span>${item[4]}</span></div></div>
+      </article>`).join('') : '';
+      const transitIcons = [
+        '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="3" width="16" height="16" rx="3"/><path d="M7 16h10M8 20v1M16 20v1M8 7h8"/></svg>',
+        '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 17h14l-1-7H6zM8 10l2-4h4l2 4M7 17v2M17 17v2"/></svg>'
+      ];
+      document.getElementById('guideTransitList').innerHTML = cfg.transport.map((row, i) => `<div class="guide-transit-row">
+        <div class="guide-transit-icon">${transitIcons[i % transitIcons.length]}</div><div><b>${row[0]}</b><p>${row[1]}</p></div>
+      </div>`).join('');
+      document.getElementById('guideLivingList').innerHTML = details.living.map(row => `<div class="guide-living-row"><b>${row[0]}</b><p>${row[1]}</p></div>`).join('');
+      const firstCost = currentGuide.kind === 'trip'
+        ? ['已购行程', '¥' + currentGuide.price, '票面价值 ¥' + currentGuide.value]
+        : ['盲盒权益', '¥' + currentGuide.price, '票面保底 ≥ ¥' + currentGuide.guarantee];
+      document.getElementById('guideCostList').innerHTML = [firstCost, ...cfg.costs].map(row => `<div class="guide-cost-row">
+        <span>${row[0]}</span><strong>${row[1]}<small>${row[2]}</small></strong>
+      </div>`).join('');
+      document.getElementById('guideChecklist').innerHTML = cfg.packing.map(item => `<button class="guide-check" type="button" onclick="toggleGuideCheck(this)"><i></i><span>${item}</span></button>`).join('');
+      document.getElementById('guidePlanB').innerHTML = details.planB.map(row => `<div class="guide-planb-row"><b>${row[0]}</b><p>${row[1]}</p></div>`).join('');
+      document.getElementById('guideRules').innerHTML = details.rules.map(rule => `<div class="guide-rule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m5 12 4 4L19 6"/></svg><p>${rule}</p></div>`).join('');
+      document.getElementById('guideTips').innerHTML = cfg.tips.map((tip, i) => `<div class="guide-tip"><b>${i + 1}</b><p>${tip}</p></div>`).join('');
+      document.getElementById('guideFaq').innerHTML = details.faq.map((item, i) => `<details ${i === 0 ? 'open' : ''}><summary>${item[0]}</summary><p>${item[1]}</p></details>`).join('');
+      const saveBtn = document.getElementById('guideSaveBtn');
+      saveBtn.classList.remove('btn-sage');
+      saveBtn.classList.add('btn-line');
+      saveBtn.textContent = '收藏攻略';
+      document.querySelectorAll('.guide-anchorbar button').forEach((b, i) => b.classList.toggle('on', i === 0));
+    }
+    function closeGuide() { navTo(guideReturnTab || 'product'); }
+    function jumpGuide(id, button) {
+      const scroller = document.querySelector('.scroll-content');
+      const target = document.getElementById(id);
+      if (!scroller || !target) return;
+      const top = scroller.scrollTop + target.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 102;
+      scroller.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+      document.querySelectorAll('.guide-anchorbar button').forEach(b => b.classList.remove('on'));
+      if (button) button.classList.add('on');
+    }
+    function toggleGuideCheck(button) {
+      button.classList.toggle('done');
+      button.querySelector('i').textContent = button.classList.contains('done') ? '✓' : '';
+    }
+    function toggleGuideSave(button) {
+      const saved = button.classList.toggle('btn-sage');
+      button.classList.toggle('btn-line', !saved);
+      button.textContent = saved ? '已收藏' : '收藏攻略';
+      showDemoToast(saved ? '攻略已收藏' : '已取消收藏');
+    }
+    function askGuideAi() {
+      if (!currentGuide) return;
+      const question = '请根据「' + currentGuide.title + '」帮我检查行前准备，并提醒最容易遗漏的三件事。';
+      navTo('ai');
+      setTimeout(() => sendUserMessage(question), 160);
+    }
+    function renderMarket() { const filters = document.getElementById('marketFilters'); const grid = document.getElementById('marketGrid'); if (!filters || !grid) return; const cats = [['all','全部'],['nearby','周边微度假'],['province','省内深度游'],['cross','跨省限定'],['theme','主题专线']]; filters.innerHTML = cats.map(([k, n]) => `<button class="mood-chip ${marketCategory === k ? 'active' : ''}" onclick="marketCategory='${k}';renderMarket()">${n}</button>`).join(''); const list = TUGE_BOXES.filter(b => marketCategory === 'all' || b.category === marketCategory); grid.innerHTML = list.map(b => `<article class="market-card" onclick="openProductDetail('${b.id}')"><img src="${b.img}" alt="${b.name}" onerror="this.src='${TUGE_BOXES[0].img}'"><div class="prod-info"><div class="prod-name">${b.name}</div><div class="prod-desc">${b.desc}<br>保底 ¥${b.guarantee}</div><div class="market-actions" onclick="event.stopPropagation()"><button class="cart-add" onclick="addToCart('${b.id}')">加入购物车</button><button class="buy-now" onclick="openUnboxModal('${b.id}')">立即开盒</button></div></div></article>`).join(''); updateCartBadge(); }
+    function renderCartPage() { const el = document.getElementById('cartPageList'); if (!el) return; const items = cartItems(); if (!items.length) { el.innerHTML = '<div class="empty-box"><div style="font-size:36px;">□</div><p>购物车还是空的</p><span>先去商品广场挑一份想去的地方吧</span><button class="ghost-cta" onclick="navTo(\'market\')">去逛商品</button></div>'; return; } const s = cartSummary(); el.innerHTML = items.map(b => `<div class="record-row"><div class="record-top"><span>${b.tag || '旅行盲盒'}</span><button class="linkish" onclick="state.cart=state.cart.filter(x=>x!=='${b.id}');saveState();renderCartPage();renderMarket()">移除</button></div><strong>${b.name}</strong><div class="record-foot"><span>保底 ¥${b.guarantee}</span><b>¥${b.price}</b></div></div>`).join('') + `<div class="soft-panel" style="margin-top:14px;"><div class="detail-row"><span>已选 ${s.count} 件</span><strong>合计 ¥${s.total}</strong></div><button class="btn-block btn-sage" onclick="checkoutCart()">统一结算并支付</button></div>`; }
+    function openCartPage(fromTab) {
+      cartReturnTab = fromTab || document.querySelector('.iphone-frame').dataset.tab || 'market';
+      navTo('cart');
+    }
+    function closeCartPage() { navTo(cartReturnTab === 'cart' ? 'market' : cartReturnTab); }
+    function checkoutCart() { if (!requireLogin({ type:'orders' })) return; const items = cartItems(); if (!items.length) return; openUnboxModal(items[0].id); showDemoToast('已生成结算批次，原型逐单开盒'); }
+    function renderPaymentRecords() { const el = document.getElementById('paymentRecordsList'); if (!el) return; const list = state.paymentRecords || []; el.innerHTML = list.length ? list.map(r => `<div class="record-row"><div class="record-top"><span>${r.time || '刚刚'} · ${r.batch || 'PAY-DEMO'}</span><b class="st-ok">${r.status || '支付成功'}</b></div><strong>${r.name || '旅行盲盒'}</strong><div class="record-foot"><span>${r.channel || '支付宝沙箱'}</span><b>¥${r.amount || 0}</b></div></div>`).join('') : '<div class="empty-box"><div style="font-size:34px;">⌁</div><p>还没有支付记录</p><span>完成一次开盒支付后，会在这里留下记录</span></div>'; }
+    let communityChip = 'all';
+    const XHS_CHIPS = [['all','推荐'],['古村','古村'],['山野','山野'],['露营','露营'],['美食','美食'],['文艺','文艺'],['徽章','开箱']];
+    function allPosts() { return [...(state.posts || []), ...TUGE_POSTS]; }
+    function findPost(id) { return allPosts().find(p => p.id === id); }
+    function liked(id) { return !!((state.likes || {})[id]); }
+    function collected(id) { return !!((state.collects || {})[id]); }
+    function following(name) { return (state.follows || []).includes(name); }
+    function postComments(id) { return (state.comments || {})[id] || []; }
+    function likesOf(p) { return (p.likes || 0) + (liked(p.id) ? 1 : 0); }
+    function collectsOf(p) { return (p.collects || 0) + (collected(p.id) ? 1 : 0); }
+    function commentsOf(p) { return (p.comments || 0) + postComments(p.id).length; }
+
+    function renderCommunity() {
+      const feed = document.getElementById('communityGrid');
+      const chips = document.getElementById('communityChips');
+      if (!feed) return;
+      document.querySelectorAll('#communityTabs button').forEach(b => b.classList.toggle('on', b.dataset.community === communityMode));
+
+      if (communityMode === 'topics') {
+        if (chips) chips.innerHTML = '';
+        feed.innerHTML = `<div class="xhs-topic" style="column-span:all;">` + TUGE_TOPICS.map(t => `
+          <button type="button" class="xhs-topic-row" onclick="showDemoToast('进入话题 ${t.tag}')">
+            <span class="mini-ava" style="width:34px;height:34px;border-radius:11px;background:var(--sage-mist);color:var(--sage-deep);display:grid;place-items:center;font-weight:800;">#</span>
+            <span class="n"><b>${t.tag}</b><small>${t.desc}</small></span>
+            <em>${t.views}</em>
+          </button>`).join('') + `</div>`;
+        return;
+      }
+
+      if (communityMode === 'creators') {
+        if (chips) chips.innerHTML = '';
+        feed.innerHTML = `<div style="column-span:all;">` + TUGE_CREATORS.map((c, i) => `
+          <div class="xhs-creator">
+            <span class="rk">${i + 1}</span>
+            <span class="ava" style="width:40px;height:40px;border-radius:50%;background:var(--sage-mist);color:var(--sage-deep);display:grid;place-items:center;font-weight:800;">${c.badge}</span>
+            <span class="n"><b>${c.name}</b><small>${c.bio}</small></span>
+            <button type="button" class="xhs-follow ${following(c.name) ? 'on' : ''}" onclick="toggleFollow('${c.name}')">${following(c.name) ? '已关注' : '关注'}</button>
+          </div>`).join('') + `</div>`;
+        return;
+      }
+
+      if (chips) {
+        chips.innerHTML = XHS_CHIPS.map(([k, n]) => `<button type="button" class="${communityChip === k ? 'on' : ''}" onclick="communityChip='${k}';renderCommunity()">${n}</button>`).join('');
+      }
+
+      let list = allPosts();
+      if (communityMode === 'follow') list = list.filter(p => following(p.author));
+      if (communityChip !== 'all') list = list.filter(p => p.cat === communityChip);
+
+      if (!list.length) {
+        feed.innerHTML = `<div class="empty-box" style="column-span:all;"><p>${communityMode === 'follow' ? '还没有关注的达人' : '这个分类下还没有笔记'}</p><span>${communityMode === 'follow' ? '去「达人」看看，关注几个旅途同伴' : '换个分类，或者自己发一篇'}</span><button class="ghost-cta" type="button" onclick="${communityMode === 'follow' ? "communityMode='creators';renderCommunity()" : "openPostComposer()"}">${communityMode === 'follow' ? '去看达人榜' : '发布笔记'}</button></div>`;
+        return;
+      }
+
+      feed.innerHTML = list.map(p => {
+        const cover = (p.imgs && p.imgs[0]) || p.img || TUGE_BOXES[0].img;
+        const r = p.ratio || 1.2;
+        return `<article class="xhs-card" onclick="openPostDetail('${p.id}')">
+          <div class="xhs-cover">
+            <img src="${cover}" alt="${p.title}" style="aspect-ratio:1/${r}" loading="lazy" onerror="this.src='${TUGE_BOXES[0].img}'">
+            ${p.imgs && p.imgs.length > 1 ? `<span class="xhs-badge">${p.imgs.length} 图</span>` : (p.cat ? `<span class="xhs-badge">${p.cat}</span>` : '')}
+          </div>
+          <div class="xhs-title">${escAi(p.title)}</div>
+          <div class="xhs-foot">
+            <div class="xhs-author"><span class="ava">${escAi((p.author || '途').slice(0, 1))}</span><span>${escAi(p.author || '途友')}</span></div>
+            <button type="button" class="xhs-like ${liked(p.id) ? 'on' : ''}" onclick="event.stopPropagation();toggleLike('${p.id}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="${liked(p.id) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.9"><path d="M12 21s-7-4.4-9.5-9.2C.6 8.2 2.2 5 5.4 5c1.8 0 3.2 1 3.9 2.4C10 6 11.4 5 13.2 5c3.2 0 4.8 3.2 2.9 6.8C19 16.6 12 21 12 21z"/></svg>
+              ${likesOf(p)}
+            </button>
+          </div>
+        </article>`;
+      }).join('');
+    }
+
+    function openPostDetail(id) {
+      const p = findPost(id);
+      if (!p) return;
+      const panel = document.getElementById('postDetail');
+      if (!panel) return;
+      const imgs = (p.imgs && p.imgs.length) ? p.imgs : [p.img || TUGE_BOXES[0].img];
+      const box = TUGE_BOXES.find(b => b.id === p.boxId);
+      const cmts = postComments(p.id);
+
+      document.getElementById('postDetailHead').innerHTML = `
+        <span class="ava">${escAi((p.author || '途').slice(0, 1))}</span>
+        <span class="who"><strong>${escAi(p.author || '途友')}</strong><small>${escAi(p.place || '旅途中')}</small></span>
+        <button type="button" class="xhs-follow ${following(p.author) ? 'on' : ''}" onclick="toggleFollow('${escAi(p.author)}')">${following(p.author) ? '已关注' : '关注'}</button>
+        <button type="button" class="xhs-close" aria-label="关闭笔记" onclick="closePostDetail()">×</button>`;
+
+      document.getElementById('postDetailBody').innerHTML = `
+        <div class="xhs-gallery">${imgs.map(s => `<img src="${s}" alt="${escAi(p.title)}" onerror="this.src='${TUGE_BOXES[0].img}'">`).join('')}</div>
+        <h3 class="xhs-detail-title">${escAi(p.title)}</h3>
+        <div class="xhs-detail-text">${escAi(p.text || '把这一站的风景记在这里。')}</div>
+        <div class="xhs-detail-tags">${[p.topic, p.cat ? '#' + p.cat : '', '#盲盒开箱'].filter(Boolean).map(t => `<span>${escAi(t)}</span>`).join('')}</div>
+        <div class="xhs-detail-meta">${escAi(p.place || '')} · 刚刚</div>
+        ${box ? `<div class="xhs-samebox" onclick="closePostDetail();openUnboxModal('${box.id}')">
+          <img src="${box.img}" alt="">
+          <span class="n"><b>${box.name}</b><small>抽同款 · 保底 ¥${box.guarantee}</small></span>
+          <em>去开盒 ›</em>
+        </div>` : ''}
+        <div class="xhs-divider"></div>
+        <div style="font-size:12.5px;font-weight:700;margin-bottom:2px;">共 ${commentsOf(p)} 条评论</div>
+        ${cmts.length ? cmts.map(c => `
+          <div class="xhs-cmt"><span class="ava">${escAi((c.by || '途').slice(0, 1))}</span>
+            <span class="c"><b>${escAi(c.by)}</b><p>${escAi(c.text)}</p><small>刚刚 · 回复</small></span>
+          </div>`).join('') : ''}
+        <div class="xhs-cmt"><span class="ava">阿</span><span class="c"><b>阿茶</b><p>这条路线看起来好舒服，想去同款！</p><small>2 小时前 · 回复</small></span></div>
+        <div class="xhs-cmt"><span class="ava">途</span><span class="c"><b>小途</b><p>风已经替你留好位置啦。</p><small>3 小时前 · 回复</small></span></div>
+        <div style="height:10px;"></div>`;
+
+      document.getElementById('postDetailBar').innerHTML = `
+        <input id="commentInput" placeholder="说点旅途见闻…" onkeydown="if(event.key==='Enter') submitComment('${p.id}')">
+        <button type="button" class="act ${liked(p.id) ? 'on' : ''}" onclick="toggleLike('${p.id}')">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="${liked(p.id) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-4.4-9.5-9.2C.6 8.2 2.2 5 5.4 5c1.8 0 3.2 1 3.9 2.4C10 6 11.4 5 13.2 5c3.2 0 4.8 3.2 2.9 6.8C19 16.6 12 21 12 21z"/></svg>
+          ${likesOf(p)}
+        </button>
+        <button type="button" class="act collect ${collected(p.id) ? 'on' : ''}" onclick="toggleCollect('${p.id}')">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="${collected(p.id) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8"><path d="M12 3 14.5 8l5.5.8-4 3.9.9 5.5L12 16l-4.9 2.2.9-5.5-4-3.9L9.5 8z"/></svg>
+          ${collectsOf(p)}
+        </button>
+        <button type="button" class="act" onclick="showDemoToast('分享卡片已生成')">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 16V3M8 7l4-4 4 4"/></svg>
+          分享
+        </button>`;
+
+      panel.dataset.postId = id;
+      panel.classList.add('on');
+      panel.setAttribute('aria-hidden', 'false');
+    }
+    function closePostDetail() {
+      const panel = document.getElementById('postDetail');
+      if (!panel) return;
+      panel.classList.remove('on');
+      panel.setAttribute('aria-hidden', 'true');
+    }
+    function toggleLike(id) {
+      state.likes = state.likes || {};
+      state.likes[id] = !state.likes[id];
+      saveState();
+      renderCommunity();
+      if (document.getElementById('postDetail').classList.contains('on')) openPostDetail(id);
+    }
+    function toggleCollect(id) {
+      state.collects = state.collects || {};
+      state.collects[id] = !state.collects[id];
+      saveState();
+      showDemoToast(state.collects[id] ? '已收藏到我的收藏夹' : '已取消收藏');
+      if (document.getElementById('postDetail').classList.contains('on')) openPostDetail(id);
+    }
+    function toggleFollow(name) {
+      state.follows = state.follows || [];
+      const i = state.follows.indexOf(name);
+      if (i >= 0) state.follows.splice(i, 1); else state.follows.push(name);
+      saveState();
+      showDemoToast(i >= 0 ? '已取消关注' : '已关注 ' + name);
+      renderCommunity();
+      const panel = document.getElementById('postDetail');
+      if (panel.classList.contains('on')) {
+        const id = panel.dataset.postId;
+        if (id) openPostDetail(id);
+      }
+    }
+    function openMyCollection() {
+      const list = allPosts().filter(p => collected(p.id));
+      if (!list.length) return showDemoToast('收藏夹还是空的，去笔记里点个星吧');
+      communityMode = 'discover';
+      communityChip = 'all';
+      const feed = document.getElementById('communityGrid');
+      document.querySelectorAll('#communityTabs button').forEach(b => b.classList.toggle('on', false));
+      const chips = document.getElementById('communityChips');
+      if (chips) chips.innerHTML = '<button type="button" class="on">我的收藏 ' + list.length + '</button>';
+      feed.innerHTML = list.map(p => {
+        const cover = (p.imgs && p.imgs[0]) || p.img || TUGE_BOXES[0].img;
+        return `<article class="xhs-card" onclick="openPostDetail('${p.id}')">
+          <div class="xhs-cover"><img src="${cover}" alt="${escAi(p.title)}" style="aspect-ratio:1/${p.ratio || 1.2}" onerror="this.src='${TUGE_BOXES[0].img}'"></div>
+          <div class="xhs-title">${escAi(p.title)}</div>
+          <div class="xhs-foot"><div class="xhs-author"><span class="ava">${escAi((p.author || '途').slice(0, 1))}</span><span>${escAi(p.author)}</span></div><span style="font-size:10px;color:var(--caramel,#D4924A);">★ ${collectsOf(p)}</span></div>
+        </article>`;
+      }).join('');
+      showDemoToast('已筛出 ' + list.length + ' 篇收藏');
+    }
+    function openMineCollection() {
+      navTo('community');
+      setTimeout(openMyCollection, 60);
+    }
+    function submitComment(id) {
+      const input = document.getElementById('commentInput');
+      if (!input || !input.value.trim()) return;
+      state.comments = state.comments || {};
+      state.comments[id] = state.comments[id] || [];
+      state.comments[id].push({ by: (state.user && state.user.nickname) || '我', text: input.value.trim() });
+      saveState();
+      showDemoToast('评论已发布');
+      openPostDetail(id);
+    }
+    function addPostImage() {
+      const grid = document.getElementById('postImageGrid');
+      const n = grid.querySelectorAll('img').length;
+      if (n >= 9) return showDemoToast('最多 9 张照片');
+      const img = document.createElement('img');
+      img.src = TUGE_BOXES[n % TUGE_BOXES.length].img;
+      img.alt = '旅行照片';
+      grid.insertBefore(img, grid.querySelector('.add'));
+      if (n + 1 >= 9) grid.querySelector('.add').style.display = 'none';
+    }
+    function openPostComposer() {
+      if (!requireLogin({ type: 'post' })) return;
+      document.getElementById('postTitle').value = '';
+      document.getElementById('postText').value = '';
+      document.getElementById('postCharCount').textContent = '0';
+      const grid = document.getElementById('postImageGrid');
+      grid.innerHTML = '<div class="xhs-pub-slot add" onclick="addPostImage()">＋</div>';
+      document.getElementById('postModal').classList.add('active');
+      setTimeout(() => document.getElementById('postTitle').focus(), 120);
+    }
+    function closePostComposer() { document.getElementById('postModal').classList.remove('active'); }
+    function publishPost() {
+      const title = document.getElementById('postTitle').value.trim();
+      const text = document.getElementById('postText').value.trim();
+      if (!title && !text) return showDemoToast('写点什么再发布吧');
+      const imgs = [...document.querySelectorAll('#postImageGrid img')].map(i => i.getAttribute('src'));
+      state.posts.unshift({
+        id: 'mine_' + Date.now(),
+        title: title || text.slice(0, 20),
+        text: text || title,
+        author: (state.user && state.user.nickname) || '途友',
+        place: '我的旅途',
+        likes: 0, comments: 0, collects: 0,
+        cat: '开箱',
+        topic: '#盲盒开箱',
+        ratio: 1.25,
+        imgs: imgs.length ? imgs : [TUGE_BOXES[1].img]
+      });
+      saveState();
+      closePostComposer();
+      communityMode = 'discover';
+      communityChip = 'all';
+      navTo('community');
+      renderCommunity();
+      showDemoToast('已发布到旅途社区');
+    }
+
+    document.querySelectorAll('#communityTabs button').forEach(b => b.addEventListener('click', () => { communityMode = b.dataset.community; communityChip = 'all'; renderCommunity(); }));
+    document.getElementById('postText').addEventListener('input', e => { document.getElementById('postCharCount').textContent = e.target.value.length; });
 
     function renderProducts() {
       const grid = document.getElementById('boxProductGrid');
@@ -1939,7 +3196,7 @@
         return;
       }
       grid.innerHTML = list.slice(0, 3).map(item => `
-        <div class="product-card">
+        <div class="product-card" onclick="openProductDetail('${item.id}')">
           <div class="prod-img-wrap">
             <img src="${item.img}" alt="${item.name}" />
             <div class="top-badge">${item.rank}</div>
@@ -1948,7 +3205,7 @@
             <div class="prod-name">${item.name}</div>
             <div class="prod-bottom">
               <div class="prod-price"><span>¥</span>${item.price}</div>
-              <button class="btn-add" type="button" onclick="openUnboxModal('${item.id}')">+</button>
+              <button class="btn-add" type="button" aria-label="查看${item.name}详情" onclick="event.stopPropagation();openProductDetail('${item.id}')">+</button>
             </div>
           </div>
         </div>`).join('');
@@ -2019,9 +3276,9 @@
       loginAfter = null;
       if (a && a.type === 'unbox') openUnboxModal(a.boxId);
       else if (a && a.type === 'orders') openOrderSheet();
-      else if (a && a.type === 'trips') switchNav('trips', document.querySelectorAll('.tab-item')[3]);
+      else if (a && a.type === 'trips') navTo('trips');
       else if (a && a.type === 'pay') openPayForOrder(a.no);
-      else if (a && a.type === 'mine') switchNav('mine', document.querySelectorAll('.tab-item')[4]);
+      else if (a && a.type === 'mine') navTo('mine');
     }
     function submitPhoneLogin() {
       const phone = (document.getElementById('loginPhone').value || '').trim();
@@ -2059,6 +3316,7 @@
       document.getElementById('mBoxName').innerText = order.box;
       document.getElementById('payOrderNo').innerText = order.no;
       document.getElementById('payAmount').innerText = '¥' + order.pay;
+      document.getElementById('unboxClose').style.visibility = 'visible';
       document.getElementById('unboxModal').classList.add('active');
       tickPayClock();
       clearInterval(payTimer);
@@ -2139,6 +3397,7 @@
     function confirmSandboxPay() {
       if (!currentOrder || currentOrder.st !== 'pending_pay') return;
       currentOrder.st = 'paid';
+      state.paymentRecords.unshift({ batch: 'PAY-' + currentOrder.no.slice(-8), orderNo: currentOrder.no, name: currentOrder.box, amount: currentOrder.pay, channel: '支付宝沙箱', status: '支付成功', time: nowStamp() });
       saveState();
       clearInterval(payTimer);
       runUnboxDraw();
@@ -2155,6 +3414,7 @@
       document.getElementById('stepPay').style.display = 'none';
       document.getElementById('stepDrawing').style.display = 'none';
       document.getElementById('stepResult').style.display = 'none';
+      document.getElementById('unboxClose').style.visibility = 'visible';
       document.getElementById('unboxModal').classList.add('active');
     }
     function closeModal() {
@@ -2165,21 +3425,44 @@
     function runUnboxDraw() {
       document.getElementById('stepConfirm').style.display = 'none';
       document.getElementById('stepPay').style.display = 'none';
-      document.getElementById('stepDrawing').style.display = 'block';
-      document.getElementById('stepResult').style.display = 'none';
+      const drawing = document.getElementById('stepDrawing');
+      const result = document.getElementById('stepResult');
+      drawing.style.display = 'block';
+      result.style.display = 'none';
+      result.classList.remove('reveal-in');
+      document.getElementById('unboxClose').style.visibility = 'hidden';
+      drawing.classList.remove('animating');
+      void drawing.offsetWidth;
+      drawing.classList.add('animating');
+      const statuses = ['正在验证价值保底', '正在摇匀候选目的地', '正在匹配你的主题线路', '路线卡即将揭晓'];
+      const status = document.getElementById('drawStatus');
+      let statusIndex = 0;
+      status.textContent = statuses[0];
+      clearInterval(drawStatusTimer);
+      drawStatusTimer = setInterval(() => {
+        statusIndex = Math.min(statusIndex + 1, statuses.length - 1);
+        status.style.opacity = '0';
+        setTimeout(() => { status.textContent = statuses[statusIndex]; status.style.opacity = '1'; }, 150);
+      }, 620);
       let pool = TUGE_ROUTES.filter(r => r.category === currentBox.category && r.value >= currentBox.guarantee);
       if (!pool.length) pool = TUGE_ROUTES.filter(r => r.value >= currentBox.guarantee);
       drawnRoute = pool[Math.floor(Math.random() * pool.length)];
-      setTimeout(() => {
-        document.getElementById('stepDrawing').style.display = 'none';
-        document.getElementById('stepResult').style.display = 'block';
+      clearTimeout(drawRevealTimer);
+      drawRevealTimer = setTimeout(() => {
+        clearInterval(drawStatusTimer);
+        drawing.classList.remove('animating');
+        drawing.style.display = 'none';
+        result.style.display = 'block';
+        void result.offsetWidth;
+        result.classList.add('reveal-in');
+        document.getElementById('unboxClose').style.visibility = 'visible';
         document.getElementById('mResImg').src = drawnRoute.img;
         document.getElementById('mResName').innerText = drawnRoute.name;
         document.getElementById('mResMood').innerText = '“' + drawnRoute.moodText + '”';
         document.getElementById('mResDest').innerText = drawnRoute.dest;
         document.getElementById('mResVal').innerText = '¥' + drawnRoute.value;
         settleOpenedOrder();
-      }, 900);
+      }, 2700);
     }
 
     function settleOpenedOrder() {
@@ -2190,7 +3473,7 @@
         boxName: currentBox.name, name: drawnRoute.name,
         dest: drawnRoute.dest, val: drawnRoute.value, price: currentBox.price,
         img: drawnRoute.img, date: new Date().toISOString().split('T')[0],
-        moodText: drawnRoute.moodText, category: drawnRoute.category, diary: ''
+        moodText: drawnRoute.moodText, category: drawnRoute.category, routeId: drawnRoute.id, diary: ''
       });
       state.savedTotal += (drawnRoute.value - currentBox.price);
       if (drawnRoute.badge && !state.badges.includes(drawnRoute.badge)) state.badges.push(drawnRoute.badge);
@@ -2209,7 +3492,13 @@
 
     function acceptRouteResult() {
       closeModal();
-      switchNav('trips', document.querySelectorAll('.tab-item')[3]);
+      navTo('trips');
+    }
+
+    function routeGuideForTrip(trip) {
+      if (!trip) return null;
+      const route = TUGE_ROUTES.find(r => r.id === trip.routeId || r.name === trip.name);
+      return route ? ROUTE_GUIDES[route.id] || null : null;
     }
 
     function renderTrips() {
@@ -2230,34 +3519,61 @@
           <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#8EA47C" stroke-width="1.5"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           <p>还没有开启旅程</p>
           <span>去首页开一个盲盒吧</span>
-          <button type="button" class="ghost-cta" onclick="switchNav('home', document.querySelectorAll('.tab-item')[0])">去首页看看</button>
+          <button type="button" class="ghost-cta" onclick="navTo('home')">去首页看看</button>
         </div>`;
         return;
       }
-      box.innerHTML = list.map(t => `
-        <div class="ticket-card" onclick="openTripDetail('${t.id}')">
-          <img src="${t.img}" alt="" />
-          <div class="ticket-body">
-            <div class="ticket-meta">${t.boxName} · ${t.date}</div>
-            <div class="ticket-name">${t.name}</div>
-            <div class="ticket-dest">${t.dest}</div>
-            <div class="ticket-foot">
-              <div class="ticket-price">购入 ¥${t.price} · 票面 ¥${t.val}</div>
-              <span class="ticket-tag">已解锁</span>
+      box.innerHTML = list.map(t => {
+        const routeGuide = routeGuideForTrip(t);
+        const schedule = (routeGuide || GUIDE_BY_CAT[t.category] || GUIDE_BY_CAT.nearby).schedule;
+        const pointIndexes = [0, Math.floor((schedule.length - 1) / 2), schedule.length - 1];
+        const routePreview = pointIndexes.map(i => `<div class="ticket-route-node"><i></i><b>${schedule[i][1]}</b><span>${schedule[i][0]}</span></div>`).join('');
+        return `<article class="ticket-card" onclick="openTripDetail('${t.id}')">
+          <div class="ticket-main">
+            <img src="${t.img}" alt="${t.name}" />
+            <div class="ticket-body">
+              <div class="ticket-meta">${t.boxName} · ${t.date}</div>
+              <div class="ticket-name">${t.name}</div>
+              <div class="ticket-dest">${t.dest}</div>
+              <div class="ticket-foot">
+                <div class="ticket-price">购入 ¥${t.price} · 票面 ¥${t.val}</div>
+                <span class="ticket-tag">已解锁</span>
+              </div>
             </div>
           </div>
-        </div>`).join('');
+          <div class="ticket-route-preview">${routePreview}</div>
+          <div class="ticket-actions" onclick="event.stopPropagation()">
+            <button class="route-btn" type="button" onclick="openTripDetail('${t.id}')">路线详情</button>
+            <button class="guide-btn" type="button" onclick="openGuideForTrip('${t.id}')">出行攻略</button>
+          </div>
+        </article>`;
+      }).join('');
     }
 
     function openTripDetail(id) {
       const t = state.trips.find(x => x.id === id);
       if (!t) return;
       currentTripId = id;
+      const baseCfg = GUIDE_BY_CAT[t.category] || GUIDE_BY_CAT.nearby;
+      const baseDetail = GUIDE_DETAIL_BY_CAT[t.category] || GUIDE_DETAIL_BY_CAT.nearby;
+      const routeCfg = routeGuideForTrip(t);
+      const cfg = routeCfg ? { ...baseCfg, ...routeCfg } : baseCfg;
+      const detail = routeCfg ? { ...baseDetail, ...routeCfg } : baseDetail;
       document.getElementById('tdName').textContent = t.name;
       document.getElementById('tdDest').textContent = t.dest;
+      document.getElementById('tdImg').src = t.img;
+      document.getElementById('tdImg').alt = t.name;
+      document.getElementById('tdMeta').innerHTML = [t.date, cfg.duration, cfg.pace + '节奏', detail.facts[0][1] + '步行'].map(x => '<span>' + x + '</span>').join('');
       document.getElementById('tdVal').textContent = '¥' + t.val;
       document.getElementById('tdPrice').textContent = '¥' + t.price;
       document.getElementById('tdHighlight').textContent = t.moodText || '把心情交给这一路就好。';
+      document.getElementById('tdTimeline').innerHTML = cfg.schedule.map(stop => `<article class="guide-stop"><div class="time">${stop[0]}</div><h4>${stop[1]}</h4><p>${stop[2]}</p><em>${stop[3]}</em></article>`).join('');
+      document.getElementById('tdAttractions').innerHTML = routeCfg ? routeCfg.attractions.map(item => `<article class="trip-attraction">
+        <b>${item[0]}<span>${item[1]}</span></b><p>${item[3]} · ${item[4]}</p>
+      </article>`).join('') : '<p style="padding:10px 0;color:var(--muted);font-size:10px;">具体景点以出发通知为准</p>';
+      document.getElementById('tdGuideHint').textContent = routeCfg
+        ? routeCfg.attractions.length + ' 个景点详解、交通、费用与天气备选'
+        : '交通、费用、' + detail.facts[0][1] + '步行量与天气备选';
       const includes = SERVICE_BY_CAT[t.category] || SERVICE_BY_CAT.nearby;
       document.getElementById('tdInclude').innerHTML = includes.map(i => '· ' + i).join('<br>');
       const hasDiary = !!t.diary;
@@ -2360,7 +3676,7 @@
     }
     function finishPersonalityToHome() {
       closeTestModal();
-      switchNav('home', document.querySelectorAll('.tab-item')[0]);
+      navTo('home');
     }
 
     function openOrderSheet() {
@@ -2423,7 +3739,7 @@
     function viewOrderTrip(no) {
       const o = state.orders.find(x => x.no === no);
       closeOrderSheet();
-      switchNav('trips', document.querySelectorAll('.tab-item')[3]);
+      navTo('trips');
       if (o && o.tripId) setTimeout(() => openTripDetail(o.tripId), 80);
     }
     function cancelOrderByNo(no) {
@@ -2678,6 +3994,7 @@
     }
     function renderMineMenu() {
       const pending = (state.orders || []).filter(o => o.st === 'pending_pay').length;
+      const collectionCount = Object.values(state.collects || {}).filter(Boolean).length;
       const logged = isLoggedIn();
       const u = state.user || {};
       document.getElementById('mineNick').textContent = logged ? (u.nickname || '旅行探险家') : '未登录';
@@ -2688,16 +4005,30 @@
         ? `<button type="button" class="menu-row" onclick="showDemoToast('演示原型，资料编辑稍后开放')"><b>编辑资料</b><small>昵称 / 头像 ›</small></button>`
         : `<button type="button" class="menu-row" onclick="openLogin({type:'mine'})"><b>登录 / 注册</b><small>手机验证码或微信 ›</small></button>`;
       document.getElementById('mineMenu').innerHTML = `
-        <button type="button" class="menu-row" onclick="openOrderSheet()">
-          <b>我的订单</b><small>${logged ? (pending ? pending + ' 笔待支付 ›' : '全部 / 待支付 / 退款 ›') : '登录后查看 ›'}</small>
-        </button>
-        ${authBtn}
-        <button type="button" class="menu-row" onclick="switchNav('badges', document.querySelectorAll('.tab-item')[2])">
-          <b>徽章图鉴</b><small>${state.badges.length} / 12 ›</small>
-        </button>
-        ${logged ? '<button type="button" class="menu-row" onclick="logoutUser()"><b>退出登录</b><small>行程仍保留在本机 ›</small></button>' : ''}`;
+        <div class="mine-section-label">旅程与订单</div>
+        <div class="menu-list">
+          <button type="button" class="menu-row" onclick="navTo('trips')"><b>我的行程</b><small>${validTrips().length} 次出行 ›</small></button>
+          <button type="button" class="menu-row" onclick="openOrderSheet()"><b>我的订单</b><small>${pending ? pending + ' 笔待支付' : '查看全部'} ›</small></button>
+          <button type="button" class="menu-row" onclick="openCartPage('mine')"><b>我的购物车</b><small>${(state.cart || []).length} 件待结算 ›</small></button>
+          <button type="button" class="menu-row" onclick="navTo('records')"><b>支付记录</b><small>支付宝沙箱流水 ›</small></button>
+        </div>
+        <div class="mine-section-label">我的内容</div>
+        <div class="menu-list">
+          <button type="button" class="menu-row" onclick="openMineCollection()"><b>我的收藏</b><small>${collectionCount} 篇笔记 ›</small></button>
+          <button type="button" class="menu-row" onclick="navTo('badges')"><b>旅行图鉴</b><small>${state.badges.length} / 12 ›</small></button>
+        </div>
+        <div class="mine-section-label">账户与服务</div>
+        <div class="menu-list">
+          ${authBtn}
+          <button type="button" class="menu-row" onclick="showDemoToast('已连接在线客服')"><b>客服与帮助</b><small>退换 / 行程问题 ›</small></button>
+          <button type="button" class="menu-row" onclick="showDemoToast('设置页：原型演示')"><b>设置</b><small>通知 / 隐私 / 账号 ›</small></button>
+          ${logged ? '<button type="button" class="menu-row" onclick="logoutUser()"><b>退出登录</b><small>行程仍保留在本机 ›</small></button>' : ''}
+        </div>`;
     }
 
+    function navTo(tabKey) {
+      switchNav(tabKey, document.querySelector('.tab-item[data-tab="' + tabKey + '"]'));
+    }
     function switchNav(tabKey, el) {
       document.querySelectorAll('.tab-view').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-item').forEach(i => i.classList.remove('active'));
@@ -2705,8 +4036,13 @@
       if (target) target.classList.add('active');
       if (el) el.classList.add('active');
       document.querySelector('.iphone-frame').dataset.tab = tabKey;
+      document.querySelector('.scroll-content').scrollTop = 0;
       if (tabKey === 'trips') renderTrips();
       if (tabKey === 'badges') renderBadges();
+      if (tabKey === 'market') renderMarket();
+      if (tabKey === 'community') renderCommunity();
+      if (tabKey === 'cart') renderCartPage();
+      if (tabKey === 'records') renderPaymentRecords();
       if (tabKey === 'mine') syncStats();
       if (tabKey === 'ai') renderAiSession();
     }
@@ -2718,40 +4054,51 @@
       renderBadges();
       renderTrips();
       renderAiSession();
+      renderMarket();
+      renderCommunity();
+      renderCartPage();
+      renderPaymentRecords();
       syncStats();
       const hash = (location.hash || '').replace('#', '');
-      const tabMap = { home: 0, ai: 1, badges: 2, trips: 3, mine: 4 };
+      const tabMap = { home: 0, market: 1, community: 2, ai: 3, mine: 4, badges: 5, trips: 6, cart: 7, records: 8 };
       if (hash && tabMap[hash] !== undefined) {
-        switchNav(hash, document.querySelectorAll('.tab-item')[tabMap[hash]]);
+        switchNav(hash, document.querySelector(`.tab-item[data-tab="${hash}"]`));
       }
       if (hash === 'ai-fold') {
         state.aiHistCollapsed = true;
         applyAiHistFold();
-        switchNav('ai', document.querySelectorAll('.tab-item')[1]);
+        navTo('ai');
+      }
+      if (hash === 'product') {
+        openProductDetail('box_1');
+      }
+      if (hash === 'guide') {
+        openProductDetail('box_1');
+        openGuideForProduct('box_1');
       }
       if (hash === 'quiz') {
-        switchNav('badges', document.querySelectorAll('.tab-item')[2]);
+        navTo('badges');
         setTimeout(startPersonalityTest, 80);
       }
       if (hash === 'trip') {
         ensurePreviewTrip();
-        switchNav('trips', document.querySelectorAll('.tab-item')[3]);
+        navTo('trips');
       }
       if (hash === 'detail') {
         ensurePreviewTrip();
-        switchNav('trips', document.querySelectorAll('.tab-item')[3]);
+        navTo('trips');
         setTimeout(() => openTripDetail('trip_preview'), 120);
       }
       if (hash === 'diary') {
         ensurePreviewTrip();
-        switchNav('trips', document.querySelectorAll('.tab-item')[3]);
+        navTo('trips');
         setTimeout(() => {
           openTripDetail('trip_preview');
           generateDiary();
         }, 120);
       }
       if (hash === 'result') {
-        switchNav('badges', document.querySelectorAll('.tab-item')[2]);
+        navTo('badges');
         setTimeout(() => {
           startPersonalityTest();
           selectTestOption(2);
@@ -2766,7 +4113,7 @@
       }
       if (hash === 'pay') {
         ensurePreviewTrip();
-        switchNav('home', document.querySelectorAll('.tab-item')[0]);
+        navTo('home');
         setTimeout(() => {
           openUnboxModal('box_1');
           goCheckout();
@@ -2774,21 +4121,21 @@
       }
       if (hash === 'refund') {
         ensurePreviewTrip();
-        switchNav('mine', document.querySelectorAll('.tab-item')[4]);
+        navTo('mine');
         setTimeout(() => { orderFilter = 'opened'; openOrderSheet(); }, 80);
       }
       if (hash === 'orders') {
         ensurePreviewTrip();
-        switchNav('mine', document.querySelectorAll('.tab-item')[4]);
+        navTo('mine');
         setTimeout(openOrderSheet, 80);
       }
       if (hash === 'stats') {
         ensurePreviewTrip();
-        switchNav('mine', document.querySelectorAll('.tab-item')[4]);
+        navTo('mine');
       }
       const say = new URLSearchParams(location.search).get('say');
       if (say) {
-        switchNav('ai', document.querySelectorAll('.tab-item')[1]);
+        navTo('ai');
         setTimeout(() => sendUserMessage(say), 280);
       }
       window.addEventListener('storage', (e) => {
