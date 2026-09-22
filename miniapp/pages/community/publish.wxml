@@ -124,3 +124,5 @@
     <view wx:if="{{uploadProgress}}" class="upload-progress">{{uploadProgress}}</view>
   </view>
 </view>
+
+<tuge-overlay />

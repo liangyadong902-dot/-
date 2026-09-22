@@ -1,4 +1,6 @@
 {
   "navigationStyle": "custom",
-  "usingComponents": {}
+  "usingComponents": {
+    "tuge-overlay": "/components/tuge-overlay/index"
+  }
 }

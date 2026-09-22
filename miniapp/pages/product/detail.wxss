@@ -1,7 +1,16 @@
-/* 商品详情：对照 index-app-latest.html .product-detail-*，390px → 750rpx */
+/* 商品详情：米色商业风 —— 大层级、白卡分区、sage 唯一强调色 */
 .product-page { min-height: 100vh; background: var(--cream); }
 .state { min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20rpx; color: var(--muted); }
 .state button { color: #fff; background: var(--sage); border: 0; border-radius: 8rpx; }
+
+/* —— 骨架屏 —— */
+@keyframes pd-shimmer { 0% { opacity: 0.55; } 50% { opacity: 1; } 100% { opacity: 0.55; } }
+.pd-skel { background: linear-gradient(100deg, #EFE8D8, #F6F1E6 60%, #EFE8D8); border-radius: 14rpx; animation: pd-shimmer 1.4s ease-in-out infinite; }
+.pd-skel-hero { width: 100%; height: 634.62rpx; border-radius: 0; }
+.skel-title { height: 44rpx; width: 60%; margin: 38.46rpx 0 22rpx; }
+.skel-line { height: 26rpx; width: 92%; margin-bottom: 16rpx; }
+.skel-line.short { width: 55%; }
+.skel-card { height: 150rpx; margin-top: 26.92rpx; }
 
 .pd-hero { position: relative; height: 634.62rpx; overflow: hidden; background: var(--cream-2); }
 .pd-hero-swiper { width: 100%; height: 100%; }
@@ -45,18 +54,9 @@
 }
 
 .pd-body { padding: 38.46rpx 34.62rpx 26.92rpx; }
-.pd-unbox-head {
-  margin: -4rpx 0 34rpx;
-  padding: 27rpx 27rpx 25rpx;
-  border: 2rpx solid var(--sage-soft);
-  border-radius: 24rpx;
-  background: linear-gradient(135deg, var(--sage-mist), #f7f4e9);
-  box-shadow: 0 10rpx 26rpx rgba(108,126,88,.08);
-}
-.pd-unbox-kicker { color: var(--sage-deep); font-size: 17rpx; font-weight: 800; letter-spacing: .16em; }
-.pd-unbox-title { margin-top: 11rpx; font-family: "Noto Serif SC", "Songti SC", serif; font-size: 31rpx; font-weight: 900; line-height: 1.35; }
-.pd-unbox-copy { margin-top: 8rpx; color: var(--muted); font-size: 20rpx; line-height: 1.6; }
-.pd-unbox-tags { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 18rpx; }
+.pd-unbox-head { margin: -6rpx 0 6rpx; }
+.pd-unbox-copy { color: #79836b; font-size: 24rpx; font-weight: 500; line-height: 1.6; }
+.pd-unbox-tags { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 16rpx; }
 .pd-tag { display: inline-flex; align-items: center; min-height: 38rpx; padding: 0 13rpx; border-radius: 999rpx; background: rgba(255,253,248,.84); color: var(--muted); font-size: 17rpx; font-weight: 700; }
 .pd-tag-accent { color: var(--sage-deep); background: var(--paper); }
 .pd-title { font-family: "Noto Serif SC", "Songti SC", serif; font-size: 46.15rpx; font-weight: 900; line-height: 1.35; }
@@ -71,64 +71,54 @@
 }
 .pd-price { color: var(--sage-deep); font-family: "Noto Serif SC", "Songti SC", serif; font-size: 57.69rpx; font-weight: 900; line-height: 1; }
 .pd-price-unit { margin-left: 7.69rpx; color: var(--muted); font-family: "Noto Sans SC", "PingFang SC", sans-serif; font-size: 21.15rpx; font-weight: 600; }
-.pd-seal { text-align: right; color: var(--sage-deep); }
-.pd-seal-strong { font-size: 30.77rpx; font-weight: 900; line-height: 1.2; }
-.pd-seal-span { color: var(--muted); font-size: 19.23rpx; }
-
-.pd-section { padding: 32.69rpx 0; border-bottom: 1.92rpx solid var(--line); }
-.pd-section-last { border-bottom: 0; }
-.pd-section-title { font-size: 26.92rpx; font-weight: 800; margin-bottom: 21.15rpx; }
-.pd-clue-card { padding: 4rpx 23rpx; border-radius: 18rpx; background: var(--paper); border: 2rpx solid var(--line); }
-.pd-clue-row { display: flex; align-items: center; gap: 20rpx; min-height: 74rpx; border-bottom: 2rpx dashed var(--line); }
-.pd-clue-row:last-child { border-bottom: 0; }
-.pd-clue-label { width: 108rpx; flex-shrink: 0; color: var(--muted); font-size: 19rpx; }
-.pd-clue-value { flex: 1; min-width: 0; color: var(--ink); font-size: 20rpx; font-weight: 700; line-height: 1.45; text-align: right; }
-.pd-clue-hidden { color: var(--sage-deep); }
-.pd-service-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15.38rpx; }
-.pd-service-item {
-  min-height: 146.15rpx;
-  padding: 21.15rpx 15.38rpx;
-  background: var(--paper);
+.pd-seal {
+  flex-shrink: 0;
+  padding: 13.46rpx 23.08rpx;
   border-radius: 15.38rpx;
-  text-align: center;
-  box-shadow: 0 5.77rpx 19.23rpx rgba(60, 52, 44, 0.04);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  background: var(--sage-deep);
+  color: #fff;
+  text-align: right;
 }
-.pd-service-mark { color: var(--sage-deep); font-size: 25rpx; font-weight: 800; margin-bottom: 9.62rpx; }
-.pd-service-text { color: var(--muted); font-size: 19.23rpx; line-height: 1.45; }
-.pd-note { color: var(--muted); font-size: 21.15rpx; line-height: 1.75; }
-.pd-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12rpx; margin-top: 26rpx; }
-.pd-step { min-width: 0; padding: 16rpx 13rpx 15rpx; border-radius: 15rpx; background: var(--paper); border: 2rpx solid var(--line); }
-.pd-step-no { display: block; color: var(--sage-deep); font-size: 16rpx; font-weight: 800; letter-spacing: .08em; }
-.pd-step-title { display: block; margin-top: 9rpx; font-size: 21rpx; font-weight: 800; }
-.pd-step-copy { display: block; margin-top: 5rpx; color: var(--muted); font-size: 17rpx; line-height: 1.45; }
+.pd-seal-strong { font-size: 30.77rpx; font-weight: 900; line-height: 1.2; }
+.pd-seal-span { color: rgba(255, 255, 255, 0.85); font-size: 19.23rpx; }
+
+.pd-section { padding: 34rpx 0 10rpx; }
+.pd-section-last { padding-bottom: 26rpx; }
+.pd-section-title { font-size: 26.92rpx; font-weight: 800; margin-bottom: 21.15rpx; }
+.pd-clue-dest { display: flex; align-items: baseline; gap: 16rpx; padding: 6rpx 0 2rpx; }
+.pd-clue-dest-label { color: var(--muted); font-size: 22rpx; }
+.pd-clue-mask { font-family: "Noto Serif SC", "Songti SC", serif; font-size: 52rpx; font-weight: 900; letter-spacing: .08em; color: var(--sage-deep); line-height: 1.15; }
+.pd-clue-hint { margin-left: auto; color: var(--muted); font-size: 19rpx; }
+.pd-clue-chips { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 18rpx; }
+.pd-clue-chip { display: inline-flex; align-items: center; height: 48rpx; padding: 0 22rpx; border-radius: 999rpx; background: var(--sage-mist); color: var(--sage-deep); font-size: 20rpx; font-weight: 700; }
+.pd-clue-foot { margin-top: 16rpx; color: #7d7468; font-size: 23rpx; line-height: 1.7; }
+.pd-include-list { padding: 0; }
+.pd-include-row { display: flex; align-items: flex-start; gap: 14rpx; padding: 10rpx 0; }
+.pd-include-mark { flex-shrink: 0; width: 34rpx; height: 34rpx; margin-top: 3rpx; border-radius: 50%; background: var(--sage-mist); color: var(--sage-deep); font-size: 19rpx; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.pd-include-text { color: var(--ink); font-size: 23rpx; line-height: 1.6; }
+.pd-note { color: var(--muted); font-size: 22rpx; line-height: 1.8; }
 
 .pd-guide-entry {
   width: 100%;
-  min-height: 130.77rpx;
-  margin-top: 26.92rpx;
-  padding: 21.15rpx 25rpx;
+  min-height: 110rpx;
+  margin-top: 20rpx;
+  padding: 14rpx 4rpx;
   display: flex;
   align-items: center;
-  gap: 21.15rpx;
-  border: 1.92rpx solid var(--sage-soft);
-  border-radius: 15.38rpx;
-  background: var(--sage-mist);
+  gap: 19rpx;
+  border-top: 1.92rpx solid var(--line);
   color: var(--ink);
   box-sizing: border-box;
 }
 .pd-guide-icon {
-  width: 76.92rpx;
-  height: 76.92rpx;
+  width: 72rpx;
+  height: 72rpx;
   flex-shrink: 0;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--paper);
+  background: var(--sage-mist);
   color: var(--sage-deep);
   font-family: "Noto Serif SC", "Songti SC", serif;
   font-size: 26.92rpx;
@@ -140,32 +130,64 @@
 .pd-guide-arrow { font-size: 30.77rpx; }
 
 .pd-offline { margin-top: 24rpx; padding: 18rpx; background: var(--cream-2); color: var(--muted); font-size: 21rpx; }
-.pd-cart-row { margin-top: 26.92rpx; }
-.pd-cart-btn {
-  height: 76.92rpx;
-  line-height: 76.92rpx;
-  padding: 0 30.77rpx;
-  border: 1.92rpx solid var(--sage);
-  background: transparent;
-  color: var(--sage-deep);
-  border-radius: 999rpx;
-  font-size: 23.08rpx;
-  font-weight: 700;
-}
-.pd-cart-btn[disabled] { opacity: 0.45; }
 
+/* —— 吸底三段操作栏：收藏 | 加购 | 开盒 —— */
 .pd-actions-bar {
   position: fixed;
   left: 0; right: 0; bottom: 0;
   z-index: 10;
   display: grid;
-  grid-template-columns: 1fr 1.35fr;
-  gap: 17.31rpx;
-  padding: 21.15rpx 34.62rpx calc(23.08rpx + env(safe-area-inset-bottom));
-  background: rgba(246, 241, 230, 0.96);
+  grid-template-columns: 108rpx 1fr 1.35fr;
+  gap: 15.38rpx;
+  align-items: center;
+  padding: 17.31rpx 30.77rpx calc(19.23rpx + env(safe-area-inset-bottom));
+  background: rgba(246, 241, 230, 0.97);
   border-top: 1.92rpx solid var(--line);
 }
-.pd-actions-bar .btn-block { margin: 0; }
-.pd-actions-bar .btn-sage[disabled] { opacity: 0.45; }
-.pd-saved { border-color: var(--sage); color: var(--sage-deep); }
-.product-page .pd-body { padding-bottom: 219.23rpx; }
+.pd-act-save {
+  width: 108rpx;
+  height: 84rpx;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rpx;
+  background: transparent;
+  border: 0;
+  border-radius: 14rpx;
+  color: var(--muted);
+  font-size: 17rpx;
+  line-height: 1.2;
+}
+.pd-act-save-icon { font-size: 34rpx; line-height: 1; color: var(--muted); }
+.pd-act-save.pd-saved { color: #C25E5E; }
+.pd-act-save.pd-saved .pd-act-save-icon { color: #C25E5E; }
+.pd-act-cart {
+  height: 84rpx;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.92rpx solid var(--sage);
+  background: var(--paper);
+  color: var(--sage-deep);
+  border-radius: 999rpx;
+  font-size: 25rpx;
+  font-weight: 700;
+}
+.pd-act-cart[disabled] { opacity: 0.45; }
+.pd-act-buy {
+  height: 84rpx;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999rpx;
+  font-size: 27rpx;
+  font-weight: 800;
+}
+.pd-act-buy[disabled] { opacity: 0.45; }
+.pd-press { transform: scale(0.96); opacity: 0.88; }
+.product-page .pd-body { padding-bottom: 200rpx; }

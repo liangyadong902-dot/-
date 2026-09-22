@@ -1,6 +1,7 @@
 const data = require('./tuge-data')
 const markdown = require('./markdown')
-const { resolveMedia } = require('./request')
+const { resolveMedia, fetchDisplayMedia, cachedMediaPath } = require('./request')
+const push = require('./push')
 const {
   AI_GREET,
   DEMO_SMS,
@@ -13,7 +14,7 @@ const {
 
 const TABS = [
   { key: 'home', path: '/pages/index/index', text: '首页' },
-  { key: 'ai', path: '/pages/ai/index', text: 'AI搭子' },
+  { key: 'message', path: '/pages/message/index', text: '消息' },
   { key: 'community', path: '/pages/community/index', text: '社区' },
   { key: 'trips', path: '/pages/trips/index', text: '行程' },
   { key: 'mine', path: '/pages/mine/index', text: '我的' },
@@ -51,6 +52,11 @@ let drawStatusTimer = null
 let chatTimer = null
 let wxLoginBusy = false
 let toastSeq = 0
+let msgBadge = 0
+let msgBadgeSeq = 0
+let bannerTimer = null
+let bannerSeq = 0
+let homeCacheTried = false
 
 const ui = {
   unbox: false,
@@ -76,6 +82,7 @@ const ui = {
   searchActive: false,
   searching: false,
   chatAnchor: 'chat-end',
+  banner: null,
   testResult: false,
   diaryLoading: false,
   refundHint: '',
@@ -221,9 +228,22 @@ function keepAvatar(remote) {
   return ''
 }
 
+let avatarLocalizing = false
 function resolvedAvatar() {
   if (isUsableAvatar(avatarSrc)) return avatarSrc
-  return keepAvatar('')
+  const pick = keepAvatar('')
+  // 只剩远程 http 头像时（本地副本失效/未生成）：优先用媒体持久缓存里的本地文件，
+  // 没有则后台下载落地后回填，避免真机明文 http 头像空白
+  if (pick && /^http:/i.test(pick) && !avatarLocalizing) {
+    const local = cachedMediaPath(pick)
+    if (local) return local
+    avatarLocalizing = true
+    fetchDisplayMedia(pick).then((localPath) => {
+      avatarLocalizing = false
+      if (localPath && localPath !== pick) { avatarSrc = localPath; emit() }
+    }).catch(() => { avatarLocalizing = false })
+  }
+  return pick
 }
 
 function recoverAvatarDisplay() {
@@ -514,7 +534,7 @@ function mineMenu() {
   const logged = isLoggedIn()
   return [
     { key: 'trips', group: 'journey', action: 'trips', b: '我的行程', small: logged ? ((stats ? stats.tripCount : 0) + ' 次出行 ›') : '登录后查看 ›' },
-    { key: 'orders', group: 'journey', action: 'orders', b: '我的订单', small: logged ? (pending ? pending + ' 笔待支付 ›' : '查看全部 ›') : '登录后查看 ›' },
+    { key: 'orders', group: 'journey', action: 'orders', b: '购物车', small: logged ? (pending ? pending + ' 笔待付款 ›' : '想买的都在这里 ›') : '登录后查看 ›' },
     { key: 'collections', group: 'content', action: 'collections', b: '我的收藏', small: '旅途笔记 ›' },
     { key: 'badges', group: 'content', action: 'badges', b: '旅行图鉴', small: logged && stats ? stats.badgeUnlocked + ' / ' + stats.badgeTotal + ' ›' : '登录后同步 ›' },
   ].concat(logged
@@ -582,6 +602,8 @@ function snapshot() {
     specialDesc: specialDescText(item),
     specialPager: specialPager(),
     loggedIn: logged,
+    msgBadge,
+    msgBanner: ui.banner,
     mineNick: logged ? (u.nickname || '旅行探险家') : '未登录',
     mineAvatar: logged ? resolvedAvatar() : '',
     loginAvatar: resolvedAvatar(),
@@ -941,6 +963,7 @@ function finishLogin(user) {
   else if (a && a.type === 'orders') openOrderSheet()
   else if (a && a.type === 'trips') switchNav('trips')
   else if (a && a.type === 'pay') openPayForOrder(a.no)
+  refreshMsgBadge()
 }
 
 async function submitPhoneLogin() {
@@ -1034,6 +1057,8 @@ async function submitWxLogin(chosenAvatar) {
 
 function logoutUser() {
   state.loggedIn = false
+  msgBadge = 0
+  closeBanner()
   clearUserTransactions()
   state.personality = null
   state.aiSessions = [blankAiSession()]
@@ -1799,10 +1824,11 @@ async function submitProfile() {
 }
 
 function normalizeBoxList(result) {
+  const RANK_LABELS = { TOP1: '人气第1', TOP2: '热卖第2', TOP3: '精选第3', HOT: '热门', NEW: '新上架' }
   const list = Array.isArray(result) ? result : (result && Array.isArray(result.list) ? result.list : [])
   return list.map((item, i) => ({
     id: 'box_' + (item.id != null ? item.id : i),
-    rank: item.rankTag || item.tag || '',
+    rank: RANK_LABELS[item.rankTag] || item.rankTag || item.tag || '',
     name: item.name || '',
     category: item.category || 'nearby',
     desc: item.intro || '',
@@ -1925,6 +1951,35 @@ function applyRemoteTrips(result) {
   emit()
 }
 
+// 拉取个人资产统计（/me/stats）。登出状态不发起请求也不留错误文案，
+// 避免与 getMe 的自动登出竞态后把红色错误残留在页面上；可重复调用用于重试。
+function refreshStats() {
+  try {
+    const api = require('../services/api')
+    if (!wx.getStorageSync('token')) {
+      stats = null
+      ui.statsError = ''
+      emit()
+      return
+    }
+    // 先渲染上次缓存，秒出骨架，再后台拉最新
+    const uid = (wx.getStorageSync('user') || {}).id || 'me'
+    const cached = wx.getStorageSync('xhs_stats_cache_' + uid)
+    if (cached && !stats) { stats = cached; emit() }
+    api.meStats().then((result) => {
+      stats = result || null
+      ui.statsError = ''
+      if (stats) wx.setStorageSync('xhs_stats_cache_' + uid, stats)
+      emit()
+    }).catch(() => {
+      if (stats) { ui.statsError = ''; emit(); return } // 有缓存数据时不报错
+      stats = null
+      ui.statsError = wx.getStorageSync('token') ? '数据加载失败 · 点击重试' : ''
+      emit()
+    })
+  } catch (e) {}
+}
+
 function hydrateTransactions() {
   try {
     const api = require('../services/api')
@@ -1953,15 +2008,7 @@ function hydrateTransactions() {
         emit()
       }
     })
-    api.meStats().then((result) => {
-      stats = result || null
-      ui.statsError = ''
-      emit()
-    }).catch(() => {
-      stats = null
-      ui.statsError = '个人数据加载失败，请重试'
-      emit()
-    })
+    refreshStats()
     api.myPersonality().then((result) => {
       if (!result) return
       state.personality = {
@@ -1998,23 +2045,35 @@ function hydrateTransactions() {
 function hydrateRemote(params) {
   try {
     const api = require('../services/api')
+    // 首页缓存先行：上次数据立即渲染出内容，接口回来后覆盖（避免每次进首页都盯骨架转圈）
+    if (!homeCacheTried) {
+      homeCacheTried = true
+      const cachedBoxes = wx.getStorageSync('home_cache_boxes')
+      if (cachedBoxes && !boxes.length) applyRemoteBoxes(cachedBoxes)
+      const cachedBadges = wx.getStorageSync('home_cache_badges')
+      if (cachedBadges && !badgeCatalog.length) applyRemoteBadges(cachedBadges)
+      const cachedBanners = wx.getStorageSync('home_cache_banners')
+      if (cachedBanners && !banners.length) applyRemoteBanners(cachedBanners)
+    }
     api.listBoxes(params)
-      .then((list) => applyRemoteBoxes(list))
+      .then((list) => { if (list) wx.setStorageSync('home_cache_boxes', list); applyRemoteBoxes(list) })
       .catch(() => {
-        boxes = []
-        contentLoaded = true
-        contentError = '盲盒加载失败，请下拉重试'
+        if (!boxes.length) {
+          boxes = []
+          contentLoaded = true
+          contentError = '盲盒加载失败，请下拉重试'
+        }
         emit()
       })
     api.listBadges()
-      .then((list) => applyRemoteBadges(list))
+      .then((list) => { if (list) wx.setStorageSync('home_cache_badges', list); applyRemoteBadges(list) })
       .catch(() => {
         badgeCatalog = []
         badgeTotal = 0
         emit()
       })
     api.listBanners()
-      .then((list) => applyRemoteBanners(list))
+      .then((list) => { if (list) wx.setStorageSync('home_cache_banners', list); applyRemoteBanners(list) })
       .catch(() => {
         banners = []
         emit()
@@ -2064,9 +2123,120 @@ function init() {
   const savedAvatar = keepAvatar('')
   if (savedAvatar) avatarSrc = savedAvatar
   hydrateRemote()
-  if (state.loggedIn) hydrateTransactions()
+  if (state.loggedIn) { hydrateTransactions(); refreshMsgBadge() }
   hydrateAi()
+  setupPushRelay()
   emit()
+}
+
+// ===== 消息提醒体系（仿小红书）：tab 角标 + 全局横幅 =====
+const NOTICE_BANNER_TEXT = {
+  like: '赞了你的笔记',
+  comment: '评论了：',
+  reply: '回复了：',
+  follow: '关注了你',
+  system: '系统通知',
+}
+
+function currentPage() {
+  const pages = getCurrentPages()
+  return pages[pages.length - 1] || null
+}
+
+/** 刷新底部「消息」tab 角标：私信未读 + 通知未读 */
+async function refreshMsgBadge() {
+  if (!isLoggedIn()) {
+    if (msgBadge !== 0) { msgBadge = 0; emit() }
+    return
+  }
+  const seq = ++msgBadgeSeq
+  try {
+    const api = require('../services/api')
+    const [dm, notice] = await Promise.all([
+      api.dmUnreadTotal(),
+      api.notificationUnread(),
+    ])
+    if (seq !== msgBadgeSeq) return // 过期响应丢弃
+    // 接口返回 Result<Long>：data 为纯数字（防御性兼容 {count}/{total} 包装）
+    const num = (v) => (v && typeof v === 'object'
+      ? Number(v.count != null ? v.count : (v.total != null ? v.total : 0))
+      : Number(v)) || 0
+    const total = num(dm) + num(notice)
+    if (total !== msgBadge) { msgBadge = total; emit() }
+  } catch (e) { /* 静默：角标下次推送/进消息中心再刷 */ }
+}
+
+/** 弹全局横幅（tuge-overlay 顶部），4.5s 自动收起；头像异步本地化后回填 */
+function showBanner(banner) {
+  if (bannerTimer) { clearTimeout(bannerTimer); bannerTimer = null }
+  const seq = ++bannerSeq
+  ui.banner = {
+    kind: banner.kind || 'notice',
+    title: banner.title || '新消息',
+    desc: String(banner.desc || '').slice(0, 40),
+    avatar: '',
+    peerUserId: banner.peerUserId || 0,
+  }
+  emit()
+  bannerTimer = setTimeout(() => { ui.banner = null; bannerTimer = null; emit() }, 4500)
+  const raw = banner.avatarUrl || ''
+  if (raw) {
+    fetchDisplayMedia(resolveMedia(raw)).then((local) => {
+      // 期间横幅可能已被下一条替换或关闭，避免回填到旧横幅
+      if (ui.banner && bannerSeq === seq) { ui.banner.avatar = local || ''; emit() }
+    }).catch(() => { /* 无头像时回落到类型图标 */ })
+  }
+}
+
+function closeBanner() {
+  if (bannerTimer) { clearTimeout(bannerTimer); bannerTimer = null }
+  if (ui.banner) { ui.banner = null; emit() }
+}
+
+/** 点横幅：私信进聊天页 / 通知进消息中心 */
+function bannerTap() {
+  const b = ui.banner
+  closeBanner()
+  if (!b) return
+  if (b.kind === 'dm' && b.peerUserId) {
+    wx.navigateTo({ url: '/pages/message/chat?peerUserId=' + b.peerUserId + '&nickname=' + encodeURIComponent('私信') })
+  } else {
+    wx.switchTab({ url: '/pages/message/index' })
+  }
+}
+
+/** WebSocket 推送 → 角标刷新 + 横幅（聊天页/消息中心内不弹对应横幅） */
+function setupPushRelay() {
+  if (setupPushRelay._done) return
+  setupPushRelay._done = true
+  push.subscribe((data) => {
+    if (!isLoggedIn()) return
+    if (data.channel === 'dm') {
+      refreshMsgBadge()
+      const cur = currentPage()
+      const onChat = cur && cur.route && cur.route.indexOf('pages/message/chat') >= 0
+      if (!onChat) showBanner({
+        kind: 'dm',
+        title: data.fromNickname || '私信消息',
+        desc: data.content || '',
+        avatarUrl: data.fromAvatarUrl || '',
+        peerUserId: data.fromUserId,
+      })
+    } else if (data.channel === 'notice') {
+      refreshMsgBadge()
+      const cur = currentPage()
+      const onMsg = cur && cur.route && cur.route.indexOf('pages/message/index') >= 0
+      if (!onMsg) {
+        const action = NOTICE_BANNER_TEXT[data.type] || '有新通知'
+        showBanner({
+          kind: 'notice',
+          title: (data.actorNickname ? data.actorNickname + ' ' : '') + action,
+          desc: data.content || '',
+          avatarUrl: data.actorAvatarUrl || '',
+        })
+      }
+    }
+  })
 }
 
 function copyPayUrl() {
@@ -2091,6 +2261,9 @@ module.exports = {
   init,
   subscribe,
   snapshot,
+  refreshMsgBadge,
+  closeBanner,
+  bannerTap,
   refreshHome,
   setSpecial,
   openCurrentSpecial,
@@ -2151,6 +2324,7 @@ module.exports = {
   sendQuickPrompt,
   hydrateAi,
   onMineMenu,
+  refreshStats,
   setLoginPhone,
   setLoginSms,
   goHomeFromEmpty,

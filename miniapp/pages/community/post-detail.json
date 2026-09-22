@@ -1,1 +1,8 @@
-{ "navigationStyle": "custom", "navigationBarTitleText": "帖子详情", "usingComponents": { "emoji-picker": "/components/emoji-picker/index" } }
+{
+  "navigationStyle": "custom",
+  "navigationBarTitleText": "帖子详情",
+  "usingComponents": {
+    "emoji-picker": "/components/emoji-picker/index",
+    "tuge-overlay": "/components/tuge-overlay/index"
+  }
+}

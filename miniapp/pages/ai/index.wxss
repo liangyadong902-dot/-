@@ -27,10 +27,30 @@ page {
 }
 
 .page-ai .cloud-head.ai-cloud {
+  position: relative;
   padding: 96.15rpx 30.77rpx 53.85rpx 34.62rpx;
   flex-shrink: 0;
   overflow: visible;
   z-index: 2;
+}
+
+/* 返回按钮：AI页已从 tab 改为二级页 */
+.page-ai .ai-back {
+  position: absolute;
+  top: 88rpx;
+  left: 20rpx;
+  width: 58rpx;
+  height: 58rpx;
+  border-radius: 50%;
+  background: rgba(255, 253, 248, 0.92);
+  box-shadow: 0 2rpx 10rpx rgba(76, 89, 62, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44rpx;
+  line-height: 44rpx;
+  color: #4C593E;
+  z-index: 9;
 }
 
 .page-ai .ai-hero {

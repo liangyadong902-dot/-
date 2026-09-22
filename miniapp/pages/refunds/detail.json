@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "退款详情",
-  "usingComponents": {}
+  "usingComponents": {
+    "tuge-overlay": "/components/tuge-overlay/index"
+  }
 }

@@ -1069,6 +1069,7 @@ CREATE TABLE `dm_message` (
   `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `conversation_id` BIGINT UNSIGNED NOT NULL,
   `sender_id`       BIGINT UNSIGNED NOT NULL,
+  `msg_type`        VARCHAR(16)     NOT NULL DEFAULT 'text' COMMENT '消息类型 text/image',
   `content`         VARCHAR(500)    NOT NULL,
   `is_read`         TINYINT         NOT NULL DEFAULT 0,
   `created_at`      DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

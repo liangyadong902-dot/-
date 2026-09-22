@@ -1,3 +1,15 @@
+<!-- 全局消息横幅（仿小红书）：顶部下拉，点击进对应会话/消息中心 -->
+<view wx:if="{{msgBanner}}" class="msg-banner" catchtap="bannerTap">
+  <view class="mb-ic {{msgBanner.kind === 'dm' ? 'ic-dm' : 'ic-notice'}}">
+    <image wx:if="{{msgBanner.avatar}}" class="mb-ava" src="{{msgBanner.avatar}}" mode="aspectFill" />
+  </view>
+  <view class="mb-main">
+    <view class="mb-title">{{msgBanner.title}}</view>
+    <view wx:if="{{msgBanner.desc}}" class="mb-desc">{{msgBanner.desc}}</view>
+  </view>
+  <view class="mb-close" catchtap="closeBanner">×</view>
+</view>
+
 <view wx:if="{{anyModal || toastShow}}" class="overlay-host {{anyModal ? 'on' : ''}}">
 <view class="modal-overlay {{unboxOpen ? 'active' : ''}}" catchtouchmove="noop">
   <view class="modal-sheet">

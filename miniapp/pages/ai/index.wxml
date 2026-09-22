@@ -1,6 +1,7 @@
 <view class="page-ai tab-view active" style="height: {{pageH}}px;">
   <view class="ai-stage">
     <view class="cloud-head ai-cloud">
+      <view class="ai-back" bindtap="goBack">‹</view>
       <view class="scallop-row">
         <view class="scallop"></view>
         <view class="scallop"></view>

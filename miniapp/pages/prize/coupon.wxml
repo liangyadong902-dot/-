@@ -9,3 +9,5 @@
     <button wx:if="{{item.status === 'granted' && item.userCouponId}}" class="btn" bindtap="openCoupon">进入卡包查看</button>
   </view>
 </view>
+
+<tuge-overlay />

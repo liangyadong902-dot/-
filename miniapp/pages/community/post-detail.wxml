@@ -64,7 +64,7 @@
         <view class="cd-comment-title">共 {{post.commentCount}} 条评论</view>
         <view wx:if="{{!comments.length}}" class="cd-comment-empty">还没有评论，留下第一句吧</view>
         <view wx:for="{{comments}}" wx:key="commentId" class="cd-comment">
-          <view class="cd-avatar sm">
+          <view class="cd-avatar sm" data-id="{{item.author.userId}}" catchtap="openUserProfile">
             <image wx:if="{{item.author.avatarUrl}}" class="cd-avatar-img" src="{{item.author.avatarUrl}}" mode="aspectFill" />
             <block wx:else>{{item.mark}}</block>
           </view>
@@ -78,7 +78,7 @@
             <view wx:if="{{item.replies.length}}" class="cd-sub">
               <block wx:for="{{item.replies}}" wx:for-item="sub" wx:for-index="subIndex" wx:key="commentId">
                 <view wx:if="{{item.expanded || subIndex <= 1}}" class="cd-sub-item">
-                  <view class="cd-sub-avatar">
+                  <view class="cd-sub-avatar" data-id="{{sub.author.userId}}" catchtap="openUserProfile">
                     <image wx:if="{{sub.author.avatarUrl}}" class="cd-sub-avatar-img" src="{{sub.author.avatarUrl}}" mode="aspectFill" />
                     <block wx:else>{{sub.mark}}</block>
                   </view>
@@ -116,3 +116,5 @@
     </view>
   </block>
 </view>
+
+<tuge-overlay />

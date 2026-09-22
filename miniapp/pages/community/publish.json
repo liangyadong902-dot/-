@@ -1,1 +1,8 @@
-{ "navigationStyle": "custom", "navigationBarTitleText": "写下旅途", "enablePullDownRefresh": false }
+{
+  "navigationStyle": "custom",
+  "navigationBarTitleText": "写下旅途",
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "tuge-overlay": "/components/tuge-overlay/index"
+  }
+}

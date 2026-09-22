@@ -6,8 +6,10 @@ import com.tuge.common.push.PushService;
 import com.tuge.common.result.PageResult;
 import com.tuge.domain.entity.AppUser;
 import com.tuge.domain.entity.Notification;
+import com.tuge.domain.entity.PostImage;
 import com.tuge.domain.mapper.AppUserMapper;
 import com.tuge.domain.mapper.NotificationMapper;
+import com.tuge.domain.mapper.PostImageMapper;
 import com.tuge.domain.vo.NotificationVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +28,14 @@ public class NotificationService {
 
     private final NotificationMapper notificationMapper;
     private final AppUserMapper userMapper;
+    private final PostImageMapper postImageMapper;
     private final PushService pushService;
 
-    public NotificationService(NotificationMapper notificationMapper, AppUserMapper userMapper, PushService pushService) {
+    public NotificationService(NotificationMapper notificationMapper, AppUserMapper userMapper,
+                               PostImageMapper postImageMapper, PushService pushService) {
         this.notificationMapper = notificationMapper;
         this.userMapper = userMapper;
+        this.postImageMapper = postImageMapper;
         this.pushService = pushService;
     }
 
@@ -45,12 +50,15 @@ public class NotificationService {
             item.setContent(content == null ? null : (content.length() > 255 ? content.substring(0, 255) : content));
             item.setIsRead(0);
             notificationMapper.insert(item);
-            // WebSocket 实时推送给在线接收端
+            // WebSocket 实时推送给在线接收端（带头像昵称供横幅展示）
+            AppUser actor = actorId == null ? null : userMapper.selectById(actorId);
             pushService.push(userId, Map.of(
                     "channel", "notice",
                     "noticeId", item.getId(),
                     "type", type,
                     "actorId", actorId == null ? 0 : actorId,
+                    "actorNickname", actor != null && actor.getNickname() != null ? actor.getNickname() : "用户",
+                    "actorAvatarUrl", actor != null && actor.getAvatarUrl() != null ? actor.getAvatarUrl() : "",
                     "postId", postId == null ? 0 : postId,
                     "content", item.getContent() == null ? "" : item.getContent()));
         } catch (Exception ignored) {
@@ -68,10 +76,19 @@ public class NotificationService {
         Map<Long, AppUser> actors = records.stream().map(Notification::getActorId).filter(Objects::nonNull).distinct()
                 .map(userMapper::selectById).filter(Objects::nonNull)
                 .collect(Collectors.toMap(AppUser::getId, Function.identity()));
+        // 批量取关联帖子首图（一条查询），用作列表右侧缩略图
+        List<Long> postIds = records.stream().map(Notification::getPostId).filter(Objects::nonNull).distinct().toList();
+        Map<Long, String> covers = new java.util.HashMap<>();
+        if (!postIds.isEmpty()) {
+            List<PostImage> images = postImageMapper.selectList(new LambdaQueryWrapper<PostImage>()
+                    .in(PostImage::getPostId, postIds).orderByAsc(PostImage::getSortOrder));
+            for (PostImage image : images) covers.putIfAbsent(image.getPostId(), image.getUrl());
+        }
         List<NotificationVO> list = records.stream().map(n -> {
             NotificationVO vo = new NotificationVO();
             vo.setId(n.getId()); vo.setType(n.getType()); vo.setActorId(n.getActorId());
             vo.setPostId(n.getPostId()); vo.setCommentId(n.getCommentId()); vo.setContent(n.getContent());
+            vo.setPostCoverUrl(n.getPostId() == null ? null : covers.get(n.getPostId()));
             vo.setRead(n.getIsRead() != null && n.getIsRead() == 1); vo.setCreatedAt(n.getCreatedAt());
             AppUser actor = n.getActorId() == null ? null : actors.get(n.getActorId());
             if (actor != null) { vo.setActorNickname(actor.getNickname()); vo.setActorAvatarUrl(actor.getAvatarUrl()); }

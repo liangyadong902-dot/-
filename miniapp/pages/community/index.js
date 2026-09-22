@@ -1,6 +1,6 @@
 const makePage = require('../../behaviors/tuge-page')
 const api = require('../../services/api')
-const { resolveMedia, fetchDisplayMediaList } = require('../../utils/request')
+const { resolveMedia, thumbMediaUrl, fetchDisplayMediaList } = require('../../utils/request')
 
 const RATIOS = [1.26, 1.04, 1.42, 1.18, 1.34, 1.08]
 
@@ -10,8 +10,8 @@ function decoratePosts(list) {
     ratio: RATIOS[index % RATIOS.length],
     tagText: (post.topic && post.topic.name) || '旅途',
     authorMark: ((post.author && post.author.nickname) || '途').slice(0, 1),
-    authorAvatar: resolveMedia((post.author && post.author.avatarUrl) || ''),
-    cover: post.imageUrls && post.imageUrls.length ? resolveMedia(post.imageUrls[0]) : '',
+    authorAvatar: thumbMediaUrl((post.author && post.author.avatarUrl) || '', 200),
+    cover: post.imageUrls && post.imageUrls.length ? thumbMediaUrl(post.imageUrls[0], 600) : '',
   }))
 }
 
@@ -54,7 +54,7 @@ Page(makePage(2, {
               userId: user.userId,
               nickname: user.nickname || '途友',
               mark: (user.nickname || '途').slice(0, 1),
-              avatar: resolveMedia(user.avatarUrl || ''),
+              avatar: thumbMediaUrl(user.avatarUrl || '', 200),
               bio: (item.postCount || 0) + ' 篇笔记 · ' + (item.checkinCount || 0) + ' 次打卡',
               followed: !!user.followed,
             }

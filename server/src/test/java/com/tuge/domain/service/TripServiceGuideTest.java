@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 class TripServiceGuideTest {
     private final TripMapper tripMapper = mock(TripMapper.class);
     private final TravelRouteMapper routeMapper = mock(TravelRouteMapper.class);
-    private final TripService service = new TripService(tripMapper, routeMapper, new ObjectMapper());
+    private final TripService service = new TripService(tripMapper, routeMapper, mock(com.tuge.domain.mapper.BlindBoxMapper.class), new ObjectMapper());
 
     @BeforeEach
     void initializeMybatisMetadata() {

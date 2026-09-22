@@ -1,1 +1,7 @@
-{"navigationStyle":"default","navigationBarTitleText":"积分商城"}
+{
+  "navigationStyle": "default",
+  "navigationBarTitleText": "积分商城",
+  "usingComponents": {
+    "tuge-overlay": "/components/tuge-overlay/index"
+  }
+}

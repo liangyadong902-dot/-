@@ -228,6 +228,14 @@ function request(options) {
   })
 }
 
+// 列表封面/头像等小尺寸展示位使用服务端缩略图，避免拉 3-5MB 原图
+function thumbMediaUrl(url, width) {
+  const resolved = resolveMedia(url)
+  const m = /\/([^\/?#]+)\.(jpe?g|png|webp)(?:$|[?#])/i.exec(resolved || '')
+  if (!m) return resolved
+  return MEDIA_BASE + '/api/v1/media/thumb?f=' + encodeURIComponent(m[1] + '.' + m[2]) + '&w=' + (Number(width) || 600)
+}
+
 module.exports = {
   get: (url, data, extra) => request({ url, method: 'GET', data, ...extra }),
   post: (url, data, extra) => request({ url, method: 'POST', data, ...extra }),
@@ -235,6 +243,8 @@ module.exports = {
   patch: (url, data, extra) => request({ url, method: 'PATCH', data, ...extra }),
   delete: (url, data, extra) => request({ url, method: 'DELETE', data, ...extra }),
   resolveMedia,
+  thumbMediaUrl,
   fetchDisplayMedia,
   fetchDisplayMediaList,
+  cachedMediaPath,
 }

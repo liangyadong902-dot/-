@@ -41,6 +41,9 @@ Page(makePage(3, {
   onDraft(e) {
     this.setData({ draft: e.detail.value })
   },
+  goBack() {
+    wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/message/index' }) })
+  },
   sendChat() {
     if (this.data.aiBusy) return
     const text = (this.data.draft || '').trim()

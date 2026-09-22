@@ -1,5 +1,5 @@
 module.exports = {
-  BASE_URL: 'http://172.20.10.2:8080/api/v1',
+  BASE_URL: 'http://8.136.34.95:8080/api/v1',
   COLORS: {
     primary: '#FF6B35',
     secondary: '#1A1A2E',

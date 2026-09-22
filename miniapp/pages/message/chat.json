@@ -1,4 +1,8 @@
 {
   "navigationBarTitleText": "私信",
-  "usingComponents": { "emoji-picker": "/components/emoji-picker/index" }
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "emoji-picker": "/components/emoji-picker/index",
+    "tuge-overlay": "/components/tuge-overlay/index"
+  }
 }

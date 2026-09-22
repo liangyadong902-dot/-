@@ -29,7 +29,7 @@ class TripServiceIsolationTest {
     void setUp() {
         TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""), Trip.class);
         tripMapper = mock(TripMapper.class);
-        service = new TripService(tripMapper, mock(TravelRouteMapper.class), new ObjectMapper());
+        service = new TripService(tripMapper, mock(TravelRouteMapper.class), mock(com.tuge.domain.mapper.BlindBoxMapper.class), new ObjectMapper());
     }
 
     @Test

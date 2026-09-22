@@ -1,5 +1,5 @@
 const api = require('../../services/api')
-const { fetchDisplayMedia, fetchDisplayMediaList } = require('../../utils/request')
+const { fetchDisplayMedia, fetchDisplayMediaList, thumbMediaUrl } = require('../../utils/request')
 
 function fmtDate(value) {
   if (!value) return ''
@@ -35,13 +35,17 @@ Page({
         cover: '',
       }))
       this.setData({ profile, followed: !!profile.followed, isSelf: !!profile.self, works, loading: false })
-      const covers = (data.list || []).map((p) => (p.imageUrls && p.imageUrls[0]) || '').filter(Boolean)
-      const displayCovers = await fetchDisplayMediaList(covers)
+      // 封面统一走 600px 缩略图（150-250KB 级别），配合媒体持久缓存，二次进入直接命中本地文件
+      const rawCovers = (data.list || []).map((p) => (p.imageUrls && p.imageUrls[0]) || '').filter(Boolean)
+      const thumbKeys = rawCovers.map((c) => thumbMediaUrl(c, 600))
+      const displayCovers = await fetchDisplayMediaList(thumbKeys)
       const coverMap = {}
-      covers.forEach((c, i) => { coverMap[c] = displayCovers[i] })
+      thumbKeys.forEach((k, i) => { coverMap[k] = displayCovers[i] })
       const patch = {}
       ;(data.list || []).forEach((p, i) => {
-        const resolved = coverMap[(p.imageUrls && p.imageUrls[0]) || '']
+        const raw = (p.imageUrls && p.imageUrls[0]) || ''
+        const key = raw ? thumbMediaUrl(raw, 600) : ''
+        const resolved = key ? coverMap[key] : ''
         if (resolved) patch['works[' + i + '].cover'] = resolved
       })
       if (Object.keys(patch).length) this.setData(patch)
@@ -59,7 +63,7 @@ Page({
   },
   goChat() {
     if (this.data.isSelf) return
-    wx.navigateTo({ url: '/pages/message/chat?peerUserId=' + this.data.userId + '&nickname=' + encodeURIComponent((this.data.profile && this.data.profile.nickname) || '') })
+    wx.navigateTo({ url: '/pages/message/chat?peerUserId=' + this.data.userId + '&nickname=' + encodeURIComponent((this.data.profile && this.data.profile.nickname) || '') + '&avatar=' + encodeURIComponent((this.data.profile && this.data.profile.avatarUrl) || '') })
   },
   openWork(e) { wx.navigateTo({ url: '/pages/community/post-detail?id=' + e.currentTarget.dataset.id }) },
 })

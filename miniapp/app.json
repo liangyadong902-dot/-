@@ -7,6 +7,7 @@
     "pages/community/publish",
     "pages/community/collections",
     "pages/community/rankings",
+    "pages/community/follow-list",
     "pages/checkin/index",
     "pages/checkin/create",
     "pages/checkin/detail",
@@ -72,10 +73,10 @@
         "selectedIconPath": "assets/tabs/community-active.png"
       },
       {
-        "pagePath": "pages/ai/index",
-        "text": "AI搭子",
-        "iconPath": "assets/tabs/ai.png",
-        "selectedIconPath": "assets/tabs/ai-active.png"
+        "pagePath": "pages/message/index",
+        "text": "消息",
+        "iconPath": "assets/tabs/message.png",
+        "selectedIconPath": "assets/tabs/message-active.png"
       },
       {
         "pagePath": "pages/mine/index",

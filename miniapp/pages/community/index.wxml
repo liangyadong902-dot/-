@@ -35,7 +35,7 @@
       <view wx:for="{{creators}}" wx:key="userId" class="community-row">
         <view class="community-row-rank">{{index + 1}}</view>
         <view class="community-avatar lg">
-          <image wx:if="{{item.avatar}}" class="avatar-img" src="{{item.avatar}}" mode="aspectFill" />
+          <image wx:if="{{item.avatar}}" class="avatar-img" src="{{item.avatar}}" mode="aspectFill" lazy-load />
           <block wx:else>{{item.mark}}</block>
         </view>
         <view class="community-row-copy"><view class="row-title">{{item.nickname}}</view><view class="row-sub">{{item.bio}}</view></view>
@@ -69,7 +69,7 @@
     <view wx:else class="community-feed">
       <view wx:for="{{posts}}" wx:key="postId" class="community-card" data-id="{{item.postId}}" bindtap="openPost">
         <view class="community-card-cover">
-          <image wx:if="{{item.cover}}" class="card-img" src="{{item.cover}}" mode="aspectFill" style="aspect-ratio: 1/{{item.ratio}};" />
+          <image wx:if="{{item.cover}}" class="card-img" src="{{item.cover}}" mode="aspectFill" lazy-load style="aspect-ratio: 1/{{item.ratio}};" />
           <view wx:else class="card-img card-img-empty" style="aspect-ratio: 1/{{item.ratio}};">途个好心情</view>
           <view class="community-card-tag">{{item.tagText}}</view>
         </view>
@@ -78,7 +78,7 @@
           <view class="community-card-foot">
             <view class="community-author" data-id="{{item.author.userId}}" catchtap="openAuthor">
               <view class="community-avatar">
-                <image wx:if="{{item.authorAvatar}}" class="avatar-img" src="{{item.authorAvatar}}" mode="aspectFill" />
+                <image wx:if="{{item.authorAvatar}}" class="avatar-img" src="{{item.authorAvatar}}" mode="aspectFill" lazy-load />
                 <block wx:else>{{item.authorMark}}</block>
               </view>
               <view class="author-name">{{item.author.nickname || '途友'}}</view>
@@ -96,3 +96,5 @@
   <view class="community-compose" bindtap="openPublish">＋ 发布</view>
   <view class="tab-safe"></view>
 </view>
+
+<tuge-overlay />

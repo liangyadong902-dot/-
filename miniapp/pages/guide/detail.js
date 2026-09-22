@@ -152,7 +152,7 @@ Page({
       error: '',
       previewOnly: meta.kind === 'product',
       img: meta.img,
-      kicker: meta.kind === 'trip' ? 'ROUTE GUIDE · 已解锁' : 'THEME GUIDE · 开盒前',
+      kicker: meta.kind === 'trip' ? '路线攻略 · 已解锁' : '主题攻略 · 开盒前',
       title: meta.title,
       place: meta.place,
       metas: [config.duration, config.pace, config.transit, config.season].filter(Boolean),
@@ -208,7 +208,7 @@ Page({
   askAi() {
     const prompt = '请根据「' + this.data.title + '」帮我检查行前准备，并提醒最容易遗漏的三件事。'
     store.sendUserMessage(prompt)
-    wx.switchTab({ url: '/pages/ai/index' })
+    wx.navigateTo({ url: '/pages/ai/index' })
   },
 
   goBack() {

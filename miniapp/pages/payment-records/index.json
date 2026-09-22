@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "支付记录",
-  "usingComponents": {}
+  "usingComponents": {
+    "tuge-overlay": "/components/tuge-overlay/index"
+  }
 }

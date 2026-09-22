@@ -1,77 +1,160 @@
 <view class="page-mine tab-view active">
-  <view class="cloud-head sub-cloud">
-    <view class="scallop-row">
-      <view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view><view class="scallop"></view>
-    </view>
-    <view class="mine-hero">
-      <view class="avatar-ring">
-        <image wx:if="{{mineAvatar}}" src="{{mineAvatar}}" mode="aspectFill" class="mine-avatar" binderror="onAvatarError" />
-        <view wx:else class="avatar-fallback"></view>
-      </view>
-      <view class="mine-copy">
-        <view class="ai-name">{{mineNick}}</view>
-        <view class="ai-sub mine-sub">{{minePhone}}</view>
-        <view class="rank-pill">{{profileRankText}}</view>
-        <view class="sub-desc mine-hint">{{mineBadgeHint}}</view>
+  <!-- 小红书式头部：鼠尾草绿 + 个人信息 + 数据行 -->
+  <view class="x-head">
+    <view style="height:{{xStatusBar}}px"></view>
+    <view class="x-toprow">
+      <view class="x-burger" bindtap="toggleDrawer"><view></view><view></view><view></view></view>
+      <view class="x-topright">
+        <view class="x-pill" bindtap="goProfile">
+          <view class="x-pill-ic"></view>我的主页
+        </view>
+        <button class="x-share" open-type="share" plain hover-class="x-share-hover">
+          <view class="x-share-ic"></view>
+        </button>
       </view>
     </view>
+
+    <view class="x-idrow">
+      <view class="x-avawrap">
+        <image wx:if="{{mineAvatar}}" src="{{mineAvatar}}" mode="aspectFill" class="x-ava" binderror="onAvatarError" />
+        <view wx:else class="x-ava x-ava-fb">{{xNickInit}}</view>
+      </view>
+      <view class="x-idcol">
+        <view class="x-nick">{{mineNick || '旅行者'}}</view>
+        <view class="x-uid" bindtap="copyUid">途个号：{{xUserId || '—'}} <text class="x-copy">⧉</text></view>
+        <view class="x-ip">IP：{{xCity || '未知'}}</view>
+      </view>
+    </view>
+
+    <view class="x-stats">
+      <view class="x-stat" data-tab="following" bindtap="goFollowList"><text class="n">{{xFollowing}}</text><text class="t">关注</text></view>
+      <view class="x-stat" data-tab="followers" bindtap="goFollowList"><text class="n">{{xFollowers}}</text><text class="t">粉丝</text></view>
+      <view class="x-stat"><text class="n">{{xLikes}}</text><text class="t">获赞与收藏</text></view>
+    </view>
+
+    <view class="x-bio" wx:if="{{profileRankText || mineBadgeHint}}">
+      <text wx:if="{{profileRankText}}">{{profileRankText}}</text>
+      <text wx:if="{{profileRankText && mineBadgeHint}}" class="x-bio-dot"> · </text>
+      <text wx:if="{{mineBadgeHint}}">{{mineBadgeHint}}</text>
+    </view>
+
+    <!-- 三张半透明快捷卡：对接原菜单 action（行程/订单/图鉴） -->
+    <view class="x-cards">
+      <view class="x-card" data-action="trips" bindtap="onMenu">
+        <view class="x-card-t">我的行程</view>
+        <view class="x-card-s">{{statTrips === '—' ? '登录后查看' : statTrips + ' 次出行'}}</view>
+      </view>
+      <view class="x-card" data-action="orders" bindtap="onMenu">
+        <view class="x-card-t">我的订单</view>
+        <view class="x-card-s">行程·退款</view>
+      </view>
+      <view class="x-card" data-action="badges" bindtap="onMenu">
+        <view class="x-card-t">旅行图鉴</view>
+        <view class="x-card-s">{{mineBadgeHint}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{statsError}}" class="x-head-err" bindtap="onStatsRetry">{{statsError}}</view>
   </view>
-  <view class="page-pad">
-    <view class="menu-list mine-quick">
-      <view class="menu-row" bindtap="goProfile">
-        <text class="b">我的主页</text><text class="small">作品与关注 ›</text>
-      </view>
-      <view class="menu-row" bindtap="goMessages">
-        <view class="quick-msg"><text class="b">消息中心</text><view wx:if="{{msgBadge}}" class="msg-badge">{{msgBadge > 99 ? '99+' : msgBadge}}</view></view>
-        <text class="small">通知与私信 ›</text>
-      </view>
+
+  <!-- 白色圆角面板：Tabs + 内容 -->
+  <view class="x-sheet">
+    <view class="x-tabs">
+      <view class="x-tab {{xTab === 'posts' ? 'on' : ''}}" data-tab="posts" bindtap="switchTab">笔记</view>
+      <view class="x-tab {{xTab === 'checkins' ? 'on' : ''}}" data-tab="checkins" bindtap="switchTab">打卡</view>
+      <view class="x-tab {{xTab === 'favs' ? 'on' : ''}}" data-tab="favs" bindtap="switchTab">收藏</view>
     </view>
-    <view class="stats-4grid">
-      <view class="stat-tile"><text class="strong">{{statTrips}}</text><text class="span">出行次数</text></view>
-      <view class="stat-tile"><text class="strong">{{statSaved}}</text><text class="span">累计省钱</text></view>
-      <view class="stat-tile"><text class="strong">{{statLevel}}</text><text class="span">当前等级</text></view>
-      <view class="stat-tile"><text class="strong">{{statWelfare}}</text><text class="span">公益里程</text></view>
+
+    <!-- 发布引导条 -->
+    <view class="x-banner" wx:if="{{xTab === 'posts' && xLoggedIn}}">
+      <view class="x-banner-cover">途</view>
+      <view class="x-banner-main">
+        <view class="x-banner-t">记录你的旅途日常</view>
+        <view class="x-banner-s">晒出开盒瞬间与路上风景</view>
+      </view>
+      <view class="x-banner-btn" bindtap="goPublish">去发布</view>
     </view>
-    <view wx:if="{{statsError}}" class="empty-hint">{{statsError}}</view>
-    <view class="mine-menu-groups">
-      <view class="mine-menu-group">
-        <view class="mine-section-label">旅程与订单</view>
-        <view class="menu-list">
-          <view class="menu-row" wx:for="{{mineJourneyMenu}}" wx:key="key" data-action="{{item.action}}" bindtap="onMenu">
-            <text class="b">{{item.b}}</text><text class="small">{{item.small}}</text>
+
+    <!-- 未登录 -->
+    <view wx:if="{{!xLoggedIn}}" class="x-empty">
+      <view class="x-empty-t">登录后查看我的内容</view>
+      <view class="x-empty-btn" bindtap="goProfile">去登录</view>
+    </view>
+
+    <!-- 笔记 / 收藏：双列瀑布流 -->
+    <block wx:if="{{xLoggedIn && (xTab === 'posts' || xTab === 'favs')}}">
+      <view wx:if="{{xLoading}}" class="x-empty-t x-pad">加载中…</view>
+      <view wx:elif="{{!xGrid.length}}" class="x-empty">
+        <view class="x-empty-t">{{xTab === 'posts' ? '还没有笔记，发第一篇吧' : '还没有收藏'}}</view>
+      </view>
+      <view wx:else class="x-grid">
+        <view class="x-cell" wx:for="{{xGrid}}" wx:key="id" data-id="{{item.id}}" bindtap="openPost">
+          <image wx:if="{{item.cover}}" src="{{item.cover}}" mode="widthFix" class="x-cell-img" />
+          <view wx:else class="x-cell-img x-cell-noimg">{{item.title || '途个惊喜'}}</view>
+          <view class="x-cell-t">{{item.title}}</view>
+          <view class="x-cell-meta" wx:if="{{item.likes !== ''}}">♡ {{item.likes}}</view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 打卡：列表行 -->
+    <block wx:if="{{xLoggedIn && xTab === 'checkins'}}">
+      <view wx:if="{{xLoading}}" class="x-empty-t x-pad">加载中…</view>
+      <view wx:elif="{{!xCheckins.length}}" class="x-empty">
+        <view class="x-empty-t">还没有打卡记录，出发吧</view>
+      </view>
+      <view wx:else class="x-cklist">
+        <view class="x-ck" wx:for="{{xCheckins}}" wx:key="id">
+          <image wx:if="{{item.cover}}" src="{{item.cover}}" mode="aspectFill" class="x-ck-img" />
+          <view wx:else class="x-ck-img x-ck-noimg">📍</view>
+          <view class="x-ck-main">
+            <view class="x-ck-t">{{item.title}}</view>
+            <view class="x-ck-s">{{item.time}}</view>
           </view>
         </view>
       </view>
-      <view class="mine-menu-group">
-        <view class="mine-section-label">我的内容</view>
-        <view class="menu-list">
-          <view class="menu-row" wx:for="{{mineContentMenu}}" wx:key="key" data-action="{{item.action}}" bindtap="onMenu">
-            <text class="b">{{item.b}}</text><text class="small">{{item.small}}</text>
-          </view>
-        </view>
-      </view>
-      <view class="mine-menu-group">
-        <view class="mine-section-label">账户与服务</view>
-        <view class="menu-list">
-          <view class="menu-row" wx:for="{{mineAccountMenu}}" wx:key="key" data-action="{{item.action}}" bindtap="onMenu">
-            <text class="b">{{item.b}}</text><text class="small">{{item.small}}</text>
-          </view>
-        </view>
-      </view>
-    </view>
-    <view class="service-block">
-      <view class="h4">退换规则</view>
-      <view class="p">未出行且符合退换规则时，可在“我的订单”中申请退换。</view>
-    </view>
-    <view class="service-block">
-      <view class="h4">AI 情绪匹配</view>
-      <view class="p">按心情匹配旅行主题与线路，不替你指定抽中哪一条。</view>
-    </view>
-    <view class="service-block">
-      <view class="h4">乡村文旅扶持</view>
-      <view class="p">每售出 1 份盲盒，提取 1 元纳入乡村文旅扶持金。</view>
-    </view>
+    </block>
+    <!-- 原三组菜单已合并：行程/订单/图鉴 → 快捷卡；收藏 → Tab；资料/资产/成就/退出 → 抽屉 -->
   </view>
+
+  <!-- 抽屉：完整菜单（收纳原有分组） -->
+  <view wx:if="{{xDrawer}}" class="x-mask" bindtap="toggleDrawer"></view>
+  <view class="x-drawer {{xDrawer ? 'open' : ''}}">
+    <view class="x-drawer-head">
+      <image wx:if="{{mineAvatar}}" src="{{mineAvatar}}" mode="aspectFill" class="x-drawer-ava" />
+      <view wx:else class="x-drawer-ava x-ava-fb">{{xNickInit}}</view>
+      <view class="x-drawer-nick">{{mineNick || '旅行者'}}</view>
+    </view>
+    <scroll-view scroll-y class="x-drawer-body">
+      <view class="x-drawer-label">我的资产{{statsError ? ' · 点击重试' : ''}}</view>
+      <view class="x-asset" bindtap="onStatsRetry">
+        <view class="x-asset-cell"><text class="n">{{statTrips}}</text><text class="t">出行次数</text></view>
+        <view class="x-asset-cell"><text class="n">{{statSaved}}</text><text class="t">累计省钱</text></view>
+        <view class="x-asset-cell"><text class="n">{{statLevel}}</text><text class="t">当前等级</text></view>
+        <view class="x-asset-cell"><text class="n">{{statWelfare}}</text><text class="t">公益里程</text></view>
+      </view>
+      <view class="x-drawer-row" bindtap="goMessages">
+        <text class="b">消息中心</text>
+        <view wx:if="{{msgBadge}}" class="x-drawer-badge">{{msgBadge > 99 ? '99+' : msgBadge}}</view>
+      </view>
+      <view class="x-drawer-label">旅程与订单</view>
+      <view class="menu-list">
+        <view class="menu-row" wx:for="{{mineJourneyMenu}}" wx:key="key" data-action="{{item.action}}" bindtap="onMenu"><text class="b">{{item.b}}</text><text class="small">{{item.small}}</text></view>
+      </view>
+      <view class="x-drawer-label">我的内容</view>
+      <view class="menu-list">
+        <view class="menu-row" wx:for="{{mineContentMenu}}" wx:key="key" data-action="{{item.action}}" bindtap="onMenu"><text class="b">{{item.b}}</text><text class="small">{{item.small}}</text></view>
+      </view>
+      <view class="x-drawer-label">账户与服务</view>
+      <view class="menu-list">
+        <view class="menu-row" wx:for="{{mineAccountMenu}}" wx:key="key" data-action="{{item.action}}" bindtap="onMenu"><text class="b">{{item.b}}</text><text class="small">{{item.small}}</text></view>
+      </view>
+      <view class="x-drawer-foot">退换规则：未出行且符合退换规则时，可在「我的订单」中申请退换。</view>
+      <view class="x-drawer-foot">AI情绪匹配：按心情匹配旅行主题与线路，不替你指定抽中哪一条。</view>
+      <view class="x-drawer-foot">乡村文旅扶持：每售出 1 份盲盒，提取 1 元纳入乡村文旅扶持金。</view>
+    </scroll-view>
+  </view>
+
   <view class="tab-safe"></view>
   <tuge-overlay />
 </view>

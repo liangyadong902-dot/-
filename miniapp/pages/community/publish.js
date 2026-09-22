@@ -50,6 +50,7 @@ Page({
     wx.chooseMedia({
       count: remain,
       mediaType: ['image'],
+      sizeType: ['compressed'],
       sourceType: ['album', 'camera'],
       success: (res) => {
         const files = (res.tempFiles || []).filter((item) => item && item.tempFilePath)

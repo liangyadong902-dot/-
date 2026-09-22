@@ -85,11 +85,16 @@ public class AiDiaryService {
     }
 
     private String template(Trip trip) {
-        DiaryTemplate row = templateMapper.selectOne(new LambdaQueryWrapper<DiaryTemplate>()
+        List<DiaryTemplate> rows = templateMapper.selectList(new LambdaQueryWrapper<DiaryTemplate>()
                 .eq(DiaryTemplate::getStatus, "on")
-                .orderByDesc(DiaryTemplate::getSortWeight).orderByAsc(DiaryTemplate::getId).last("LIMIT 1"));
-        String value = row == null ? "今天在{目的地}走了一段{线路名称}。{亮点} 购入价{购入价}元，票面{票面价值}元。\n—— AI生成"
-                : row.getContent();
+                .orderByDesc(DiaryTemplate::getSortWeight).orderByAsc(DiaryTemplate::getId));
+        String value = null;
+        if (rows != null && !rows.isEmpty()) {
+            value = rows.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(rows.size())).getContent();
+        }
+        if (value == null || value.isBlank()) {
+            value = "今天在{目的地}把{线路名称}走了一遍，{亮点}，这趟挺值。";
+        }
         value = value.replace("{线路名称}", safe(trip.getRouteName()))
                 .replace("{目的地}", safe(trip.getLocation()))
                 .replace("{亮点}", safe(trip.getHighlight()))
@@ -97,9 +102,8 @@ public class AiDiaryService {
                 .replace("{购入价}", cents(trip.getPriceCent()))
                 .replace("{票面价值}", cents(trip.getValueCent()));
         if (!containsFacts(value, trip)) {
-            value = "今天在" + safe(trip.getLocation()) + "走了一段" + safe(trip.getRouteName()) + "。"
-                    + safe(trip.getHighlight()) + " 购入价" + cents(trip.getPriceCent())
-                    + "元，票面" + cents(trip.getValueCent()) + "元。\n—— AI生成";
+            value = "今天在" + safe(trip.getLocation()) + "把" + safe(trip.getRouteName()) + "走了一遍，"
+                    + safe(trip.getHighlight()) + "，这趟挺值。";
         }
         return value;
     }

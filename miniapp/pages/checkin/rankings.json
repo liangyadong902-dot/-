@@ -1,1 +1,6 @@
-{ "navigationBarTitleText": "打卡排行" }
+{
+  "navigationBarTitleText": "打卡排行",
+  "usingComponents": {
+    "tuge-overlay": "/components/tuge-overlay/index"
+  }
+}

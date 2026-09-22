@@ -1,4 +1,5 @@
 const api = require('../../services/api')
+const { fetchDisplayMediaList, resolveMedia } = require('../../utils/request')
 
 const SAVED_KEY = 'tuge-saved-boxes'
 
@@ -8,6 +9,18 @@ const CATEGORY_LABELS = {
   cross: '跨省游',
   theme: '主题专线',
   guide: '纯攻略',
+}
+
+const SCENE_LABELS = {
+  ancient_town: '古镇', village: '古村', mountain: '山野', lake: '湖畔', seaside: '海边',
+  island: '海岛', city_walk: '城市漫步', camping: '露营', hot_spring: '温泉', theme_park: '乐园',
+  night_view: '夜色', food: '觅食', museum: '展馆', countryside: '田园', grassland: '草原',
+  desert: '大漠', snow: '冰雪', forest: '森林',
+}
+
+const MOOD_LABELS = {
+  bored: '无聊想逃', emo: 'emo了', happy: '开心出逃', weekend: '周末就走', holiday: '假期去哪',
+  tired: '累了想躺', miss: '想出门透透气', celebrate: '庆祝一下', relax: '想放空', explore: '想探险',
 }
 
 Page({
@@ -21,17 +34,30 @@ Page({
       box.includes = box.includes && box.includes.length ? box.includes : []
       box.moods = Array.isArray(box.moods) ? box.moods : []
       box.scenes = Array.isArray(box.scenes) ? box.scenes : []
+      box.moods = box.moods.map((m) => MOOD_LABELS[m] || m)
+      const sceneName = (s) => SCENE_LABELS[s] || s
       box.tag = box.tag || CATEGORY_LABELS[box.category] || '旅行盲盒'
-      box.rankTag = box.rankTag || ''
+      const RANK_LABELS = { TOP1: '人气第1', TOP2: '热卖第2', TOP3: '精选第3', HOT: '热门', NEW: '新上架' }
+      box.rankTag = RANK_LABELS[box.rankTag] || box.rankTag || ''
       const previewScenes = Array.isArray(box.guidePreview.sceneTags) ? box.guidePreview.sceneTags : []
-      box.sceneText = box.scenes.length ? box.scenes.join(' · ') : previewScenes.join(' · ')
+      box.sceneText = box.scenes.length
+        ? box.scenes.map(sceneName).join(' · ')
+        : (previewScenes.map(sceneName).join(' · ') || '开盒才能看到')
+      box.sceneChips = (box.scenes.length ? box.scenes : previewScenes).map(sceneName).slice(0, 4)
       box.guidePreviewText = box.guidePreview.summary || box.guidePreview.notice || ''
       box.gallery = box.gallery.filter(Boolean)
       if (!box.gallery.length) box.gallery = ['']
       box.hasMultipleImages = box.gallery.length > 1
-      box.ratePercent = Math.max(100, Math.round((Number(box.minValue || 0) / Number(box.price || 1)) * 100))
       const saved = (wx.getStorageSync(SAVED_KEY) || []).indexOf(String(this.id)) >= 0
       this.setData({ box, saved, loading: false, error: '' })
+      // 真机明文 http 图片会空白：轮播图统一走媒体缓存本地化（命中持久缓存则秒回）
+      const raws = box.gallery.filter(Boolean).map(resolveMedia)
+      if (raws.length) {
+        fetchDisplayMediaList(raws).then((locals) => {
+          const merged = box.gallery.map((u, i) => (u && locals[i]) || u)
+          this.setData({ 'box.gallery': merged })
+        }).catch(() => {})
+      }
     } catch (e) {
       this.setData({ loading: false, error: '商品不存在或暂时无法加载' })
     }

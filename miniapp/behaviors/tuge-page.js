@@ -12,7 +12,10 @@ module.exports = function makePage(tabIndex, extra) {
         })
       }
       if (!this._unsub) {
-        this._unsub = store.subscribe((s) => this.setData(s))
+        this._unsub = store.subscribe((s) => {
+          this.setData(s)
+          if (extra && typeof extra.onStoreUpdate === 'function') extra.onStoreUpdate.call(this, s)
+        })
       } else {
         this.setData(store.snapshot())
       }

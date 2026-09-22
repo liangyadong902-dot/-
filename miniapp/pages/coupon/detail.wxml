@@ -11,3 +11,5 @@
     <view wx:if="{{used}}" class="ok">已核销成功</view>
   </view>
 </view>
+
+<tuge-overlay />

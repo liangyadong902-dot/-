@@ -1,27 +1,53 @@
-<view class="chat-page">
+<view class="chat-page" style="padding-top:{{navHeight}}px;">
+  <!-- 自绘导航：返回 + 对方头像昵称 + 更多 -->
+  <view class="cnav" style="padding-top:{{statusBarHeight}}px;height:{{navHeight}}px;">
+    <view class="cnav-row">
+      <view class="cnav-back" bindtap="goBack"><view class="ic-back"></view></view>
+      <image wx:if="{{peerAvatar}}" class="cnav-avatar" src="{{peerAvatar}}" mode="aspectFill" />
+      <view wx:else class="cnav-avatar cnav-avatar-fb">{{peerInitial}}</view>
+      <view class="cnav-name">{{peerNickname}}</view>
+      <view class="cnav-more" style="right:{{iconRight}}px;" bindtap="onMore">•••</view>
+    </view>
+  </view>
+
   <scroll-view class="chat-scroll" scroll-y scroll-into-view="{{bottomAnchor}}" scroll-with-animation>
     <view wx:if="{{!messages.length}}" class="empty-hint">打个招呼吧～</view>
     <view class="chat-list">
-      <view class="msg-row {{item.mine ? 'mine' : ''}}" wx:for="{{messages}}" wx:key="id" id="msg-{{item.id}}">
-        <image wx:if="{{!item.mine && peerAvatar}}" src="{{peerAvatar}}" mode="aspectFill" class="m-avatar" />
-        <view wx:elif="{{!item.mine}}" class="m-avatar m-avatar-fb">{{peerNickname[0]}}</view>
-        <view class="m-col">
-          <view class="m-bubble">{{item.content}}</view>
-          <view class="m-time">{{item.time}}</view>
+      <block wx:for="{{messages}}" wx:key="id">
+        <view wx:if="{{item.divider}}" class="time-divider">{{item.divider}}</view>
+        <view class="msg-row {{item.mine ? 'mine' : ''}}" id="msg-{{item.id}}">
+          <image wx:if="{{item.mine && myAvatar}}" src="{{myAvatar}}" mode="aspectFill" class="m-avatar" />
+          <view wx:elif="{{item.mine}}" class="m-avatar m-avatar-fb">我</view>
+          <image wx:elif="{{peerAvatar}}" src="{{peerAvatar}}" mode="aspectFill" class="m-avatar" />
+          <view wx:else class="m-avatar m-avatar-fb">{{peerInitial}}</view>
+
+          <image wx:if="{{item.type === 'image'}}" class="m-image" src="{{item.image}}" mode="widthFix" data-preview="{{item.preview}}" bindtap="previewImage" />
+          <view wx:else class="m-bubble">{{item.content}}</view>
         </view>
-        <image wx:if="{{item.mine && myAvatar}}" src="{{myAvatar}}" mode="aspectFill" class="m-avatar" />
-        <view wx:elif="{{item.mine}}" class="m-avatar m-avatar-fb">我</view>
-      </view>
+      </block>
     </view>
     <view class="chat-pad"></view>
   </scroll-view>
 
   <view class="chat-footer">
     <emoji-picker wx:if="{{emojiOpen}}" bind:select="onEmojiSelect" />
+    <!-- 快捷表情条：点击直接发送 -->
+    <scroll-view class="quick-bar" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="quick-inner">
+        <view class="quick-chip" wx:for="{{quick}}" wx:key="index" wx:for-item="q" data-index="{{index}}" bindtap="sendQuick" hover-class="chip-hover">
+          <text class="qc-emoji">{{q[0]}}</text><text class="qc-text">{{q[1]}}</text>
+        </view>
+      </view>
+    </scroll-view>
     <view class="chat-bar">
-      <view class="emoji-btn {{emojiOpen ? 'on' : ''}}" bindtap="toggleEmoji">表情</view>
-      <input class="chat-input" value="{{input}}" confirm-type="send" placeholder="说点什么…" bindinput="onInput" bindconfirm="send" />
-      <view class="send-btn {{input ? '' : 'dim'}}" bindtap="send">{{sending ? '…' : '发送'}}</view>
+      <view class="input-pill">
+        <input class="chat-input" value="{{input}}" confirm-type="send" placeholder="发消息..." placeholder-class="input-ph" bindinput="onInput" bindconfirm="send" cursor-spacing="20" />
+        <view class="pill-emoji {{emojiOpen ? 'on' : ''}}" bindtap="toggleEmoji">😊</view>
+      </view>
+      <view wx:if="{{input.length > 0}}" class="send-btn {{sending ? 'dim' : ''}}" bindtap="send">发送</view>
+      <view wx:else class="plus-btn" bindtap="chooseImage"><view class="ic-plus"></view></view>
     </view>
   </view>
 </view>
+
+<tuge-overlay />

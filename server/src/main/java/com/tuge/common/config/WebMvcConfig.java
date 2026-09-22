@@ -67,7 +67,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/v1/achievements/*",
                         "/api/v1/pay/notify/alipay",
                         "/api/v1/pay/**",
-                        "/api/v1/upload/**"
+                        "/api/v1/upload/**",
+                        "/api/v1/media/**"
                 );
     }
     @Override

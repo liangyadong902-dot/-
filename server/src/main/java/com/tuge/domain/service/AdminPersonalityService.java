@@ -89,6 +89,10 @@ public class AdminPersonalityService {
     @Transactional
     public PersonalityResult saveResult(Long id, AdminPersonalityResultRequest request) {
         requireWrite();
+        long duplicate = resultMapper.selectCount(new LambdaQueryWrapper<PersonalityResult>()
+                .eq(PersonalityResult::getType, request.type())
+                .ne(id != null, PersonalityResult::getId, id));
+        if (duplicate > 0) throw new BusinessException(409, "该人格类型的结果已存在，请直接编辑现有结果");
         PersonalityResult row = id == null ? new PersonalityResult() : require(resultMapper.selectById(id), "人格结果不存在");
         row.setType(request.type()); row.setName(request.name().trim()); row.setMark(request.mark().trim());
         row.setDescription(request.description().trim()); row.setRecommend(request.recommend().trim());

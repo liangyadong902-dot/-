@@ -1,0 +1,33 @@
+<view class="fl-page">
+  <view class="fl-tabs">
+    <view class="fl-tab {{tab === 'following' ? 'on' : ''}}" data-tab="following" bindtap="switchTab">关注</view>
+    <view class="fl-tab {{tab === 'followers' ? 'on' : ''}}" data-tab="followers" bindtap="switchTab">粉丝</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="fl-tip">加载中…</view>
+  <view wx:elif="{{error}}" class="fl-tip">{{error}}</view>
+  <view wx:elif="{{!list.length}}" class="fl-tip">{{tab === 'followers' ? '还没有粉丝，发篇笔记被看到吧' : '还没有关注的人，去社区逛逛吧'}}</view>
+
+  <view wx:else class="fl-list">
+    <view class="fl-row" wx:for="{{list}}" wx:key="userId">
+      <view class="fl-user" data-id="{{item.userId}}" bindtap="goProfile">
+        <image wx:if="{{item.avatarUrl}}" src="{{item.avatarUrl}}" mode="aspectFill" class="fl-ava" />
+        <view wx:else class="fl-ava fl-ava-fb">{{item.initial}}</view>
+        <view class="fl-main">
+          <view class="fl-nick">{{item.nickname}}</view>
+          <view class="fl-sub">{{item.followerCount}} 粉丝{{item.city ? ' · ' + item.city : ''}}</view>
+        </view>
+      </view>
+      <view
+        wx:if="{{!item.self}}"
+        class="fl-btn {{item.followed ? 'off' : ''}}"
+        data-id="{{item.userId}}"
+        data-followed="{{item.followed}}"
+        catchtap="toggleFollow"
+      >{{item.followed ? '已关注' : '关注'}}</view>
+    </view>
+    <view wx:if="{{hasMore}}" class="fl-more">上拉加载更多</view>
+  </view>
+</view>
+
+<tuge-overlay />

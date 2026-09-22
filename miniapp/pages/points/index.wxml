@@ -14,3 +14,5 @@
     <view class="link" bindtap="openCoupons">我的卡包</view>
   </view>
 </view>
+
+<tuge-overlay />

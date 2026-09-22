@@ -42,10 +42,11 @@ public class DmService {
     }
 
     @Transactional
-    public DmMessageVO send(Long senderId, Long toUserId, String content) {
+    public DmMessageVO send(Long senderId, Long toUserId, String content, String msgType) {
         if (Objects.equals(senderId, toUserId)) throw new BusinessException(400, "不能给自己发私信");
+        String type = "image".equals(msgType) ? "image" : "text";
         String text = content == null ? "" : content.trim();
-        if (text.isEmpty()) throw new BusinessException(400, "消息内容不能为空");
+        if (text.isEmpty()) throw new BusinessException(400, type.equals("image") ? "图片不能为空" : "消息内容不能为空");
         if (text.length() > 500) throw new BusinessException(400, "消息最长 500 字");
         AppUser peer = userMapper.selectById(toUserId);
         if (peer == null || !"normal".equals(peer.getStatus())) throw new BusinessException(404, "对方账号不可用");
@@ -53,19 +54,24 @@ public class DmService {
         DmConversation conversation = requireConversation(senderId, toUserId, true);
         DmMessage message = new DmMessage();
         message.setConversationId(conversation.getId()); message.setSenderId(senderId);
-        message.setContent(text); message.setIsRead(0); message.setCreatedAt(LocalDateTime.now());
+        message.setMsgType(type); message.setContent(text); message.setIsRead(0); message.setCreatedAt(LocalDateTime.now());
         messageMapper.insert(message);
 
-        conversation.setLastMessage(text); conversation.setLastSenderId(senderId); conversation.setLastMessageAt(message.getCreatedAt());
+        conversation.setLastMessage("image".equals(type) ? "[图片]" : text);
+        conversation.setLastSenderId(senderId); conversation.setLastMessageAt(message.getCreatedAt());
         if (Objects.equals(senderId, conversation.getUserLowId())) conversation.setHighUnread(safe(conversation.getHighUnread()) + 1);
         else conversation.setLowUnread(safe(conversation.getLowUnread()) + 1);
         conversationMapper.updateById(conversation);
-        // WebSocket 实时推送给在线的接收方
+        // WebSocket 实时推送给在线的接收方（带头像昵称供横幅展示）
+        AppUser sender = userMapper.selectById(senderId);
         pushService.push(toUserId, Map.of(
                 "channel", "dm",
                 "messageId", message.getId(),
                 "fromUserId", senderId,
+                "fromNickname", sender != null && sender.getNickname() != null ? sender.getNickname() : "用户",
+                "fromAvatarUrl", sender != null && sender.getAvatarUrl() != null ? sender.getAvatarUrl() : "",
                 "conversationId", conversation.getId(),
+                "msgType", type,
                 "content", text));
         return toMessage(message, senderId);
     }
@@ -140,7 +146,9 @@ public class DmService {
 
     private DmMessageVO toMessage(DmMessage message, Long viewerId) {
         DmMessageVO vo = new DmMessageVO();
-        vo.setId(message.getId()); vo.setSenderId(message.getSenderId()); vo.setContent(message.getContent());
+        vo.setId(message.getId()); vo.setSenderId(message.getSenderId());
+        vo.setMsgType(message.getMsgType() == null || message.getMsgType().isBlank() ? "text" : message.getMsgType());
+        vo.setContent(message.getContent());
         vo.setMine(Objects.equals(message.getSenderId(), viewerId)); vo.setCreatedAt(message.getCreatedAt());
         return vo;
     }

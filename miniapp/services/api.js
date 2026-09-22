@@ -52,6 +52,8 @@ module.exports = {
   listTopics: (params) => request.get('/community/topics', params, { silent: true }),
   followTopic: (id, active) => active ? request.put('/community/topics/' + id + '/follow', {}) : request.delete('/community/topics/' + id + '/follow'),
   followCommunityUser: (id, active) => active ? request.put('/community/users/' + id + '/follow', {}) : request.delete('/community/users/' + id + '/follow'),
+  listFollowers: (id, params) => request.get('/community/users/' + id + '/followers', params, { silent: true }),
+  listFollowing: (id, params) => request.get('/community/users/' + id + '/following', params, { silent: true }),
   listCreators: (params) => request.get('/community/creators', params, { silent: true }),
   listMyPosts: (params) => request.get('/me/posts', params, { silent: true }),
   listCollections: (params) => request.get('/me/collections', params, { silent: true }),
@@ -64,7 +66,7 @@ module.exports = {
   listConversations: () => request.get('/dm/conversations', undefined, { silent: true }),
   dmUnreadTotal: () => request.get('/dm/unread-total', undefined, { silent: true }),
   listDmMessages: (peerUserId, params) => request.get('/dm/messages', { peerUserId, ...(params || {}) }, { silent: true }),
-  sendDmMessage: (toUserId, content) => request.post('/dm/messages', { toUserId, content }),
+  sendDmMessage: (toUserId, content, msgType) => request.post('/dm/messages', { toUserId, content, msgType }),
   // 用户公开主页
   getUserProfile: (id) => request.get('/users/' + id + '/profile', undefined, { silent: true }),
   listUserPosts: (id, params) => request.get('/users/' + id + '/posts', params, { silent: true }),

@@ -38,6 +38,6 @@ public class DmController {
 
     @PostMapping("/messages")
     public Result<DmMessageVO> send(@Valid @RequestBody DmSendRequest request) {
-        return Result.success(service.send(JwtContext.getUserId(), request.toUserId(), request.content()));
+        return Result.success(service.send(JwtContext.getUserId(), request.toUserId(), request.content(), request.msgType()));
     }
 }

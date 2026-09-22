@@ -12,14 +12,14 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // 开发环境代理后端，避免跨域
+      // 开发环境代理后端（生产服务器），避免跨域
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://8.136.34.95:8080',
         changeOrigin: true,
       },
-      // 本地上传的图片资源
+      // 上传的图片资源
       '/uploads': {
-        target: 'http://localhost:8080',
+        target: 'http://8.136.34.95:8080',
         changeOrigin: true,
       },
     },

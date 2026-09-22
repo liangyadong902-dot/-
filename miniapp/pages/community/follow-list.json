@@ -1,5 +1,4 @@
 {
-  "navigationBarTitleText": "购物车",
   "usingComponents": {
     "tuge-overlay": "/components/tuge-overlay/index"
   }

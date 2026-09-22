@@ -1,4 +1,7 @@
 {
   "navigationStyle": "custom",
-  "navigationBarTitleText": "资产详情"
+  "navigationBarTitleText": "资产详情",
+  "usingComponents": {
+    "tuge-overlay": "/components/tuge-overlay/index"
+  }
 }

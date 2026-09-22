@@ -1,1 +1,6 @@
-{ "navigationBarTitleText": "登录" }
+{
+  "navigationBarTitleText": "登录",
+  "usingComponents": {
+    "tuge-overlay": "/components/tuge-overlay/index"
+  }
+}

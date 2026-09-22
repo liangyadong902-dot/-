@@ -1,1 +1,6 @@
-{ "navigationBarTitleText": "行为成就" }
+{
+  "navigationBarTitleText": "行为成就",
+  "usingComponents": {
+    "tuge-overlay": "/components/tuge-overlay/index"
+  }
+}

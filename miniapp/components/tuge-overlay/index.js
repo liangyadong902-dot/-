@@ -22,6 +22,8 @@ Component({
   methods: {
     noop() {},
     closeModal() { store.closeModal() },
+    bannerTap() { store.bannerTap() },
+    closeBanner() { store.closeBanner() },
     goCheckout() { store.goCheckout() },
     copyPayUrl() { store.copyPayUrl() },
     confirmSandboxPay() { store.confirmSandboxPay() },

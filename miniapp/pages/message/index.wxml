@@ -1,44 +1,116 @@
-<view class="msg-page">
-  <view class="msg-tabs">
-    <view class="msg-tab {{tab === 'notice' ? 'on' : ''}}" data-tab="notice" bindtap="switchTab">通知<text wx:if="{{noticeUnread > 0}}" class="tab-badge">{{noticeUnread > 99 ? '99+' : noticeUnread}}</text></view>
-    <view class="msg-tab {{tab === 'dm' ? 'on' : ''}}" data-tab="dm" bindtap="switchTab">私信<text wx:if="{{dmUnread > 0}}" class="tab-badge">{{dmUnread > 99 ? '99+' : dmUnread}}</text></view>
+<view class="page">
+  <!-- 自绘导航：居中标题 + 搜索/加号（避开右侧胶囊） -->
+  <view class="nav" style="padding-top:{{statusBarHeight}}px;height:{{navHeight}}px;">
+    <view class="nav-row">
+      <view class="nav-title">消息</view>
+      <view class="nav-icons" style="right:{{iconRight}}px;">
+        <view class="nav-btn" bindtap="toggleSearch"><view class="ic-search"></view></view>
+        <view class="nav-btn" bindtap="onPlus"><view class="ic-plus"></view></view>
+      </view>
+    </view>
   </view>
 
-  <block wx:if="{{tab === 'notice'}}">
-    <view class="notice-actions" wx:if="{{noticeUnread > 0}}"><view class="mark-all" bindtap="markAll">全部标为已读</view></view>
-    <view wx:if="{{loading}}" class="empty-hint">加载中…</view>
-    <view wx:elif="{{!notices.length}}" class="empty-hint">还没有通知，去社区互动一下吧</view>
-    <view wx:else class="notice-list">
-      <view class="notice-item {{item.read ? '' : 'unread'}}" wx:for="{{notices}}" wx:key="id" data-id="{{item.id}}" bindtap="openNotice">
-        <view class="n-avatar-wrap">
-          <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill" class="n-avatar" />
-          <view wx:else class="n-avatar n-avatar-fb">{{item.actor[0]}}</view>
-          <view class="n-type">{{item.label}}</view>
-        </view>
-        <view class="n-body">
-          <view class="n-line"><text class="n-actor">{{item.actor}}</text><text class="n-content">{{item.content}}</text></view>
-          <view class="n-time">{{item.time}}</view>
-        </view>
-        <view wx:if="{{!item.read}}" class="n-dot"></view>
+  <view class="page-body" style="padding-top:{{navHeight}}px;">
+    <!-- 搜索会话 -->
+    <view wx:if="{{searchOpen}}" class="search-row">
+      <view class="search-pill">
+        <view class="ic-search sm"></view>
+        <input class="search-input" value="{{keyword}}" placeholder="搜索会话" placeholder-class="input-ph" bindinput="onKeyword" confirm-type="search" focus />
       </view>
+      <view class="search-cancel" bindtap="toggleSearch">取消</view>
     </view>
-  </block>
 
-  <block wx:else>
-    <view wx:if="{{loading}}" class="empty-hint">加载中…</view>
-    <view wx:elif="{{!conversations.length}}" class="empty-hint">还没有私信，去别人主页打个招呼吧</view>
-    <view wx:else class="conv-list">
-      <view class="conv-item" wx:for="{{conversations}}" wx:key="id" data-id="{{item.id}}" bindtap="openConversation">
-        <view class="c-avatar-wrap">
-          <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill" class="c-avatar" />
-          <view wx:else class="c-avatar c-avatar-fb">{{item.nickname[0]}}</view>
-          <view wx:if="{{item.unread > 0}}" class="c-badge">{{item.unread > 99 ? '99+' : item.unread}}</view>
+    <!-- 首页：入口卡片 + 私信列表 -->
+    <block wx:if="{{view === 'home'}}">
+      <view class="quick-row">
+        <view class="quick" data-group="like" bindtap="openGroup">
+          <view class="q-icon qi-like">
+            <view class="sh-heart"></view>
+            <view wx:if="{{counts.like > 0}}" class="q-badge">{{counts.like > 99 ? '99+' : counts.like}}</view>
+          </view>
+          <view class="q-label">赞和收藏</view>
         </view>
-        <view class="c-body">
-          <view class="c-row"><text class="c-name">{{item.nickname}}</text><text class="c-time">{{item.time}}</text></view>
-          <view class="c-last">{{item.lastMessage}}</view>
+        <view class="quick" data-group="follow" bindtap="openGroup">
+          <view class="q-icon qi-follow">
+            <view class="sh-person"></view>
+            <view wx:if="{{counts.follow > 0}}" class="q-badge">{{counts.follow > 99 ? '99+' : counts.follow}}</view>
+          </view>
+          <view class="q-label">新增关注</view>
+        </view>
+        <view class="quick" data-group="comment" bindtap="openGroup">
+          <view class="q-icon qi-comment">
+            <view class="sh-bubble"></view>
+            <view wx:if="{{counts.comment > 0}}" class="q-badge">{{counts.comment > 99 ? '99+' : counts.comment}}</view>
+          </view>
+          <view class="q-label">评论和@</view>
         </view>
       </view>
-    </view>
-  </block>
+
+      <!-- AI搭子：会话列表置顶 -->
+      <view class="ai-pin" bindtap="openAiDm" hover-class="row-hover">
+        <view class="ai-pin-ava">
+          <image src="/assets/mascot/ai-dog.png" mode="aspectFill" />
+        </view>
+        <view class="ai-pin-main">
+          <view class="ai-pin-name">小途 · AI搭子<text class="ai-pin-tag">置顶</text></view>
+          <view class="ai-pin-last">今天想吹吹山风，还是找个古村坐下来？</view>
+        </view>
+        <view class="ai-pin-chevron">›</view>
+      </view>
+
+      <view wx:if="{{loading}}" class="empty-hint">加载中…</view>
+      <block wx:else>
+        <view wx:if="{{!convView.length}}" class="empty-hint">{{keyword ? '没有匹配的会话' : '还没有私信，去别人主页打个招呼吧'}}</view>
+        <view wx:else class="conv-list">
+          <view class="conv-item" wx:for="{{convView}}" wx:key="id" data-id="{{item.id}}" bindtap="openConversation" hover-class="row-hover">
+            <view class="avatar-wrap">
+              <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill" class="avatar" />
+              <view wx:else class="avatar avatar-fb">{{item.nickname[0]}}</view>
+            </view>
+            <view class="conv-main">
+              <view class="conv-name">{{item.nickname}}</view>
+              <view class="conv-last">{{item.lastMessage}}</view>
+            </view>
+            <view class="conv-side">
+              <text class="conv-time">{{item.time}}</text>
+              <view wx:if="{{item.unread > 0}}" class="conv-dot"></view>
+            </view>
+          </view>
+        </view>
+      </block>
+    </block>
+
+    <!-- 二级页：某类互动通知列表 -->
+    <block wx:else>
+      <view class="sub-nav">
+        <view class="back-btn" bindtap="backHome">‹</view>
+        <view class="sub-title">{{title}}</view>
+        <view class="read-all" bindtap="markAll">全部已读</view>
+      </view>
+      <view wx:if="{{loading}}" class="empty-hint">加载中…</view>
+      <block wx:else>
+        <view wx:if="{{!filtered.length}}" class="empty-hint">暂无新通知</view>
+        <view wx:else class="notice-list">
+          <view class="notice-item {{item.read ? 'read' : ''}}" wx:for="{{filtered}}" wx:key="id" data-id="{{item.id}}" bindtap="openNotice" hover-class="row-hover">
+            <view class="avatar-wrap">
+              <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill" class="avatar avatar-sm" />
+              <view wx:else class="avatar avatar-sm avatar-fb">{{item.actor[0]}}</view>
+              <view wx:if="{{!item.read}}" class="red-dot"></view>
+            </view>
+            <view class="notice-main">
+              <view class="notice-line">
+                <text class="n-actor">{{item.actor}}</text>
+                <text class="n-action" wx:if="{{item.action}}"> {{item.action}}</text>
+                <text class="n-content" wx:if="{{item.content}}">{{item.content}}</text>
+              </view>
+              <view class="n-time">{{item.time}}</view>
+            </view>
+            <image wx:if="{{item.cover}}" src="{{item.cover}}" mode="aspectFill" class="n-cover" />
+          </view>
+        </view>
+      </block>
+    </block>
+  </view>
 </view>
+
+<tuge-overlay />

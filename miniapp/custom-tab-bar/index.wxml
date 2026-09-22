@@ -8,11 +8,14 @@
       data-index="{{index}}"
       bindtap="onChange"
     >
-      <image
-        class="tab-icon"
-        src="{{selected === index ? item.activeIcon : item.icon}}"
-        mode="aspectFit"
-      />
+      <view class="tab-icon-wrap">
+        <image
+          class="tab-icon"
+          src="{{selected === index ? item.activeIcon : item.icon}}"
+          mode="aspectFit"
+        />
+        <view wx:if="{{item.key === 'message' && msgBadge > 0}}" class="tab-badge">{{msgBadge > 99 ? '99+' : msgBadge}}</view>
+      </view>
       <text>{{item.text}}</text>
     </view>
   </view>

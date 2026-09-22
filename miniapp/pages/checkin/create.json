@@ -1,1 +1,6 @@
-{ "navigationBarTitleText": "完成打卡" }
+{
+  "navigationBarTitleText": "完成打卡",
+  "usingComponents": {
+    "tuge-overlay": "/components/tuge-overlay/index"
+  }
+}

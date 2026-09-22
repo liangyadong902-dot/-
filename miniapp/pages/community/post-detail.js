@@ -1,6 +1,6 @@
 const makePage = require('../../behaviors/tuge-page')
 const api = require('../../services/api')
-const { resolveMedia, fetchDisplayMediaList } = require('../../utils/request')
+const { resolveMedia, thumbMediaUrl, fetchDisplayMediaList } = require('../../utils/request')
 
 // 统一评论时间展示：去掉 ISO 的 T；后端缺 createdAt 时返回空串，避免渲染 "null"
 function fmtCommentDate(value) {
@@ -11,17 +11,18 @@ function fmtCommentDate(value) {
 // 图片/头像可能存的是上传端的局域网地址，统一换成当前后端地址再渲染
 function resolveAuthor(author) {
   if (!author) return author
-  return Object.assign({}, author, { avatarUrl: resolveMedia(author.avatarUrl || '') })
+  return Object.assign({}, author, { avatarUrl: thumbMediaUrl(author.avatarUrl || '', 200) })
 }
 
 function resolvePost(post) {
   if (!post) return post
   const next = Object.assign({}, post, {
-    imageUrls: (post.imageUrls || []).map((url) => resolveMedia(url)),
+    // 1080px 缩略图：手机全宽足够清晰，解码耗时比 3-5MB 原图低一个量级
+    imageUrls: (post.imageUrls || []).map((url) => thumbMediaUrl(url, 1080)),
     author: resolveAuthor(post.author),
   })
   ;['linkedBox', 'linkedTrip', 'linkedCheckin'].forEach((key) => {
-    if (next[key]) next[key] = Object.assign({}, next[key], { coverUrl: resolveMedia(next[key].coverUrl || '') })
+    if (next[key]) next[key] = Object.assign({}, next[key], { coverUrl: thumbMediaUrl(next[key].coverUrl || '', 600) })
   })
   return next
 }
@@ -170,6 +171,11 @@ Page(makePage(-1, {
   openAuthorProfile() {
     const author = this.data.post && this.data.post.author
     if (author && author.userId) wx.navigateTo({ url: '/pages/profile/index?id=' + author.userId })
+  },
+  // 评论区头像点击 → 对方主页
+  openUserProfile(e) {
+    const id = e.currentTarget.dataset.id
+    if (id) wx.navigateTo({ url: '/pages/profile/index?id=' + id })
   },
   toggleEmoji() { this.setData({ emojiOpen: !this.data.emojiOpen }) },
   onEmojiSelect(e) { this.setData({ input: (this.data.input || '') + e.detail.emoji }) },

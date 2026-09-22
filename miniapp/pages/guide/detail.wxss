@@ -1,6 +1,6 @@
-/* 攻略页：对照 index-app-latest.html #tab-guide，390px → 750rpx */
+/* 攻略页：大字号高可读版 —— 正文 26rpx 起，层级分明，重点前置 */
 .guide-page { min-height: 100vh; background: var(--cream); }
-.gd-state { min-height: 70vh; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 23.08rpx; }
+.gd-state { min-height: 70vh; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 26rpx; }
 
 /* —— hero —— */
 .guide-hero { position: relative; height: 538.46rpx; overflow: hidden; background: var(--cream-2); color: #fff; }
@@ -20,24 +20,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 36.54rpx;
+  font-size: 38rpx;
   box-shadow: 0 7.69rpx 26.92rpx rgba(60, 52, 44, 0.16);
 }
 .guide-hero-copy { position: absolute; left: 34.62rpx; right: 34.62rpx; bottom: 38.46rpx; z-index: 2; }
-.guide-kicker { font-size: 19.23rpx; font-weight: 700; letter-spacing: 0.12em; opacity: 0.88; }
-.guide-title { margin: 9.62rpx 0 15.38rpx; font-family: "Noto Serif SC", "Songti SC", serif; font-size: 46.15rpx; font-weight: 900; line-height: 1.3; }
-.guide-place { display: flex; align-items: center; gap: 9.62rpx; font-size: 21.15rpx; opacity: 0.92; }
-.guide-place-pin { font-size: 23.08rpx; line-height: 1; }
+.guide-kicker { font-size: 22rpx; font-weight: 700; letter-spacing: 0.12em; opacity: 0.9; }
+.guide-title { margin: 9.62rpx 0 15.38rpx; font-family: "Noto Serif SC", "Songti SC", serif; font-size: 48rpx; font-weight: 900; line-height: 1.3; }
+.guide-place { display: flex; align-items: center; gap: 9.62rpx; font-size: 25rpx; opacity: 0.94; }
+.guide-place-pin { font-size: 26rpx; line-height: 1; }
 .guide-meta { margin-top: 21.15rpx; white-space: nowrap; width: 100%; }
 .guide-meta-list { display: inline-flex; align-items: center; gap: 11.54rpx; min-width: 100%; }
 .guide-meta-chip {
   flex-shrink: 0;
-  padding: 7.69rpx 15.38rpx;
+  padding: 7.69rpx 17.31rpx;
   border: 1.92rpx solid rgba(255, 255, 255, 0.32);
   border-radius: 999rpx;
   background: rgba(255, 253, 248, 0.18);
   color: #fff;
-  font-size: 17.31rpx;
+  font-size: 20rpx;
   font-weight: 600;
 }
 
@@ -58,7 +58,7 @@
   align-items: center;
   justify-content: center;
   color: var(--muted);
-  font-size: 21.15rpx;
+  font-size: 24rpx;
   font-weight: 600;
   position: relative;
 }
@@ -80,19 +80,19 @@
 .guide-weather {
   display: flex;
   gap: 21.15rpx;
-  padding: 25rpx;
+  padding: 26.92rpx;
   background: var(--sage-mist);
   border-radius: 15.38rpx;
   margin-bottom: 42.31rpx;
 }
-.guide-weather-icon { flex-shrink: 0; color: var(--sage-deep); font-size: 42.31rpx; line-height: 1; }
-.guide-weather-title { font-size: 23.08rpx; font-weight: 700; margin-bottom: 5.77rpx; }
-.guide-weather-text { color: var(--muted); font-size: 19.23rpx; line-height: 1.6; }
-.guide-unlock-card { display: flex; align-items: center; gap: 19rpx; margin: -18rpx 0 42rpx; padding: 24rpx; border: 2rpx dashed var(--sage); border-radius: 19rpx; background: var(--paper); }
-.guide-unlock-mark { width: 48rpx; height: 48rpx; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 50%; background: var(--sage-mist); color: var(--sage-deep); font-size: 29rpx; font-weight: 900; }
-.guide-unlock-title { color: var(--ink); font-size: 22rpx; font-weight: 800; }
-.guide-unlock-copy, .guide-empty { margin-top: 6rpx; color: var(--muted); font-size: 19rpx; line-height: 1.6; }
-.guide-empty { padding: 22rpx; border-radius: 14rpx; background: var(--sage-mist); }
+.guide-weather-icon { flex-shrink: 0; color: var(--sage-deep); font-size: 44rpx; line-height: 1; }
+.guide-weather-title { font-size: 27rpx; font-weight: 800; margin-bottom: 7.69rpx; }
+.guide-weather-text { color: #5d6b4e; font-size: 25rpx; line-height: 1.7; }
+.guide-unlock-card { display: flex; align-items: center; gap: 19rpx; margin: -18rpx 0 42rpx; padding: 26.92rpx; border: 2rpx dashed var(--sage); border-radius: 19rpx; background: var(--paper); }
+.guide-unlock-mark { width: 52rpx; height: 52rpx; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 50%; background: var(--sage-mist); color: var(--sage-deep); font-size: 30rpx; font-weight: 900; }
+.guide-unlock-title { color: var(--ink); font-size: 26rpx; font-weight: 800; }
+.guide-unlock-copy, .guide-empty { margin-top: 6rpx; color: var(--muted); font-size: 24rpx; line-height: 1.7; }
+.guide-empty { padding: 24rpx; border-radius: 14rpx; background: var(--sage-mist); }
 
 .guide-facts {
   display: grid;
@@ -104,22 +104,31 @@
 }
 .guide-fact {
   min-height: 119.23rpx;
-  padding: 19.23rpx 21.15rpx;
+  padding: 19.23rpx 23.08rpx;
   background: var(--paper);
   border-right: 1.92rpx solid var(--line);
   border-bottom: 1.92rpx solid var(--line);
 }
 .guide-fact.fact-nr { border-right: 0; }
 .guide-fact.fact-nb { border-bottom: 0; }
-.guide-fact-label { display: block; color: var(--muted); font-size: 17.31rpx; margin-bottom: 7.69rpx; }
-.guide-fact-value { display: block; font-size: 21.15rpx; font-weight: 700; line-height: 1.45; }
+.guide-fact-label { display: block; color: var(--muted); font-size: 21rpx; margin-bottom: 7.69rpx; }
+.guide-fact-value { display: block; font-size: 26rpx; font-weight: 700; line-height: 1.5; }
 
 .guide-section { padding-bottom: 48.08rpx; margin-bottom: 44.23rpx; border-bottom: 1.92rpx solid var(--line); }
 .guide-section-last { border-bottom: 0; }
 .guide-section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 23.08rpx; margin-bottom: 26.92rpx; }
-.guide-section-title { font-family: "Noto Serif SC", "Songti SC", serif; font-size: 36.54rpx; font-weight: 900; }
-.guide-section-sub { color: var(--muted); font-size: 19.23rpx; }
-.guide-summary { color: var(--muted); font-size: 23.08rpx; line-height: 1.75; margin: -9.62rpx 0 28.85rpx; }
+.guide-section-title { font-family: "Noto Serif SC", "Songti SC", serif; font-size: 40rpx; font-weight: 900; }
+.guide-section-sub { color: var(--muted); font-size: 22rpx; }
+/* 一句话亮点：重点前置，粗体深色+竖条，替代原先的灰字长段 */
+.guide-summary {
+  margin: -9.62rpx 0 30.77rpx;
+  padding: 3.85rpx 0 3.85rpx 23.08rpx;
+  border-left: 7.69rpx solid var(--sage-deep);
+  color: #4c4438;
+  font-size: 28rpx;
+  font-weight: 600;
+  line-height: 1.7;
+}
 
 /* 分时行程 */
 .guide-timeline { position: relative; padding-left: 51.92rpx; }
@@ -137,38 +146,38 @@
   background: var(--paper);
   border: 3.85rpx solid var(--sage-deep);
 }
-.guide-stop-time { display: block; color: var(--sage-deep); font-size: 19.23rpx; font-weight: 800; margin-bottom: 5.77rpx; }
-.guide-stop-title { font-size: 25rpx; font-weight: 700; margin-bottom: 7.69rpx; }
-.guide-stop-desc { color: var(--muted); font-size: 21.15rpx; line-height: 1.65; }
-.guide-subhead { margin: 34.62rpx 0 13.46rpx; font-size: 23.08rpx; font-weight: 800; }
+.guide-stop-time { display: block; color: var(--sage-deep); font-size: 23rpx; font-weight: 800; margin-bottom: 7.69rpx; }
+.guide-stop-title { font-size: 31rpx; font-weight: 800; margin-bottom: 9.62rpx; }
+.guide-stop-desc { color: #6e655a; font-size: 26rpx; line-height: 1.75; }
+.guide-subhead { margin: 34.62rpx 0 15.38rpx; font-size: 29rpx; font-weight: 800; }
 .guide-spots { border-top: 1.92rpx solid var(--line); }
-.guide-spot { padding: 21.15rpx 0; border-bottom: 1.92rpx solid var(--line); }
+.guide-spot { padding: 23.08rpx 0; border-bottom: 1.92rpx solid var(--line); }
 .guide-spot:last-child { border-bottom: 0; }
-.guide-spot-top { display: flex; justify-content: space-between; gap: 19.23rpx; font-size: 23.08rpx; font-weight: 700; }
-.guide-spot-top text:last-child { flex-shrink: 0; color: var(--sage-deep); font-size: 17.31rpx; }
+.guide-spot-top { display: flex; justify-content: space-between; gap: 19.23rpx; font-size: 29rpx; font-weight: 800; }
+.guide-spot-top text:last-child { flex-shrink: 0; color: var(--sage-deep); font-size: 22rpx; }
 .guide-spot-img { display: block; width: 100%; height: 288.46rpx; border-radius: 15.38rpx; background: var(--cream-2, #F2EAD9); margin-bottom: 13.46rpx; }
-.guide-spot-notice { margin-top: 7.69rpx; padding: 9.62rpx 13.46rpx; background: var(--sage-mist, #EEF0E4); border-radius: 11.54rpx; color: var(--sage-deep, #5A6B4D); font-size: 17.31rpx; line-height: 1.6; }
-.guide-day-head { margin: 28.85rpx 0 15.38rpx; display: flex; align-items: center; gap: 13.46rpx; color: var(--sage-deep, #5A6B4D); font-size: 21.15rpx; font-weight: 800; letter-spacing: 1.54rpx; }
+.guide-spot-notice { margin-top: 9.62rpx; padding: 11.54rpx 15.38rpx; background: var(--sage-mist, #EEF0E4); border-radius: 11.54rpx; color: #556549; font-size: 23rpx; line-height: 1.65; }
+.guide-day-head { margin: 28.85rpx 0 15.38rpx; display: flex; align-items: center; gap: 13.46rpx; color: var(--sage-deep, #5A6B4D); font-size: 25rpx; font-weight: 800; letter-spacing: 1.54rpx; }
 .guide-day-head::after { content: ""; flex: 1; height: 1.92rpx; background: var(--line, #E7DCCE); }
-.guide-stop-extra { display: flex; align-items: flex-start; gap: 9.62rpx; margin-top: 7.69rpx; font-size: 19.23rpx; line-height: 1.55; color: var(--muted, #8A8175); }
-.guide-extra-tag { flex-shrink: 0; padding: 1.92rpx 9.62rpx; border-radius: 999rpx; background: var(--sage-mist, #EEF0E4); color: var(--sage-deep, #5A6B4D); font-size: 15.38rpx; font-weight: 700; }
+.guide-stop-extra { display: flex; align-items: flex-start; gap: 11.54rpx; margin-top: 9.62rpx; font-size: 24rpx; line-height: 1.6; color: #7a7267; }
+.guide-extra-tag { flex-shrink: 0; margin-top: 1.92rpx; padding: 3.85rpx 11.54rpx; border-radius: 999rpx; background: var(--sage-mist, #EEF0E4); color: var(--sage-deep, #5A6B4D); font-size: 19rpx; font-weight: 700; }
 .guide-extra-tip { color: var(--sage-deep, #5A6B4D); }
 
 /* 交通 / 费用 / 提示行 */
-.guide-transit-row, .guide-cost-row, .guide-tip { border-bottom: 1.92rpx solid var(--line); padding: 21.15rpx 0; }
+.guide-transit-row, .guide-cost-row, .guide-tip { border-bottom: 1.92rpx solid var(--line); padding: 23.08rpx 0; }
 .guide-transit-row:last-child, .guide-cost-row:last-child, .guide-tip:last-child { border-bottom: 0; }
-.guide-row-title { display: block; font-size: 23.08rpx; font-weight: 700; }
-.guide-row-desc { color: var(--muted); font-size: 19.23rpx; line-height: 1.65; margin-top: 5.77rpx; }
-.guide-service-row { padding-left: 21.15rpx; border-left: 3.85rpx solid var(--sage-soft); }
-.guide-cost-row { display: flex; justify-content: space-between; gap: 23.08rpx; font-size: 21.15rpx; }
+.guide-row-title { display: block; font-size: 29rpx; font-weight: 800; }
+.guide-row-desc { color: #6e655a; font-size: 26rpx; line-height: 1.75; margin-top: 7.69rpx; }
+.guide-service-row { padding-left: 23.08rpx; border-left: 3.85rpx solid var(--sage-soft); }
+.guide-cost-row { display: flex; justify-content: space-between; gap: 23.08rpx; font-size: 27rpx; }
 .guide-cost-label { color: var(--muted); }
-.guide-cost-value { font-weight: 700; }
+.guide-cost-value { font-weight: 800; }
 
 /* 出发清单 */
 .guide-checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15.38rpx; }
 .guide-check {
-  min-height: 84.62rpx;
-  padding: 15.38rpx 17.31rpx;
+  min-height: 92.31rpx;
+  padding: 15.38rpx 19.23rpx;
   display: flex;
   align-items: center;
   gap: 15.38rpx;
@@ -176,48 +185,48 @@
   border-radius: 15.38rpx;
   background: var(--paper);
   color: var(--ink);
-  font-size: 19.23rpx;
+  font-size: 24rpx;
   font-weight: 600;
   text-align: left;
 }
 .guide-check-box {
-  width: 34.62rpx;
-  height: 34.62rpx;
+  width: 36rpx;
+  height: 36rpx;
   flex-shrink: 0;
   border: 1.92rpx solid var(--sage);
   border-radius: 7.69rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 19.23rpx;
+  font-size: 21rpx;
   color: #fff;
 }
-.guide-check-text { flex: 1; min-width: 0; line-height: 1.4; }
+.guide-check-text { flex: 1; min-width: 0; line-height: 1.45; }
 .guide-check.done { color: var(--muted); }
 .guide-check.done .guide-check-text { text-decoration: line-through; }
 .guide-check.done .guide-check-box { background: var(--sage); }
 
 /* Plan B / 应急 */
-.guide-planb { padding: 25rpx 26.92rpx; background: var(--sage-mist); border-radius: 15.38rpx; }
-.guide-planb-row { padding: 13.46rpx 0; color: var(--muted); font-size: 19.23rpx; line-height: 1.6; }
-.guide-planb-label { color: var(--sage-deep); font-weight: 700; margin-right: 15.38rpx; }
+.guide-planb { padding: 26.92rpx; background: var(--sage-mist); border-radius: 15.38rpx; }
+.guide-planb-row { padding: 13.46rpx 0; color: #5d6b4e; font-size: 25rpx; line-height: 1.7; }
+.guide-planb-label { color: var(--sage-deep); font-weight: 800; margin-right: 15.38rpx; }
 .guide-emergency {
   margin-top: 26.92rpx;
-  padding: 23.08rpx 25rpx;
+  padding: 25rpx;
   background: var(--paper);
   border: 1.92rpx solid var(--line);
   border-radius: 15.38rpx;
-  font-size: 21.15rpx;
-  line-height: 1.8;
+  font-size: 26rpx;
+  line-height: 1.85;
 }
-.guide-emergency-title { display: block; font-weight: 800; margin-bottom: 5.77rpx; }
-.guide-rule { padding: 19.23rpx 21.15rpx; margin-bottom: 11.54rpx; border-radius: 15.38rpx; background: var(--paper); border: 1.92rpx solid var(--line); }
+.guide-emergency-title { display: block; font-weight: 800; margin-bottom: 7.69rpx; }
+.guide-rule { padding: 21.15rpx 23.08rpx; margin-bottom: 11.54rpx; border-radius: 15.38rpx; background: var(--paper); border: 1.92rpx solid var(--line); }
 .faq-head { margin-top: 34.62rpx; }
-.guide-faq { padding: 23.08rpx 0; border-bottom: 1.92rpx solid var(--line); }
+.guide-faq { padding: 25rpx 0; border-bottom: 1.92rpx solid var(--line); }
 .guide-faq:last-child { border-bottom: 0; }
-.guide-faq-q { display: flex; align-items: flex-start; gap: 13.46rpx; font-size: 21.15rpx; font-weight: 800; line-height: 1.5; }
-.guide-faq-q > text { color: var(--sage-deep); font-size: 17.31rpx; line-height: 1.9; }
-.guide-faq-a { margin: 9.62rpx 0 0 55.77rpx; color: var(--muted); font-size: 19.23rpx; line-height: 1.65; }
+.guide-faq-q { display: flex; align-items: flex-start; gap: 13.46rpx; font-size: 27rpx; font-weight: 800; line-height: 1.5; }
+.guide-faq-q > text { color: var(--sage-deep); font-size: 21rpx; line-height: 1.9; }
+.guide-faq-a { margin: 9.62rpx 0 0 55.77rpx; color: #6e655a; font-size: 25rpx; line-height: 1.75; }
 
 /* 底部双按钮 —— 对照原型 .guide-actions（与商品页 actions-bar 共用样式） */
 .guide-actions {

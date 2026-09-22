@@ -58,7 +58,7 @@
         <view class="guide-summary">{{summary}}</view>
         <view wx:if="{{scheduleDays.length}}" class="guide-timeline">
           <block wx:for="{{scheduleDays}}" wx:for-item="day" wx:key="dayNo">
-            <view wx:if="{{multiDay}}" class="guide-day-head">DAY {{day.dayNo}}</view>
+            <view wx:if="{{multiDay}}" class="guide-day-head">第 {{day.dayNo}} 天</view>
             <view wx:for="{{day.stops}}" wx:key="index" class="guide-stop">
               <text class="guide-stop-time">{{item.time}}</text>
               <view class="guide-stop-title">{{item.title}}</view>
@@ -134,7 +134,7 @@
       <view class="guide-section">
         <view class="guide-section-head">
           <text class="guide-section-title">天气与备选</text>
-          <text class="guide-section-sub">Plan B</text>
+          <text class="guide-section-sub">备选方案</text>
         </view>
         <view class="guide-planb">
           <view wx:for="{{planB}}" wx:key="label" class="guide-planb-row">
@@ -164,7 +164,7 @@
         </view>
         <view class="guide-subhead faq-head">常见问题</view>
         <view wx:for="{{faqs}}" wx:key="no" class="guide-faq">
-          <view class="guide-faq-q"><text>Q{{item.no}}</text><view>{{item.question}}</view></view>
+          <view class="guide-faq-q"><text>问</text><view>{{item.question}}</view></view>
           <view class="guide-faq-a">{{item.answer}}</view>
         </view>
       </view>
@@ -177,3 +177,5 @@
     <view class="guide-actions-safe" />
   </block>
 </view>
+
+<tuge-overlay />

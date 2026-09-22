@@ -6,4 +6,5 @@ import jakarta.validation.constraints.Size;
 
 public record DmSendRequest(
         @NotNull Long toUserId,
-        @NotBlank @Size(max = 500) String content) {}
+        @NotBlank @Size(max = 500) String content,
+        String msgType) {}

@@ -19,3 +19,5 @@
     <view class="login-note">登录即代表同意隐私与用户服务说明</view>
   </view>
 </view>
+
+<tuge-overlay />

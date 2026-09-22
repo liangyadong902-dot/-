@@ -296,6 +296,21 @@ public class CommunityService {
         if (!active && existing != null) followMapper.deleteById(existing.getId()); return socialUser(target, userId);
     }
 
+    /** 关注/粉丝列表：followers=true 查关注 targetId 的人，否则查 targetId 关注的人 */
+    public PageResult<SocialUserVO> followList(Long viewerId, Long targetId, boolean followers, long page, long pageSize) {
+        AppUser target = userMapper.selectById(targetId); if (target == null) throw new BusinessException(404, "用户不存在");
+        Page<UserFollow> result = new Page<>(safePage(page), safeSize(pageSize));
+        Page<UserFollow> rows = followMapper.selectPage(result, new LambdaQueryWrapper<UserFollow>()
+                .eq(followers ? UserFollow::getFollowedUserId : UserFollow::getFollowerUserId, targetId)
+                .orderByDesc(UserFollow::getCreatedAt));
+        List<SocialUserVO> list = rows.getRecords().stream()
+                .map(f -> userMapper.selectById(followers ? f.getFollowerUserId() : f.getFollowedUserId()))
+                .filter(u -> u != null && "normal".equals(u.getStatus()))
+                .map(u -> socialUser(u, viewerId))
+                .toList();
+        return PageResult.of(list, rows.getTotal(), rows.getCurrent(), rows.getSize());
+    }
+
     public PageResult<CommunityPostVO> myPosts(Long userId, String status, long page, long pageSize) {
         requireUser(userId);
         Page<CommunityPost> result = new Page<>(safePage(page), safeSize(pageSize));

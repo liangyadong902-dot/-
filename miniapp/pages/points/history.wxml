@@ -10,3 +10,5 @@
     <view class="more" bindtap="more">{{hasMore ? '加载更多' : '没有更多了'}}</view>
   </view>
 </view>
+
+<tuge-overlay />

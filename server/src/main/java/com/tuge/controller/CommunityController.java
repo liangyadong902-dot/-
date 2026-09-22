@@ -64,6 +64,10 @@ public class CommunityController {
     public Result<SocialUserVO> followUser(@PathVariable Long id) { return Result.success(service.setUserFollow(JwtContext.getUserId(), id, true)); }
     @DeleteMapping("/users/{id}/follow")
     public Result<SocialUserVO> unfollowUser(@PathVariable Long id) { return Result.success(service.setUserFollow(JwtContext.getUserId(), id, false)); }
+    @GetMapping("/users/{id}/followers")
+    public Result<PageResult<SocialUserVO>> followers(@PathVariable Long id, @RequestParam(defaultValue = "1") long page, @RequestParam(defaultValue = "20") long pageSize) { return Result.success(service.followList(JwtContext.getUserId(), id, true, page, pageSize)); }
+    @GetMapping("/users/{id}/following")
+    public Result<PageResult<SocialUserVO>> following(@PathVariable Long id, @RequestParam(defaultValue = "1") long page, @RequestParam(defaultValue = "20") long pageSize) { return Result.success(service.followList(JwtContext.getUserId(), id, false, page, pageSize)); }
     @GetMapping("/me/posts")
     public Result<PageResult<CommunityPostVO>> myPosts(@RequestParam(required = false) String status, @RequestParam(defaultValue = "1") long page, @RequestParam(defaultValue = "20") long pageSize) { return Result.success(service.myPosts(JwtContext.getUserId(), status, page, pageSize)); }
     @GetMapping("/me/collections")
