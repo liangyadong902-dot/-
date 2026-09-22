@@ -1,6 +1,6 @@
 <view class="page-shell">
   <view class="head">
-    <text class="kicker">ORDER DETAIL</text>
+    <text class="kicker">订单详情</text>
     <text class="title">订单详情</text>
     <text class="desc">{{order ? order.orderNo : ''}}</text>
   </view>
@@ -55,7 +55,7 @@
           <view class="unbox-confetti"><view></view><view></view><view></view><view></view><view></view><view></view></view>
           <view class="unbox-shadow"></view>
           <view class="unbox-ticket">
-            <view class="ticket-sm">DESTINATION CARD</view>
+            <view class="ticket-sm">目的地卡</view>
             <view class="ticket-b">路线卡</view>
             <view class="ticket-sm">途个惊喜</view>
           </view>
@@ -67,7 +67,7 @@
         <view class="draw-progress"><view class="draw-progress-bar"></view></view>
       </view>
       <view wx:else class="unbox-result reveal-in">
-        <view class="result-kicker">YOUR JOURNEY</view>
+        <view class="result-kicker">你的旅程</view>
         <view class="result-mark">✓</view>
         <view class="result-title">{{order.routeName || '惊喜路线已解锁'}}</view>
         <view class="result-place">{{order.location || '新的旅途正在等你'}}</view>

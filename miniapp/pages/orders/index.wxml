@@ -1,5 +1,5 @@
 <view class="page-shell">
-  <view class="head"><text class="kicker">MY ORDERS</text><text class="title">我的订单</text><text class="desc">每一笔开盒，都有一张可追溯的旅程票根</text></view>
+  <view class="head"><text class="kicker">我的订单</text><text class="title">我的订单</text><text class="desc">每一笔开盒，都有一张可追溯的旅程票根</text></view>
   <scroll-view class="tabs" scroll-x><view wx:for="{{tabs}}" wx:key="key" class="tab {{active === item.key ? 'active' : ''}}" data-key="{{item.key}}" bindtap="switchTab">{{item.label}}</view></scroll-view>
   <view wx:if="{{loading}}" class="state">正在读取订单…</view>
   <view wx:elif="{{error}}" class="state"><text>{{error}}</text><button class="ghost" bindtap="load">重试</button></view>

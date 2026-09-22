@@ -55,7 +55,7 @@
         <view class="unbox-confetti"><view></view><view></view><view></view><view></view><view></view><view></view></view>
         <view class="unbox-shadow"></view>
         <view class="unbox-ticket">
-          <view class="ticket-sm">DESTINATION CARD</view>
+          <view class="ticket-sm">目的地卡</view>
           <view class="ticket-b">路线卡</view>
           <view class="ticket-sm">途个惊喜</view>
         </view>

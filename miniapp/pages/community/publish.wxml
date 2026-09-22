@@ -10,7 +10,7 @@
   </view>
 
   <view class="publish-head">
-    <view class="publish-kicker">WRITE THE JOURNEY</view>
+    <view class="publish-kicker">写下旅程</view>
     <view class="publish-title">把这次出发，留给大家</view>
     <view class="publish-hint">真实的路线、照片和感受，会成为下一位旅行者的参考。</view>
   </view>

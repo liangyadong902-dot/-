@@ -1,5 +1,5 @@
 .profile-page { min-height:100vh; background:var(--cream); padding-bottom:60rpx; }
-.profile-head { padding:60rpx 34rpx 40rpx; background:linear-gradient(180deg,#e3edd6,var(--cream)); }
+.profile-head { padding:60rpx 34rpx 40rpx; background:linear-gradient(180deg,#F7F7F7,var(--cream)); }
 .profile-hero { display:flex; align-items:center; gap:26rpx; }
 .avatar-ring { width:130rpx; height:130rpx; border-radius:50%; border:4rpx solid var(--sage-deep); overflow:hidden; flex-shrink:0; background:var(--paper); }
 .profile-avatar { width:100%; height:100%; }
@@ -11,7 +11,7 @@
 .pstat .strong { font-size:30rpx; font-weight:900; color:var(--sage-deep); }
 .pstat .span { font-size:19rpx; color:var(--muted); }
 .profile-actions { margin-top:28rpx; display:flex; gap:16rpx; }
-.act-btn { flex:1; height:76rpx; line-height:76rpx; text-align:center; border-radius:999rpx; background:var(--sage); color:#fff; font-size:25rpx; font-weight:800; }
+.act-btn { flex:1; height:76rpx; line-height:76rpx; text-align:center; border-radius:999rpx; background:var(--sage-deep); color:#fff; font-size:25rpx; font-weight:800; }
 .act-btn.primary.ghost { background:var(--paper); color:var(--sage-deep); border:1rpx solid var(--sage-deep); }
 .profile-selfhint { margin-top:28rpx; text-align:center; color:var(--muted); font-size:21rpx; }
 .works { padding:10rpx 34rpx 60rpx; }

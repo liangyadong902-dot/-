@@ -12,7 +12,7 @@
   <view class="page-pad">
     <view class="quiz-banner">
       <view>
-        <view class="kicker">PERSONALITY</view>
+        <view class="kicker">你的旅型</view>
         <view class="h3">AI 旅行人格测试</view>
         <view class="p">{{quizHint}}</view>
       </view>

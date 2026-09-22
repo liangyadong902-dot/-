@@ -43,7 +43,7 @@
       </view>
 
       <view class="trip-section highlight-section">
-        <view class="section-eyebrow">ROUTE HIGHLIGHT</view>
+        <view class="section-eyebrow">线路亮点</view>
         <view class="section-title">线路亮点</view>
         <view wx:if="{{trip.moodText}}" class="highlight-quote">“{{trip.moodText}}”</view>
         <view wx:if="{{trip.highlight}}" class="section-copy">{{trip.highlight}}</view>

@@ -15,7 +15,7 @@
   width: 100%;
   /* 原型底栏总高为 72px（390px 画布），安全区只占内部留白，不能再叠加到总高。 */
   height: 138.46rpx;
-  background: var(--paper, #FFFDF8);
+  background: var(--paper, #FFFFFF);
   border-radius: 46.15rpx 46.15rpx 0 0;
   display: flex;
   justify-content: space-around;

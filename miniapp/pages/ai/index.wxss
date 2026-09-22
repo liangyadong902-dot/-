@@ -138,7 +138,7 @@ page {
   overflow: hidden;
   padding: 15.38rpx 11.54rpx 19.23rpx 19.23rpx;
   border-right: 1.92rpx dashed var(--line);
-  background: linear-gradient(90deg, #E8F0DC 0%, rgba(232, 240, 220, 0) 88%);
+  background: linear-gradient(90deg, #F7F7F7 0%, rgba(242,246,234, 0) 88%);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -593,7 +593,7 @@ page {
   flex-shrink: 0;
   min-height: 168rpx;
   padding: 11.54rpx 30.77rpx 19.23rpx;
-  background: linear-gradient(180deg, rgba(246, 241, 230, 0) 0%, var(--cream) 19.23rpx);
+  background: linear-gradient(180deg, rgba(250,250,247, 0) 0%, var(--cream) 19.23rpx);
   position: relative;
   z-index: 2;
 }

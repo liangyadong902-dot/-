@@ -1,5 +1,5 @@
 .market-page { min-height: 100vh; background: var(--cream); }
-.market-head { position: relative; padding: 100rpx 34.62rpx 50rpx; background: linear-gradient(180deg, #E3EDD6 0%, #EAF1E0 72%, var(--cream) 100%); }
+.market-head { position: relative; padding: 100rpx 34.62rpx 50rpx; background: var(--cream); }
 .market-head::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1rpx; height: 28rpx; background: radial-gradient(34rpx 22rpx at 8% 100%, var(--cream) 0 62%, transparent 63%), radial-gradient(44rpx 26rpx at 28% 100%, var(--cream) 0 62%, transparent 63%), radial-gradient(40rpx 24rpx at 52% 100%, var(--cream) 0 62%, transparent 63%), radial-gradient(44rpx 26rpx at 78% 100%, var(--cream) 0 62%, transparent 63%), radial-gradient(34rpx 22rpx at 100% 100%, var(--cream) 0 62%, transparent 63%); }
 .market-head .kicker { color: var(--sage-deep); font-size: 18rpx; letter-spacing: .16em; font-weight: 700; }
 .market-head .title { margin-top: 10rpx; font-family: "Noto Serif SC", serif; font-size: 46rpx; line-height: 1.15; font-weight: 900; letter-spacing: .04em; }
@@ -7,7 +7,7 @@
 .filters { padding: 26rpx 34.62rpx 18rpx; white-space: nowrap; }
 .price-filters { padding-top: 0; }
 .filter { display: inline-flex; align-items: center; justify-content: center; padding: 12rpx 24rpx; margin-right: 10rpx; border-radius: 999rpx; background: var(--paper); color: var(--muted); font-size: 21rpx; box-shadow: 0 4rpx 14rpx rgba(60,52,44,.04); }
-.filter.active { background: var(--sage); color: #fff; }
+.filter.active { background: var(--sage-deep); color: #fff; }
 .state { min-height: 48vh; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 23rpx; }
 .box-grid { padding: 0 34.62rpx 30rpx; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20rpx; }
 .box-card { background: var(--paper); border-radius: 26rpx; overflow: hidden; box-shadow: 0 8rpx 28rpx rgba(60,52,44,.06); }

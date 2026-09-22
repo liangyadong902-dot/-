@@ -1,3 +1,11 @@
+/* 社区模块专用暖陶色系：覆盖全局绿，社区=暖色人文氛围 */
+page {
+  --sage-deep: #A5603C;
+  --sage-mist: #F5EAE1;
+  --sage: #C0855F;
+  --sage-soft: #E2C4AE;
+}
+
 /* 帖子详情：对照 index-app-latest.html .community-detail，390px → 750rpx */
 .post-detail-page { height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
 .detail-state { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--muted); gap: 20rpx; font-size: 24rpx; }
@@ -202,7 +210,7 @@
   border-radius: 999rpx; border: 1.92rpx solid var(--line); background: var(--paper);
   color: var(--muted); font-size: 21.15rpx; font-weight: 700;
 }
-.cd-emoji-btn.on { background: var(--sage); color: #fff; border-color: var(--sage); }
+.cd-emoji-btn.on { background: var(--sage-deep); color: #fff; border-color: var(--sage); }
 /* 原生 input 的 flex:1 在部分基础库不生效，外包一层 view 撑满剩余宽度；flex 用长写法防个别环境不生效 */
 .cd-input-wrap {
   min-width: 0;

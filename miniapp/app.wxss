@@ -3,7 +3,7 @@
 
     /*
       Visual system — 左图烘焙店语言 → 途个惊喜
-      Canvas: cream #F6F1E6    Wash: sage mist #E4EDD8
+      Canvas: cream #FFFFFF    Wash: sage mist #E4EDD8
       Accent: sage #8EA47C     Deep: #6C7E58
       Ink: #3C342C             Muted: #8F8376
       Type: system cursive / Noto Serif SC / Noto Sans SC
@@ -11,16 +11,16 @@
       Pattern: cloud head, magazine special, line-art cats, paper cards
     */
     page {
-      --cream: #F6F1E6;
-      --cream-2: #EFE6D6;
+      --cream: #FFFFFF;
+      --cream-2: #F7F7F7;
       --sage: #8EA47C;
-      --sage-deep: #6C7E58;
-      --sage-mist: #E4EDD8;
+      --sage-deep: #5C6E4B;
+      --sage-mist: #F6F6F6;
       --sage-soft: #C9D6B8;
-      --ink: #3C342C;
-      --muted: #8F8376;
-      --paper: #FFFDF8;
-      --line: #E7DCCE;
+      --ink: #333333;
+      --muted: #767676;
+      --paper: #FFFFFF;
+      --line: #F0F0F0;
       --blush: #E8B4A2;
     }
 
@@ -134,7 +134,7 @@
         radial-gradient(107.69rpx 65.38rpx at 48% -6%, #f8fbf5 0 60%, transparent 61%),
         radial-gradient(88.46rpx 57.69rpx at 74% -2%, #eaf2df 0 64%, transparent 65%),
         radial-gradient(100rpx 61.54rpx at 96% 2%, #f3f7ec 0 62%, transparent 63%),
-        linear-gradient(180deg, #E3EDD6 0%, #E8F0DC 100%);
+        #FFFFFF;
       padding: 96.15rpx 30.77rpx 15.38rpx 34.62rpx;
     }
     .scallop-row {
@@ -413,7 +413,7 @@
     .btn-search {
       height: 61.54rpx; padding: 0 25rpx;
       border: none; border-radius: 1921.15rpx;
-      background: var(--sage); color: #fff;
+      background: var(--sage-deep); color: #fff;
       font-size: 21.15rpx; font-weight: 700;
       font-family: inherit;
       flex-shrink: 0;
@@ -457,7 +457,7 @@
       padding: 9.62rpx 19.23rpx; border-radius: 1921.15rpx;
        white-space: nowrap; font-weight: 500;
     }
-    .mood-chip.active { background: var(--sage); color: #fff; font-weight: 700; }
+    .mood-chip.active { background: var(--sage-deep); color: #fff; font-weight: 700; }
 
     .category-row {
       display: grid;
@@ -582,7 +582,7 @@
     .prod-img-wrap image { width: 100%; height: 100%; object-fit: cover; }
     .top-badge {
       position: absolute; top: 11.54rpx; left: 11.54rpx;
-      background: var(--sage); color: #fff;
+      background: var(--sage-deep); color: #fff;
       font-size: 15.38rpx; font-weight: 800;
       padding: 3.85rpx 11.54rpx; border-radius: 7.69rpx;
       letter-spacing: 0.02em;
@@ -595,7 +595,7 @@
     .prod-price .yen { font-size: 19.23rpx; }
     .btn-add {
       width: 42.31rpx; height: 42.31rpx; border-radius: 50%;
-      background: var(--sage); color: #fff; border: none;
+      background: var(--sage-deep); color: #fff; border: none;
       font-size: 28.85rpx; line-height: 42.31rpx;
       display: flex; align-items: center; justify-content: center;
       min-width: 42.31rpx; min-height: 42.31rpx; padding: 0;
@@ -603,7 +603,7 @@
 
     .page-inner {
       padding: 111.54rpx 34.62rpx 0;
-      background: linear-gradient(180deg, #EAF1E0 0%, var(--cream) 107.69rpx);
+      background: linear-gradient(180deg, #FFFFFF 0%, var(--cream) 107.69rpx);
       min-height: 100%;
     }
 
@@ -627,7 +627,7 @@
       overflow: hidden;
       padding: 15.38rpx 11.54rpx 19.23rpx 19.23rpx;
       border-right: 1.92rpx dashed var(--line);
-      background: linear-gradient(90deg, #E8F0DC 0%, rgba(232,240,220,0) 88%);
+      background: linear-gradient(90deg, #FFFFFF 0%, rgba(232,240,220,0) 88%);
       display: flex;
       flex-direction: column;
       transition: flex-basis 0.28s cubic-bezier(.22,1,.36,1), width 0.28s cubic-bezier(.22,1,.36,1), padding 0.28s ease;
@@ -888,7 +888,7 @@
     .ai-dock {
       flex-shrink: 0;
       padding: 11.54rpx 30.77rpx 19.23rpx;
-      background: linear-gradient(180deg, rgba(246,241,230,0) 0%, var(--cream) 19.23rpx);
+      background: linear-gradient(180deg, rgba(255,255,255,0) 0%, var(--cream) 19.23rpx);
       position: relative;
       z-index: 1;
     }
@@ -1137,7 +1137,7 @@
       font-family: inherit; border: none;
       display: flex; align-items: center; justify-content: center; line-height: 1;
     }
-    .order-act .go { background: var(--sage); color: #fff; }
+    .order-act .go { background: var(--sage-deep); color: #fff; }
     .order-act .ghost { background: var(--paper); color: var(--ink); border: 2.5rpx solid var(--ink); }
     .pay-clock {
       font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
@@ -1266,7 +1266,7 @@
         radial-gradient(96.15rpx 61.54rpx at 22% -4%, #eef5e5 0 64%, transparent 65%),
         radial-gradient(107.69rpx 65.38rpx at 48% -6%, #f8fbf5 0 60%, transparent 61%),
         radial-gradient(88.46rpx 57.69rpx at 74% -2%, #eaf2df 0 64%, transparent 65%),
-        linear-gradient(180deg, #E3EDD6 0%, #E8F0DC 100%);
+        #FFFFFF;
     }
     .page-shell .head::after {
       content: '';
@@ -1316,7 +1316,7 @@
       display: flex; align-items: center; justify-content: center;
       line-height: 1;
     }
-    .btn-sage { background: var(--sage); color: #fff; }
+    .btn-sage { background: var(--sage-deep); color: #fff; }
     .btn-ink { background: var(--ink); color: #fff; }
     .btn-block.btn-line {
       background: var(--paper);

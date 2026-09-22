@@ -102,7 +102,10 @@ let avatarErrorTried = false
 
 function isHttpsAvatar(url) {
   // 社区头像需要在服务器间共享：接受 http(s) 绝对地址（本地环境为 http）
-  return typeof url === 'string' && /^https?:\/\//.test(url)
+  if (typeof url !== 'string' || !/^https?:\/\//.test(url)) return false
+  // 微信 chooseAvatar 返回的 http://tmp/... 是本机临时地址，重启即失效，绝不能当远程 URL 使用/入库
+  if (/^https?:\/\/tmp\//.test(url)) return false
+  return true
 }
 
 function isDefaultWechatAvatar(url) {
@@ -154,8 +157,8 @@ function persistAvatarSync(src) {
       rememberAvatarPath(path)
       return path
     } catch (e2) {
-      rememberAvatarPath(src)
-      return src
+      // 本地副本生成失败也不回退临时路径（重启失效），返回空走占位头像
+      return ''
     }
   }
 }
@@ -1014,7 +1017,8 @@ async function submitWxLogin(chosenAvatar) {
         try { const up = await api.uploadImage(picked); uploaded = (up && up.url) || '' } catch (e) {}
       }
       const localCopy = persistAvatarSync(picked)
-      info.avatarUrl = uploaded || localCopy || picked
+      // 兜底禁用临时路径：上传失败且无本地副本时留空，走占位头像（tmp 重启即失效）
+      info.avatarUrl = uploaded || (isHttpsAvatar(localCopy) || /^wxfile:|^file:/.test(localCopy || '') ? localCopy : '')
       avatarSrc = localCopy || info.avatarUrl
       rememberAvatarPath(localCopy || info.avatarUrl)
       wx.setStorageSync('wechatProfile', info)

@@ -41,17 +41,17 @@
   ],
   "window": {
     "navigationStyle": "default",
-    "navigationBarBackgroundColor": "#E3EDD6",
+    "navigationBarBackgroundColor": "#F5F7F0",
     "navigationBarTitleText": "途个惊喜",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#F6F1E6",
+    "backgroundColor": "#FFFFFF",
     "backgroundTextStyle": "dark"
   },
   "tabBar": {
     "custom": true,
     "color": "#C0B3A5",
     "selectedColor": "#6C7E58",
-    "backgroundColor": "#FFFDF8",
+    "backgroundColor": "#FFFFFF",
     "borderStyle": "white",
     "list": [
       {

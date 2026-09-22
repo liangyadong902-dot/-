@@ -1,4 +1,12 @@
-.fl-page { min-height: 100vh; background: #F6F1E6; padding-bottom: 60rpx; box-sizing: border-box; }
+/* 社区模块专用暖陶色系：覆盖全局绿，社区=暖色人文氛围 */
+page {
+  --sage-deep: #A5603C;
+  --sage-mist: #F5EAE1;
+  --sage: #C0855F;
+  --sage-soft: #E2C4AE;
+}
+
+.fl-page { min-height: 100vh; background: #FFFFFF; padding-bottom: 60rpx; box-sizing: border-box; }
 .fl-tabs { display: flex; background: #fff; border-bottom: 2rpx solid #F2EDE2; position: relative; z-index: 5; }
 .fl-tab { position: relative; flex: 1; text-align: center; padding: 24rpx 0 20rpx; font-size: 29rpx; color: #8A8375; }
 .fl-tab.on { color: #2A3322; font-weight: 800; }
@@ -8,7 +16,7 @@
 .fl-list { padding: 12rpx 24rpx; }
 .fl-row { display: flex; align-items: center; justify-content: space-between; background: #fff; border-radius: 20rpx; padding: 20rpx 22rpx; margin-top: 14rpx; }
 .fl-user { display: flex; align-items: center; flex: 1; min-width: 0; margin-right: 20rpx; }
-.fl-ava { width: 92rpx; height: 92rpx; border-radius: 50%; background: #EFE6D6; flex-shrink: 0; }
+.fl-ava { width: 92rpx; height: 92rpx; border-radius: 50%; background: #F7F7F7; flex-shrink: 0; }
 .fl-ava-fb { display: flex; align-items: center; justify-content: center; font-size: 36rpx; font-weight: 800; color: #6C7E58; }
 .fl-main { flex: 1; min-width: 0; margin-left: 20rpx; }
 .fl-nick { font-size: 28rpx; font-weight: 700; color: #2A3322; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

@@ -40,12 +40,12 @@
     <view class="special-photo" bindtap="openCurrentSpecial">
       <!-- 原型始终展示今日特选；接口尚未返回时使用本地封面保持首屏完整 -->
       <image class="special-img" src="{{special.img || '/assets/covers/box2.jpg'}}" mode="aspectFill" />
-      <view class="v-label">FRESH JOURNEY</view>
+      <view class="v-label">新鲜出炉</view>
       <view class="photo-tag"><text>途个</text><text>惊喜</text></view>
       <view class="fresh-orb"><text>今日</text><text>新鲜出发</text></view>
     </view>
     <view class="special-copy">
-      <view class="eyebrow">TODAY'S SPECIAL</view>
+      <view class="eyebrow">今日精选</view>
       <view class="h2">{{specialName || '隐世古村\n慢生活盒'}}</view>
       <view class="p">{{specialDesc || '非遗体验 · 古镇慢游\n随机解锁主题线路'}}</view>
       <view class="link-cta" bindtap="openCurrentSpecial">
@@ -99,28 +99,28 @@
         <image src="/assets/icons/cat-nearby.png" mode="aspectFit" />
       </view>
       <view class="cat-name">周边游</view>
-      <view class="cat-en">NEARBY</view>
+      <view class="cat-en">周边游</view>
     </view>
     <view class="category-item {{category === 'province' ? 'active' : ''}}" data-cat="province" bindtap="filterCategory">
       <view class="cat-icon">
         <image src="/assets/icons/cat-province.png" mode="aspectFit" />
       </view>
       <view class="cat-name">省内游</view>
-      <view class="cat-en">PROVINCE</view>
+      <view class="cat-en">省内游</view>
     </view>
     <view class="category-item {{category === 'cross' ? 'active' : ''}}" data-cat="cross" bindtap="filterCategory">
       <view class="cat-icon">
         <image src="/assets/icons/cat-cross.png" mode="aspectFit" />
       </view>
       <view class="cat-name">跨省游</view>
-      <view class="cat-en">CROSS</view>
+      <view class="cat-en">跨省游</view>
     </view>
     <view class="category-item {{category === 'theme' ? 'active' : ''}}" data-cat="theme" bindtap="filterCategory">
       <view class="cat-icon">
         <image src="/assets/icons/cat-theme.png" mode="aspectFit" />
       </view>
       <view class="cat-name">主题盒</view>
-      <view class="cat-en">THEME</view>
+      <view class="cat-en">主题盒</view>
     </view>
   </view>
 
@@ -131,7 +131,7 @@
         <image class="sec-leaf" src="/assets/icons/leaf.png" mode="aspectFit" />
         <text>此刻的心情是？</text>
       </view>
-      <text class="mood-unbox-en">MOOD UNBOX</text>
+      <text class="mood-unbox-en">按心情开盒</text>
     </view>
     <view class="mood-unbox-chips">
       <view
@@ -186,7 +186,7 @@
     <swiper-item wx:for="{{banners}}" wx:key="id">
       <view class="member-banner-inner" data-id="{{item.id}}" bindtap="onBanner">
         <view class="copy">
-          <view class="kicker">{{item.tag || 'MEMBER BENEFITS'}}</view>
+          <view class="kicker">{{item.tag || '会员权益'}}</view>
           <view class="h3">{{item.title}}</view>
           <view class="ink-pill">立即开启</view>
         </view>
@@ -197,7 +197,7 @@
   <!-- 活动接口为空时仍保留原型中的会员权益卡，避免首屏出现空白断层 -->
   <view wx:else class="member-banner empty" bindtap="openCurrentSpecial">
     <view class="copy">
-      <view class="kicker">MEMBER BENEFITS</view>
+      <view class="kicker">会员权益</view>
       <view class="h3">开盒解锁主题行程</view>
       <view class="ink-pill">立即开启</view>
     </view>

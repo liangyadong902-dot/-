@@ -1,4 +1,4 @@
-.page { min-height:100vh; background:var(--cream, #F6F1E6); }
+.page { min-height:100vh; background:var(--cream, #FFFFFF); }
 
 /* ── 自绘导航 ── */
 .nav {
@@ -10,7 +10,7 @@
     radial-gradient(107.69rpx 65.38rpx at 48% -6%, #f8fbf5 0 60%, transparent 61%),
     radial-gradient(88.46rpx 57.69rpx at 74% -2%, #eaf2df 0 64%, transparent 65%),
     radial-gradient(100rpx 61.54rpx at 96% 2%, #f3f7ec 0 62%, transparent 63%),
-    linear-gradient(180deg, #E3EDD6 0%, #E8F0DC 100%);
+    var(--cream);
 }
 .nav-row { position:relative; height:44px; display:flex; align-items:center; justify-content:center; }
 .nav-title { font-size:34rpx; font-weight:800; color:#222; }
@@ -91,10 +91,10 @@
 
 /* ── AI搭子置顶入口 ── */
 .ai-pin { display:flex; align-items:center; gap:22rpx; margin:8rpx 24rpx 0; padding:20rpx 24rpx; background:transparent; border-bottom:2rpx solid #EAE2D4; border-radius:0; }
-.ai-pin-ava { width:92rpx; height:92rpx; border-radius:50%; background:#FFFDF8; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.ai-pin-ava { width:92rpx; height:92rpx; border-radius:50%; background:#FFFFFF; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .ai-pin-ava image { width:100%; height:100%; }
 .ai-pin-main { flex:1; min-width:0; }
 .ai-pin-name { display:flex; align-items:center; gap:12rpx; font-size:29rpx; font-weight:800; color:#222; }
-.ai-pin-tag { flex-shrink:0; font-size:19rpx; font-weight:600; color:#5E7147; background:#E3EDD6; border-radius:8rpx; padding:2rpx 12rpx; }
+.ai-pin-tag { flex-shrink:0; font-size:19rpx; font-weight:600; color:#5E7147; background:#F7F7F7; border-radius:8rpx; padding:2rpx 12rpx; }
 .ai-pin-last { margin-top:6rpx; font-size:24rpx; color:#8A9484; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .ai-pin-chevron { flex-shrink:0; color:#C8CFC0; font-size:40rpx; line-height:1; }

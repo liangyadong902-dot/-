@@ -59,7 +59,7 @@
 .detail-row-copy { flex: 1; min-width: 0; }
 .detail-row-title { color: var(--ink); font-size: 21rpx; font-weight: 800; line-height: 1.45; }
 .detail-row-desc { margin-top: 5rpx; color: var(--muted); font-size: 18rpx; line-height: 1.65; }
-.guide-entry { width: 100%; min-height: 116rpx; margin: 35rpx 0 0; padding: 19rpx 22rpx; display: flex; align-items: center; gap: 17rpx; border: 0; border-radius: 23rpx; background: var(--sage); color: #fff; text-align: left; box-shadow: 0 10rpx 25rpx rgba(108,126,88,.16); }
+.guide-entry { width: 100%; min-height: 116rpx; margin: 35rpx 0 0; padding: 19rpx 22rpx; display: flex; align-items: center; gap: 17rpx; border: 0; border-radius: 23rpx; background: var(--sage-deep); color: #fff; text-align: left; box-shadow: 0 10rpx 25rpx rgba(108,126,88,.16); }
 .guide-entry-icon { width: 54rpx; height: 54rpx; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.2); font-size: 30rpx; }
 .guide-entry-copy { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .guide-entry-copy text { font-size: 23rpx; font-weight: 800; line-height: 1.35; }

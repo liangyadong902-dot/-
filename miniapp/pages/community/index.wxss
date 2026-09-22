@@ -1,3 +1,11 @@
+/* 社区模块专用暖陶色系：覆盖全局绿，社区=暖色人文氛围 */
+page {
+  --sage-deep: #A5603C;
+  --sage-mist: #F5EAE1;
+  --sage: #C0855F;
+  --sage-soft: #E2C4AE;
+}
+
 /* 社区：对照 index-app-latest.html #tab-community，390px → 750rpx */
 .community-page { min-height: 100vh; background: var(--cream); }
 
@@ -12,7 +20,7 @@
   background:
     radial-gradient(107.69rpx 57.69rpx at 12% 0%, #f7faf3 0 62%, transparent 63%),
     radial-gradient(123.08rpx 61.54rpx at 62% -4%, #eef5e5 0 64%, transparent 65%),
-    linear-gradient(180deg, #E3EDD6 0%, #EAF1E0 100%);
+    var(--cream);
   border-bottom: 1.92rpx solid rgba(231, 220, 206, 0.7);
 }
 .community-tabs { flex: 1; display: flex; justify-content: center; gap: 38.46rpx; }
@@ -54,7 +62,7 @@
   font-weight: 600;
   box-shadow: 0 3.85rpx 15.38rpx rgba(60, 52, 44, 0.04);
 }
-.community-chip.active { background: var(--sage); color: #fff; }
+.community-chip.active { background: var(--sage-deep); color: #fff; }
 
 .community-feed { columns: 2; column-gap: 19.23rpx; padding: 0 26.92rpx 138.46rpx; }
 .community-card {

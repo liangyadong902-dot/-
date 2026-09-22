@@ -64,7 +64,7 @@ page {
 
 .publish-head {
   padding: 48rpx 36rpx 52rpx;
-  background: linear-gradient(180deg, #e3edd6 0%, rgba(228, 237, 216, 0.58) 58%, rgba(246, 241, 230, 0) 100%);
+  background: linear-gradient(180deg, #F7F7F7 0%, rgba(228, 237, 216, 0.58) 58%, rgba(250,250,247, 0) 100%);
 }
 
 .publish-kicker {

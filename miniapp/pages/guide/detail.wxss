@@ -158,7 +158,7 @@
 .guide-spot-img { display: block; width: 100%; height: 288.46rpx; border-radius: 15.38rpx; background: var(--cream-2, #F2EAD9); margin-bottom: 13.46rpx; }
 .guide-spot-notice { margin-top: 9.62rpx; padding: 11.54rpx 15.38rpx; background: var(--sage-mist, #EEF0E4); border-radius: 11.54rpx; color: #556549; font-size: 23rpx; line-height: 1.65; }
 .guide-day-head { margin: 28.85rpx 0 15.38rpx; display: flex; align-items: center; gap: 13.46rpx; color: var(--sage-deep, #5A6B4D); font-size: 25rpx; font-weight: 800; letter-spacing: 1.54rpx; }
-.guide-day-head::after { content: ""; flex: 1; height: 1.92rpx; background: var(--line, #E7DCCE); }
+.guide-day-head::after { content: ""; flex: 1; height: 1.92rpx; background: var(--line, #E8E6DF); }
 .guide-stop-extra { display: flex; align-items: flex-start; gap: 11.54rpx; margin-top: 9.62rpx; font-size: 24rpx; line-height: 1.6; color: #7a7267; }
 .guide-extra-tag { flex-shrink: 0; margin-top: 1.92rpx; padding: 3.85rpx 11.54rpx; border-radius: 999rpx; background: var(--sage-mist, #EEF0E4); color: var(--sage-deep, #5A6B4D); font-size: 19rpx; font-weight: 700; }
 .guide-extra-tip { color: var(--sage-deep, #5A6B4D); }
@@ -204,7 +204,7 @@
 .guide-check-text { flex: 1; min-width: 0; line-height: 1.45; }
 .guide-check.done { color: var(--muted); }
 .guide-check.done .guide-check-text { text-decoration: line-through; }
-.guide-check.done .guide-check-box { background: var(--sage); }
+.guide-check.done .guide-check-box { background: var(--sage-deep); }
 
 /* Plan B / 应急 */
 .guide-planb { padding: 26.92rpx; background: var(--sage-mist); border-radius: 15.38rpx; }
@@ -237,7 +237,7 @@
   grid-template-columns: 1fr 1.35fr;
   gap: 17.31rpx;
   padding: 21.15rpx 34.62rpx calc(23.08rpx + env(safe-area-inset-bottom));
-  background: rgba(246, 241, 230, 0.96);
+  background: rgba(250,250,247, 0.96);
   border-top: 1.92rpx solid var(--line);
 }
 .guide-actions .btn-block { margin: 0; }

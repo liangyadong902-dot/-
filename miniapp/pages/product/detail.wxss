@@ -5,7 +5,7 @@
 
 /* —— 骨架屏 —— */
 @keyframes pd-shimmer { 0% { opacity: 0.55; } 50% { opacity: 1; } 100% { opacity: 0.55; } }
-.pd-skel { background: linear-gradient(100deg, #EFE8D8, #F6F1E6 60%, #EFE8D8); border-radius: 14rpx; animation: pd-shimmer 1.4s ease-in-out infinite; }
+.pd-skel { background: linear-gradient(100deg, #EFE8D8, #FFFFFF 60%, #EFE8D8); border-radius: 14rpx; animation: pd-shimmer 1.4s ease-in-out infinite; }
 .pd-skel-hero { width: 100%; height: 634.62rpx; border-radius: 0; }
 .skel-title { height: 44rpx; width: 60%; margin: 38.46rpx 0 22rpx; }
 .skel-line { height: 26rpx; width: 92%; margin-bottom: 16rpx; }
@@ -141,11 +141,21 @@
   gap: 15.38rpx;
   align-items: center;
   padding: 17.31rpx 30.77rpx calc(19.23rpx + env(safe-area-inset-bottom));
-  background: rgba(246, 241, 230, 0.97);
+  background: rgba(250,250,247, 0.97);
   border-top: 1.92rpx solid var(--line);
 }
+/* 填平原生 button 默认样式：幽灵边框/默认内边距/行高/字体 */
+.pd-actions-bar button {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  font-family: inherit;
+  overflow: hidden;
+}
+.pd-actions-bar button::after { border: none; }
 .pd-act-save {
-  width: 108rpx;
+  width: 100%;
   height: 84rpx;
   margin: 0;
   padding: 0;
@@ -162,8 +172,8 @@
   line-height: 1.2;
 }
 .pd-act-save-icon { font-size: 34rpx; line-height: 1; color: var(--muted); }
-.pd-act-save.pd-saved { color: #C25E5E; }
-.pd-act-save.pd-saved .pd-act-save-icon { color: #C25E5E; }
+.pd-act-save.pd-saved { color: #A84848; }
+.pd-act-save.pd-saved .pd-act-save-icon { color: #A84848; }
 .pd-act-cart {
   height: 84rpx;
   margin: 0;
